@@ -1,16 +1,16 @@
 # clean up if the file exists.
 if "testfile.txt" in listfiles():
-  removefile("testfile.txt")
+    removefile("testfile.txt")
 
-myfile=openfile("testfile.txt",True)  #Create a file
+myfile = openfile("testfile.txt", True)  # Create a file
 
-myfile.writeat("12345678",0) # no difference, no '\n'
+myfile.writeat("12345678", 0)  # no difference, no '\n'
 
-myfile.writeat("Hi!",0) # writing early in the file
+myfile.writeat("Hi!", 0)  # writing early in the file
 
-myfile.writeat("Append!\nShould be indented!!!",8) # strictly appending...
+myfile.writeat("Append!\nShould be indented!!!", 8)  # strictly appending...
 
-assert(' ' == myfile.readat(1,17)) # this location should contain a space...
+assert (' ' == myfile.readat(1, 17))  # this location should contain a space...
 
-#Close the file
+# Close the file
 myfile.close()
