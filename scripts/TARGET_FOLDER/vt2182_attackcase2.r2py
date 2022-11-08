@@ -1,0 +1,21 @@
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+    removefile("testfile.txt")
+
+myfile = openfile("testfile.txt", True)  # Create a file
+
+myfile.writeat("12345678", 0)  # no difference, no '\n'
+
+myfile.writeat("Hi!", 0)  # writing early in the file
+
+# testcase: not strictly appending should not throw any error
+try:
+    myfile.writeat("Append!\nShould be indented\n!!!", 4)
+    assert ('be' == myfile.readat(2, 19))  # this location should contain a 'be'
+except Exception:
+    log("ERROR: attackcase2 failed: not strictly appending, no error\n")
+finally:
+    exitall()
+
+# Close the file
+myfile.close()

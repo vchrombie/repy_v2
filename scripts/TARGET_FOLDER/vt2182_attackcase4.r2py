@@ -1,0 +1,18 @@
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+    removefile("testfile.txt")
+
+myfile = openfile("testfile.txt", True)  # Create a file
+
+# testcase: strictly appending at the starting of the file
+try:
+    myfile.writeat("\n1234", 0)
+    myfile.writeat("56\n78", 9)
+    assert ('1234' == myfile.readat(4, 5))  # this location should contain a '1234'
+except Exception:
+    log("ERROR: attackcase4 failed: strictly appending at the starting of the file\n")
+finally:
+    exitall()
+
+# Close the file
+myfile.close()

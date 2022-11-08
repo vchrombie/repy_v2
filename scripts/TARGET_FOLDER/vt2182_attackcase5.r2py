@@ -1,0 +1,24 @@
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+    removefile("testfile.txt")
+
+myfile = openfile("testfile.txt", True)  # Create a file
+
+myfile.writeat("abc", 0)
+
+# Close the file
+myfile.close()
+
+# testcase: writing to an existing file
+myfile = openfile("testfile.txt", True)  # Create a file
+
+try:
+    myfile.writeat("\ndef", 3)
+    assert ('def' == myfile.readat(3, 8))  # this location should contain a 'def'
+except Exception:
+    log("ERROR: attackcase5 failed: writing to an existing file\n")
+finally:
+    exitall()
+
+# Close the file
+myfile.close()
