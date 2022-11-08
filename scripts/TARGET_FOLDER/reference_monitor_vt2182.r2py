@@ -22,6 +22,7 @@ class LPFile():
         mycontext['debug'] = False
         self.LPfile = openfile(filename, create)
         self.length = len(self.LPfile.readat(None, 0))
+        self._write_lock = createlock()
 
     def readat(self, bytes, offset):
         # Read from the file using the sandbox's readat...
@@ -34,22 +35,26 @@ class LPFile():
             return length
 
     def writeat(self, data, offset):
-        if not offset == self.length:
-            self.LPfile.writeat(data, offset)
-            self.length = self.getlength(self.length, offset+len(data))
-        else:
-            if '\n' not in data:
+        self._write_lock.acquire(True)
+        try:
+            if not offset == self.length:
                 self.LPfile.writeat(data, offset)
                 self.length = self.getlength(self.length, offset+len(data))
             else:
-                if data.count('\n') > 1:
-                    raise RepyArgumentError
+                if '\n' not in data:
+                    self.LPfile.writeat(data, offset)
+                    self.length = self.getlength(self.length, offset+len(data))
                 else:
-                    loc = data.find('\n')
-                    self.LPfile.writeat(
-                        data[:loc+1]+"    "+data[loc+1:], offset)
-                    self.length = self.getlength(
-                        self.length, offset+len(data)+4)
+                    if data.count('\n') > 1:
+                        raise RepyArgumentError
+                    else:
+                        loc = data.find('\n')
+                        self.LPfile.writeat(
+                            data[:loc+1]+"    "+data[loc+1:], offset)
+                        self.length = self.getlength(
+                            self.length, offset+len(data)+4)
+        finally:
+            self._write_lock.release()
 
     def close(self):
         self.LPfile.close()
