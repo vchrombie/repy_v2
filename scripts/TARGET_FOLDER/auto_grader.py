@@ -138,7 +138,8 @@ def did_this_attack_succeed(attackFilename, defenseFilename):
             # wait for it to stop...
             pobj.wait()
 
-            shutil.move(os.path.join(path_AttackFolder, attackFilename), os.path.join(path_HaltFolder, attackFilename))
+            # copy the attack file to a "halt" directory
+            shutil.copy(os.path.join(path_TempFolder, attackFilename), os.path.join(path_HaltFolder, attackFilename))
 
             stdout = "timeout"
             stderr = "timeout"
