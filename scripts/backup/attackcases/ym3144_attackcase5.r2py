@@ -1,0 +1,19 @@
+# Attack 5
+# Accuracy Check
+# ---------------------------
+# opening a file that doesnt exist
+# ---------------------------
+# Pass: throws FileNotFoundError
+# Fail: any other Exception raised or no exception raised.
+
+if "doesntexist.txt" in listfiles():
+  removefile("doesntexist.txt")
+
+try:
+  myfile=openfile("doesntexist.txt",False)
+except FileNotFoundError:
+    pass
+except Exception as error:
+    log("LOG - FAILED - ATTACK 5\n")
+else:
+    log("LOG - FAILED - ATTACK 5\n")

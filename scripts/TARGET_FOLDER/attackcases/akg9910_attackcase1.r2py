@@ -1,0 +1,19 @@
+#TEST PROMPTS
+#for referencemonitor in reference_monitor_*; do for testcase in akg9910_*; do python repy.py restrictions.default encasementlib.r2py $referencemonitor $testcase; done; done
+#for referencemonitor in reference_monitor_*; do echo $referencemonitor under test; for testcase in akg9910_*; do python repy.py restrictions.default encasementlib.r2py $referencemonitor $testcase; done; done
+
+#ATTACK 1: opening a file twice
+
+#creating new testfile
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+testfile=openfile("testfile.txt", True)
+testfile.close()
+
+#opening second time
+try:
+  testfile=openfile("testfile.txt", True)
+  testfile.close()
+except:
+  log("FAILED ATTACK 1: opening a file twice\n")

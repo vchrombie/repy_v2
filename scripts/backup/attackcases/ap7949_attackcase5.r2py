@@ -1,0 +1,17 @@
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+    removefile("testfile.txt")
+  
+# create a file
+myfile=openfile("testfile.txt",True)
+
+myfile.writeat("hi!", 0)
+myfile.close()
+
+try:
+    myfile.readat(None, 0)
+    #log("FileClosedError error not raised but should have raised\n")
+except FileClosedError as e:
+    pass
+else:
+    log("FileClosedError error not raised but should have raised\n")

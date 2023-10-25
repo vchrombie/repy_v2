@@ -1,0 +1,44 @@
+try:
+  if "testfile.txt" in listfiles():
+    removefile("testfile.txt")
+except Exception as e:
+  log("Error during file cleanup.\n")
+  raise
+
+try:
+  myfile=openfile("testfile.txt",True)
+except Exception as e:
+  log("An error occurred while creating the file.\n")
+  raise
+
+try:
+  # undo before any operations
+  for _ in range(5):
+    myfile.undo()
+
+  # write
+  myfile.writeat("12345678",0)
+
+  # undo multiple times
+  for _ in range(5):
+    myfile.undo()
+
+  # write something
+  myfile.writeat("abcdefgh",0) 
+  myfile.writeat("!@#$%^&*", 8)
+
+  # undo again
+  for _ in range(5):
+    myfile.undo()
+
+  # the contents should still be "abcdefgh" as the overwrite was undone
+  assert("abcdefgh" == myfile.readat(8,0))
+except Exception as e:
+  log("Error during file operations.\n")
+  raise
+
+try:
+  myfile.close()
+except Exception as e:
+  log("Error while closing the file.\n")
+  raise

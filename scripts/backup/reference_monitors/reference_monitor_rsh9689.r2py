@@ -1,0 +1,108 @@
+"""
+This security layer inadequately handles the undo functionality
+
+Note:
+    This security layer uses encasementlib.r2py, restrictions.default, repy.py and Python
+    Also you need to give it an application to run.
+    python repy.py restrictions.default encasementlib.r2py [security_layer].r2py [attack_program].r2py 
+    
+"""
+TYPE = "type"
+ARGS = "args"
+RETURN = "return"
+EXCP = "exceptions"
+TARGET = "target"
+FUNC = "func"
+OBJC = "objc"
+
+
+class LPFile():
+    def __init__(self, filename, create):
+        # globals
+        mycontext['debug'] = False
+        self.LPfile = openfile(filename, create)
+        self.is_closed = False
+        self.pending_data = None
+        self.pending_offset = None
+        self.LPfile.filelock = createlock()
+
+    def readat(self, bytes, offset):
+        # Read from the file using the sandbox's readat...
+        self.LPfile.filelock.acquire(True)
+        # if the offset or size is negative
+        if offset < 0 or len(self.LPfile.readat(None, 0)) < 0:
+            self.LPfile.filelock.release()
+            raise RepyArgumentError
+        # if the file is already closed
+        elif self.is_closed:
+            self.LPfile.filelock.release()
+            raise FileClosedError
+        # otherwise good to read
+        else: 
+            data = self.LPfile.readat(bytes, offset)
+            self.LPfile.filelock.release()
+            return data
+
+    # lock will help prevent multiple writes to the file
+    def writeat(self, data, offset):
+        self.LPfile.filelock.acquire(True)
+        # if offset is negative or data is not a string
+        if offset < 0 or not isinstance(data, str):
+            self.LPfile.filelock.release()
+            raise RepyArgumentError
+        # if the file is already closed
+        elif self.is_closed:
+            self.LPfile.filelock.release()
+            raise FileClosedError
+        # only do a writeat if there is pending data
+        elif self.pending_data != None and self.pending_offset != None:
+            self.LPfile.writeat(self.pending_data, self.pending_offset)
+        self.LPfile.filelock.release()
+        self.pending_data = data
+        self.pending_offset = offset
+
+    def undo(self):
+        self.pending_data = None
+        self.pending_offset = None
+
+
+    def close(self):
+        if self.is_closed:
+            raise FileClosedError
+        else:
+            if self.pending_data != None and self.pending_offset != None:
+                self.LPfile.writeat(self.pending_data, self.pending_offset)
+            self.LPfile.close()
+            self.is_closed = True
+
+def LPopenfile(filename, create):
+    # check for valid filename
+    file_split = filename.split(".")
+    if file_split[0].islower() and file_split[0].isalnum() and create: 
+        return LPFile(filename, create)
+    elif isinstance(create, bool) == False:
+        raise RepyArgumentError
+    else:
+        raise RepyArgumentError
+
+# The code here sets up type checking and variable hiding for you.
+# You should not need to change anything below here.
+sec_file_def = {
+    "obj-type": LPFile,
+    "name": "LPFile",
+    "writeat": {"type": "func", "args": (str, (int, long)), "exceptions": Exception, "return": (int, type(None)), "target": LPFile.writeat},
+    "readat": {"type": "func", "args": ((int, long, type(None)), (int, long)), "exceptions": Exception, "return": str, "target": LPFile.readat},
+    "undo": {"type": "func", "args": None, "exceptions": None, "return": type(None), "target": LPFile.undo},
+    "close": {"type": "func", "args": None, "exceptions": Exception, "return": (bool, type(None)), "target": LPFile.close}
+}
+
+CHILD_CONTEXT_DEF["openfile"] = {
+    TYPE: OBJC,
+    ARGS: (str, bool),
+    EXCP: Exception,
+    RETURN: sec_file_def,
+    TARGET: LPopenfile
+}
+
+# Execute the user code
+secure_dispatch_module()

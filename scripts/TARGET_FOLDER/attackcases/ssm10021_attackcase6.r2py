@@ -1,0 +1,30 @@
+# Attack Case 6: FileClosedError and SeekPastEndOfFileError in writeat()
+
+# The Repy API states that if multiple exceptions 
+# are raised the one written first in the docstring 
+# is raised
+
+# writeat() should raise a FileClosedError if a
+# FileClosedError and SeekPastEndOfFileError are raised
+
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# create a file
+myfile=openfile("testfile.txt", True)
+
+# intial write to the file
+myfile.writeat("12345678", 0)
+
+# attempt to overwrite the beginning of the file
+myfile.close()
+
+# try invalid write to closed file at location past EOF
+# should ONLY throw FileClosedError error
+try:
+    myfile.writeat("12345678", 100)
+except FileClosedError:
+   pass
+else:
+   log("FAILED ssm10021_attackcase6.r2py\n")

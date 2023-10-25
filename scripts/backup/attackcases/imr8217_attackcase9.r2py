@@ -1,0 +1,42 @@
+#Tests threads and deadlocks
+
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+myfile=openfile("testfile.txt",True)
+
+one_finished = [[False]]
+two_finished = [[False]]
+three_finished = [[False]]
+
+def thread_function1():
+  createthread(thread_function3)
+  for i in range(100):
+    myfile.writeat("a",i)
+  one_finished[0][0] = True
+
+def thread_function2():
+  for i in range(100):
+    myfile.writeat("b",(i+100))
+  two_finished[0][0] = True
+
+def thread_function3():
+  for i in range(100):
+    myfile.writeat("c",(i+200))
+  three_finished[0][0] = True
+
+myfile.writeat("0"*300, 0)
+myfile.writeat("0", 0)
+myfile.undo()
+
+createthread(thread_function1)
+createthread(thread_function2)
+
+sleep(6)
+
+if (not one_finished[0][0]) or (not two_finished[0][0]) or (not three_finished[0][0]):
+  raise Exception('Deadlock')
+
+# close the file
+myfile.close()

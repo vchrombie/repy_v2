@@ -1,0 +1,74 @@
+"""
+Author: Tom Zhang, tyz212
+
+Description
+    - Run multiple writes in parallel, all with offset=0 and data='Hello world'.
+Objective
+    - Create a deadlock by exploiting any faulty lock implementations.
+Errors
+    - LockDoubleReleaseError
+Notes
+    - A logs from this attack will contain an [ATTACK_2 SUCCESS] identifier. Any log without this identifier was not produced by this attack.
+"""
+
+CREATE = True
+FILENAME = "test.txt"
+DONE = 65535
+THREAD_NAME = "write"
+WRITE_DATA = "Hello world"
+WRITE_OFFSET = 0
+TIMEOUT = 10
+
+
+def log_success(message):
+    log("[ATTACK_2 SUCCESS] %s\n" % message)
+
+
+def write_wrapper(thread_name, func, arg1, arg2):
+    def call_rw():
+        try:
+            func(arg1, arg2)
+            mycontext[thread_name] = DONE
+        except LockDoubleReleaseError as err:
+            log_success("Thread '%s': LockDoubleReleaseError -> %s" % (thread_name, str(err)))
+        except Exception:
+            pass
+    return call_rw
+
+
+def main():
+    try:
+        if FILENAME in listfiles():
+            removefile(FILENAME)
+        test_file = openfile(FILENAME, CREATE)
+        
+        start_time = getruntime()
+        thread_names = []
+        for i in range(10):
+            tname = THREAD_NAME + "%d" % i
+            # Always write to beginning of file
+            createthread(write_wrapper(tname, test_file.writeat, WRITE_DATA, WRITE_OFFSET))
+            thread_names.append(tname)
+        
+        # Wait for threads to finish
+        is_timed_out = False
+        for tname in thread_names:
+            if is_timed_out:
+                break
+
+            # Thread writes should not exceed 10 seconds
+            while tname not in mycontext:
+                if getruntime() - start_time > TIMEOUT:
+                    log_success("Deadlock -> Runtime exceeded 10 seconds")
+                    is_timed_out = True
+                    break
+
+        test_file.close()
+
+    except Exception:
+        pass
+
+
+if callfunc == "initialize":
+    main()
+

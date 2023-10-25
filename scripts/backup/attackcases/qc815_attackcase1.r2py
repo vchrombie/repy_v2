@@ -1,0 +1,19 @@
+def errortest1():
+  if "testfile.txt" in listfiles():
+    removefile("testfile.txt")
+
+  # create a file
+  myfile=openfile("testfile.txt",True)
+
+  myfile.writeat("12345678", 0)
+
+  try:
+    myfile.writeat("233", 9)
+  except SeekPastEndOfFileError:
+    pass
+  else:
+    raise Exception("no error raised!")
+  finally:
+    myfile.close()
+
+errortest1()

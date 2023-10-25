@@ -1,0 +1,15 @@
+# 1. do we need to handle this use case where we try to remove a file which does not exist ? No
+# removefile("file_does_not_exist.txt")
+
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# create a file
+myfile=openfile("testfile.txt",True)
+
+# intial write to the file
+myfile.writeat("12345678", 0)
+
+# assert that read is empty
+assert("" == myfile.readat(None, 0))

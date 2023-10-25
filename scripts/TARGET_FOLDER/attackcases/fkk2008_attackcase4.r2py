@@ -1,0 +1,25 @@
+# Test Case 4
+# Trying to pass a faulty filename
+
+'''
+Debugging Information: In this case, add input validators to exclude invalid characters or empty filenames, and anything other than .txt files if that is what you want to work on.
+'''
+
+
+try:
+  # opening few faulty filenames
+  myfile1 = openfile("",True)
+  myfile1.close()
+
+  myfile2 = openfile("@aaa",True)
+  myfile2.close()
+
+  myfile3 = openfile("/.../", True)
+  myfile3.close()
+
+  myfile4 = openfile("scabies.exe", True)
+  myfile4.close()
+except Exception as e:
+  pass
+else:
+  log("Test failed, error expected.\n")

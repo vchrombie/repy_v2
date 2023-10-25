@@ -1,0 +1,64 @@
+TYPE = "type"
+ARGS = "args"
+RETURN = "return"
+EXCP = "exceptions"
+TARGET = "target"
+FUNC = "func"
+OBJC = "objc"
+
+class LPFile():
+    def __init__(self, filename, create):
+        self.LPfile = openfile(filename, create)
+        self.buffered_data = None
+        self.buffered_offset = None
+        self.prev_buffered_data = None
+        self.prev_buffered_offset = None
+
+    def readat(self, bytes, offset):
+        if self.buffered_data and offset == self.buffered_offset:
+            return self.buffered_data[:bytes]
+        return self.LPfile.readat(bytes, offset)
+
+    def writeat(self, data, offset):
+        # Store current buffer to previous
+        self.prev_buffered_data = self.buffered_data
+        self.prev_buffered_offset = self.buffered_offset
+        # Update current buffer
+        self.buffered_data = data
+        self.buffered_offset = offset
+
+    def undo(self):
+        # Restore previous buffer state
+        self.buffered_data = self.prev_buffered_data
+        self.buffered_offset = self.prev_buffered_offset
+
+    def close(self):
+        if self.buffered_data:
+            self.LPfile.writeat(self.buffered_data, self.buffered_offset)
+        self.LPfile.close()
+
+def LPopenfile(filename, create):
+    return LPFile(filename, create)
+
+
+# The code here sets up type checking and variable hiding for you.
+# You should not need to change anything below here.
+sec_file_def = {
+    "obj-type": LPFile,
+    "name": "LPFile",
+    "writeat": {TYPE: FUNC, ARGS: (str, (int, long)), EXCP: Exception, RETURN: (int, type(None)), TARGET: LPFile.writeat},
+    "readat": {TYPE: FUNC, ARGS: ((int, long, type(None)), (int, long)), EXCP: Exception, RETURN: str, TARGET: LPFile.readat},
+    "undo": {TYPE: FUNC, ARGS: None, EXCP: None, RETURN: type(None), TARGET: LPFile.undo},
+    "close": {TYPE: FUNC, ARGS: None, EXCP: Exception, RETURN: (bool, type(None)), TARGET: LPFile.close}
+}
+
+CHILD_CONTEXT_DEF["openfile"] = {
+    TYPE: OBJC,
+    ARGS: (str, bool),
+    EXCP: Exception,
+    RETURN: sec_file_def,
+    TARGET: LPopenfile
+}
+
+# Execute the user code
+secure_dispatch_module()

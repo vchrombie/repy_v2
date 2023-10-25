@@ -1,0 +1,18 @@
+# Check if the file "test.txt" exists and remove it if found
+if "test.txt" in listfiles():
+    removefile("test.txt")
+
+# Create a new File object and write data
+file = openfile("test.txt", True)
+file.writeat("Hello, world!", 0)
+
+# Try to write data beyond the end of the file (simulating an error)
+try:
+    file.writeat("Goodbye, world!", 13)
+except SeekPastEndOfFileError:
+    pass
+else:
+    assert False  # This should not be reached
+
+# Close the file
+file.close()

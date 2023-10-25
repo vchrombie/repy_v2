@@ -1,0 +1,29 @@
+# clean up if the file exists.
+if "out.txt" in listfiles():
+    removefile("out.txt")
+
+# create a file
+myfile=openfile("out.txt",True)
+
+myfile.writeat("123456789", 0)
+myfile.undo()
+myfile.writeat("abc", 0)
+myfile.writeat("123", 3)
+
+assert("abc" == myfile.readat(None, 0))
+
+myfile.close()
+
+# open a file wrong
+# myfile2 = openfile("out2.txt", "string")
+
+# try opening without creating file, then call writeat
+# myfile3 = openfile("out3.txt", False)
+
+# myfile2.writeat("a", 0)
+
+# assert("123456789" == myfile2.readat(9,0))
+
+# myfile2.close()
+
+#### Testing certain exception handling with out of bound parameters

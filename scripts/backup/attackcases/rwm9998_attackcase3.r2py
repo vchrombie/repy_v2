@@ -1,0 +1,13 @@
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+    removefile("testfile.txt")
+
+# create a file
+myfile=openfile("testfile.txt",True)
+myfile.writeat("123",0)
+myfile.close()
+
+myfile=openfile("testfile.txt",True)
+assert "123" == myfile.readat(None,0)
+myfile.close()
+

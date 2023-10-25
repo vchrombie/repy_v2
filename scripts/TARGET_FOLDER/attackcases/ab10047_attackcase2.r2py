@@ -1,0 +1,16 @@
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+
+myfile=openfile("testfile.txt",True)
+myfile.writeat("5678",0)
+myfile.writeat("1234",0)
+myfile.undo()
+myfile.undo()
+try:
+    assert("5678"== myfile.readat(4,0))
+    myfile.close()
+except:
+  myfile.close()
+  # Error Handle or Failure Condition
+  log("Multiple Undo not handled properly!\n")

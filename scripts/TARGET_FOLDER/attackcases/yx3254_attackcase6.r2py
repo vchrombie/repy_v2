@@ -1,0 +1,33 @@
+# security_test.r2py
+
+# Check if testfile_extended.txt exists and remove it
+if "testfile_extended.txt" in listfiles():
+    try:
+        removefile("testfile_extended.txt")
+    except:
+        log("SECURITY COMPROMISED: Monitor failed to remove existing file.\n")
+
+try:
+    myfile = openfile("testfile_extended.txt", True)
+except:
+    log("SECURITY COMPROMISED: Monitor failed to allow normal file creation.\n")
+
+try:
+    # Writing beyond the current file length
+    myfile.writeat("AttackBeyond", 500)
+    data = myfile.readat(11, 500)
+    if data != "AttackBeyond":
+        log("SECURITY VULNERABILITY: Writing beyond the current file length failed.\n")
+except:
+    log("SECURITY COMPROMISED: Error in write beyond test.\n")
+
+try:
+    # Attempt a large read beyond the file size
+    data = myfile.readat(10000, 1000)
+except:
+    log("SECURITY COMPROMISED: Monitor failed during large read beyond test or returned more data than expected.\n")
+
+try:
+    myfile.close()
+except:
+    log("SECURITY COMPROMISED: Monitor failed to close the file.\n")

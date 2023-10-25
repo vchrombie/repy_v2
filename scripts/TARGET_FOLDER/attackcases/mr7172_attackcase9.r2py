@@ -1,0 +1,26 @@
+def sleep6():
+    sleep(6)
+    raise AssertionError
+# give 6 seconds for the testcase to run, if it doesn't finish in that time,
+# it's a reference monitor performance issue
+
+createthread(sleep6)
+
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# create a file
+myfile=openfile("testfile.txt",True)
+try:
+    myfile.writeat("12345678",-2)
+except RepyArgumentError:
+    pass
+else:
+    raise AssertionError
+
+# file should be empty since writeat failed with arg error
+assert("" == myfile.readat(None,0))
+
+myfile.close()
+exitall()

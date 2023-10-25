@@ -1,0 +1,46 @@
+#DKD284 First attack case 
+
+#Testing if undo function is done correctly as I realized I did not wrong.
+#I thought you should be able to do multiple undos instead of only just 1, 
+#so now making sure everyone did it correctly :D
+
+# clean up if the file exists. - copied from example given, seems like good practive
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# create a file - copied from example given, seems like good practive
+myfile=openfile("testfile.txt",True)
+
+#This attack script is running test
+#log("STARTING")
+
+# intial write to the file
+myfile.writeat("Only this should be left",0)
+
+# writing multuple things to the file
+myfile.writeat(" EDIT 1 ",0) 
+#myfile.writeat(" EDIT 2 ",0) 
+#myfile.writeat(" EDIT 3 ",0) 
+#myfile.writeat(" EDIT 4 ",0) 
+
+# TEST CASE: CAN I DO MULTIPLE UNDOs?
+#myfile.undo() #should remove edit 4
+#myfile.undo() #should remove edit 3
+myfile.undo() #should remove edit 1
+myfile.undo() #This should do nothing
+
+# read whatever content is in the file
+text = myfile.readat(24,0)
+
+
+#If the reference monitor is correct, there should be no RepyArgumentError.
+if text != "Only this should be left":
+    log("Attack success! Your file did not handle UNDOs correctly. It should have said: Only this should be left \n")
+    log("Instead it says: "+ text +"\n")
+#else:  #Comment out before submitting, just here to test if this attack file could run
+#    log("attack failed!")
+
+# close the file 
+myfile.close()
+
+

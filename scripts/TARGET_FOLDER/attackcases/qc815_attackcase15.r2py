@@ -1,0 +1,26 @@
+def writetest1():
+  if "testfile.txt" in listfiles():
+    removefile("testfile.txt")
+
+  # create a file
+  myfile=openfile("testfile.txt",True)
+
+  ans = ""
+  loops = 1000
+
+  for i in range(loops):
+    myfile.writeat("12345678",i)
+    if i > 0:
+      ans = ans[:i - 1] + "12345678"
+    assert(ans == myfile.readat(i + 8, 0))
+
+  myfile.undo()
+  # ans = ans[:loops - 2] + "12345678"
+  assert(ans == myfile.readat(None, 0))
+
+  myfile.undo()
+  assert(ans == myfile.readat(None, 0))
+
+  myfile.close()
+
+writetest1()

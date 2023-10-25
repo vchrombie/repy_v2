@@ -1,0 +1,13 @@
+# Clean up if the file exists.
+if "testfile.txt" in listfiles():
+    removefile("testfile.txt")
+
+# Create a file using the reference monitor
+secure_file = openfile("testfile.txt", True)
+
+try:
+    # Attempt to close the same file twice
+    secure_file.close()
+    secure_file.close()
+except Exception as e:
+    assert "File is already closed" in str(e)

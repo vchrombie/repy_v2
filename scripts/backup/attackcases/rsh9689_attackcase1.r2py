@@ -1,0 +1,23 @@
+#Check for valid writeat
+
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# create a file
+myfile=openfile("testfile.txt",True)
+
+# first valid write
+myfile.writeat("hello", 0)
+
+myfile.close()
+
+#open the file again to read
+myfile = openfile("testfile.txt", True)
+
+#read file to check that writeat was valid
+try:
+    assert("hello" == myfile.readat(5,0))
+except:
+    log("Error! Valid write is unsuccessful.\n")
+myfile.close()

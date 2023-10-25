@@ -1,0 +1,27 @@
+# Clean up if the file exists.
+if "attack5.txt" in listfiles():
+    removefile("attack5.txt")
+
+# Create a file
+myfile = openfile("attack5.txt", True)
+
+# Writing a sequence of data
+myfile.writeat("aaaa", 0)
+myfile.writeat("bbbb", 4)
+myfile.writeat("cccc", 8)
+myfile.writeat("dddd", 12)
+
+# Undo the "dddd" write
+myfile.undo()
+
+myfile.writeat("eeee", 12)
+myfile.writeat("ffff", 16)
+
+# Now, overwrite a part of the file
+myfile.writeat("OVER", 4)
+
+# Close the file, making the previous writes permanent
+myfile.close()
+myfile = openfile("attack5.txt", False)
+# The final content should be: "aaaaOVERcccceeeeffff"
+assert "aaaaOVERcccceeeeffff" == myfile.readat(20, 0)

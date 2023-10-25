@@ -1,0 +1,28 @@
+# clean up if the file exists.
+if "testfile5.txt" in listfiles():
+  removefile("testfile5.txt")
+
+# create a file
+myfile=openfile("testfile5.txt",True)
+
+# initial write to the file
+myfile.writeat("01234567",0)
+
+# attempt to overwrite with "ABCD"
+myfile.writeat("ABCD",0)
+
+# immediately overwrite again with "EFGH" without waiting for the previous write to become permanent
+myfile.writeat("EFGH",0)
+
+# close the file immediately without calling undo
+myfile.close()
+
+# reopen the file to check its content
+myfile=openfile("testfile5.txt",False)
+
+# The contents should be "EFGH4567" because the immediate overwrite after "ABCD" should be the one that became permanent upon closure
+if "EFGH4567" != myfile.readat(8,0):
+  log("Consecutive writes and immediate closure failed\n")
+
+# close the file again
+myfile.close()

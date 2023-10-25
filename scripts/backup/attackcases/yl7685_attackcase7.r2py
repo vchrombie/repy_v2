@@ -1,0 +1,16 @@
+# This is the Attack Case 7
+
+#First, clean up the existing file
+while "testfile.txt" in listfiles():
+    removefile("testfile.txt")
+
+#Now, open the file
+try:
+    myfile = LPopenfile("testfile.txt", True)
+except:
+    pass
+
+#TestCase 7: trying to read from a file and then use that data to write to a file simutaneously
+
+myfile.writeat(myfile.readat(0, 50), 0)
+myfile.close()

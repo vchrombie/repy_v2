@@ -1,0 +1,30 @@
+#This file is checking multiple writeat scenarios
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+myfile=openfile("testfile.txt",True)
+
+
+
+var = 0
+for i in range(10):
+    myfile.writeat("Hi!",var)
+    var+=3
+
+
+myfile.undo()
+for i in range(10):
+  myfile.undo()
+  myfile.writeat("Hi!",0)
+  
+#writeat -
+myfile.writeat("BEFORE",-99)
+myfile.writeat("BEFORE",-99)
+
+#EOF
+
+myfile.writeat("EOF!", 999)
+myfile.writeat("EOF!", 999)
+myfile.close()
+
+#File closed
+myfile.writeat("Hi!",0)

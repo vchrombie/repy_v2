@@ -1,0 +1,17 @@
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+    removefile("testfile.txt")
+  
+myfile = openfile("testfile.txt", True)
+
+myfile.writeat("0", 0)
+myfile.writeat("0", 0)
+
+# Let's see if this offset leads to any strange behavior
+offset = int(myfile.readat(1, 0))
+
+myfile.writeat("0", offset)
+
+assert("0" == myfile.readat(None, 0))
+
+myfile.close()

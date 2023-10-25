@@ -1,0 +1,125 @@
+TYPE = "type"
+ARGS = "args"
+RETURN = "return"
+EXCEPTIONS = "exceptions"
+TARGET = "target"
+FUNC = "func"
+OBJC = "objc"
+
+class SecurityError(Exception):
+    pass
+
+class SeekPastEndOfFileError(SecurityError):
+    pass
+
+class UnauthorizedFileAccessError(SecurityError):
+    pass
+
+class InvalidOffsetError(SecurityError):
+    pass
+
+class LPFile():
+    def __init__(self, filename, create):
+        if not self.check_access(filename, create):
+            raise UnauthorizedFileAccessError("Unauthorized access to file")
+        self.file = openfile(filename, create)
+        self.pending_data = None
+        self.pending_offset = None
+        self.closed = False
+
+    def readat(self, bytes, offset):
+        if not self.check_read_access(self.file, bytes, offset):
+            raise UnauthorizedFileAccessError("Unauthorized read access")
+        data = self.file.readat(bytes, offset)
+        if offset is not None and len(data) < bytes:
+            raise SeekPastEndOfFileError("Attempt to read past the end of the file")
+        return data
+
+    def writeat(self, data, offset):
+        if not self.check_write_access(self.file, data, offset):
+            raise UnauthorizedFileAccessError("Unauthorized write access")
+        self.pending_data = data
+        self.pending_offset = offset
+
+    def undo(self):
+        if self.pending_data is not None and self.pending_offset is not None and not self.closed:
+            self.file.writeat(self.pending_data, self.pending_offset)
+        self.pending_data = None
+        self.pending_offset = None
+
+    def close(self):
+        if self.pending_data is not None and self.pending_offset is not None:
+            if not self.closed:
+                self.file.writeat(self.pending_data, self.pending_offset)
+        self.file.close()
+        self.closed = True
+
+    def check_access(self, filename, create):
+        if create:
+            return True
+        else:
+            return self.is_filename_allowed(filename) and self.is_file_accessible(filename)
+
+    def check_read_access(self, file, bytes, offset):
+        if offset is not None and offset < 0:
+            raise InvalidOffsetError("Invalid offset value")
+        return True
+
+    def check_write_access(self, file, data, offset):
+        if offset is not None and offset < 0:
+            raise InvalidOffsetError("Invalid offset value")
+        return True
+
+    def is_filename_allowed(self, filename):
+        allowed_filenames = ["file1.txt", "file2.txt"]
+        return filename in allowed_filenames
+
+    def is_file_accessible(self, filename):
+        return self.file_exists(filename)
+
+def LPopenfile(filename, create):
+    return LPFile(filename, create)
+
+sec_file_def = {
+    "obj-type": LPFile,
+    "name": "LPFile",
+    "writeat": {
+        TYPE: FUNC,
+        ARGS: (str, (int, int)),
+        EXCEPTIONS: UnauthorizedFileAccessError,
+        RETURN: (int, type(None)),
+        TARGET: LPFile.writeat
+    },
+    "readat": {
+        TYPE: FUNC,
+        ARGS: ((int, int, type(None)), (int, int)),
+        EXCEPTIONS: (UnauthorizedFileAccessError, SeekPastEndOfFileError, InvalidOffsetError),
+        RETURN: str,
+        TARGET: LPFile.readat
+    },
+    "undo": {
+        TYPE: FUNC,
+        ARGS: None,
+        EXCEPTIONS: None,
+        RETURN: type(None),
+        TARGET: LPFile.undo
+    },
+    "close": {
+        TYPE: FUNC,
+        ARGS: None,
+        EXCEPTIONS: UnauthorizedFileAccessError,
+        RETURN: (bool, type(None)),
+        TARGET: LPFile.close
+    }
+}
+
+CHILD_CONTEXT_DEF["openfile"] = {
+    TYPE: OBJC,
+    ARGS: (str, bool),
+    EXCEPTIONS: UnauthorizedFileAccessError,
+    RETURN: sec_file_def,
+    TARGET: LPopenfile
+}
+
+secure_dispatch_module()
+

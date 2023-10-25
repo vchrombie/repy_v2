@@ -1,0 +1,34 @@
+# # case 5: assert before/after Undo
+
+def close_after(t):
+  def sleep_for():
+    # Terminated the program after sleeping t sec
+    sleep(t)
+    log("ATTACK 5 | Unsuccessful Operation as Program Triggered Race Condition / Infinite Loop\n")
+    exitall()
+  return sleep_for
+terminate_program = close_after(10)
+createthread(terminate_program)
+
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+try:
+    myfile=openfile("testfile.txt",True)
+
+    myfile.writeat("12345678",0)
+
+    myfile.writeat("Hi!",3)
+    myfile.undo()
+    myfile.writeat("Hi!",5) 
+
+    assert("12345678" == myfile.readat(None,0))
+    myfile.writeat("Bye!",0) 
+    assert("12345Hi!" == myfile.readat(None,0))
+    myfile.close()
+except:
+    log("ATTACK 5 | ERROR | Undo should remove last write!\n")
+
+finally:
+    #Exit operation
+    exitall()

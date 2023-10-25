@@ -1,0 +1,174 @@
+"""
+Security Layer: A2.1
+
+Note:
+    This security layer uses encasementlib.r2py, restrictions.default, repy.py and Python
+    Also you need to give it an application to run.
+    python repy.py restrictions.default encasementlib.r2py [security_layer].r2py [attack_program].r2py 
+
+
+Command on terminal:
+py -2.7 repy.py restrictions.default encasementlib.r2py reference_monitor_at5076.r2py application.r2py
+
+File Path:
+C:\Users\atvie\repy_v2\A2-1
+    
+"""
+
+TYPE = "type"
+ARGS = "args"
+RETURN = "return"
+EXCP = "exceptions"
+TARGET = "target"
+FUNC = "func"
+OBJC = "objc"
+
+
+class LPFile():
+    # ==================================================================
+    def __init__(self, filename, create):
+        # globals
+        mycontext['debug'] = False
+        self.LPfile = openfile(filename, create)
+
+	# getting size of file, if file already has things written in it
+	self.file_size = len(self.readat(None, 0))
+
+	# create lock (writeat & undo)
+	self.lock = createlock()
+
+        self.pending_data = None
+        self.pending_offset = None
+    # ==================================================================
+
+
+    # ==================================================================
+    def readat(self, bytes, offset):
+        # Read from the file using the sandbox's readat...
+        return self.LPfile.readat(bytes, offset)
+    # ==================================================================
+
+
+    # ==================================================================
+    def writeat(self, data, offset, close=False):
+	# self.lock.acquire(True)
+
+	with self.lock:
+		# if we're closing, we're just comitting our last valid writeat
+		# so don't need to check for exceptions, and won't need to update
+		# length of our file
+		if not close: 
+			# --------------------  EXCEPTIONS  ---------------------------
+			# ~EXCEPTION: FileClosedError
+			if not mycontext['close_valid']: 
+				# raise exception
+				self.LPfile.close()
+				
+			# ____________ UPDATING LENGTH (if valid) ____________________
+			# type is checked underneath
+			# checking if the offset is positive, and that we're not
+			# trying to write past EOF
+			if offset >= 0 and self.file_size >= offset:
+				if (len(data) + offset) > self.file_size:
+					self.file_size = len(data) + offset
+			# ____________________________________________________________
+	
+			# ~EXCEPTION: RepyArgumentError
+			elif offset < 0:
+				mycontext['writeat_valid'] = False
+				# raise exception
+				self.LPfile.writeat("Null", -1)
+
+			# ~EXCEPTION: SeekPastEndOfFileError
+			elif self.file_size < offset:
+				mycontext['writeat_valid'] = False
+				# raise exception
+				self.LPfile.writeat("Null", offset)
+			# ---------------------------------------------------------------
+	
+		# make writeat permanent time to writeat
+		if mycontext['writeat_valid']:
+			# write old stuff into file
+			self.LPfile.writeat(self.pending_data, self.pending_offset)
+
+			# holding onto these in case of undo
+			mycontext['old_data'] = self.pending_data
+			mycontext['old_offset'] = self.pending_offset
+
+
+		# valid writeat to come
+		mycontext['writeat_valid'] = True
+		
+		# hold onto the next valid data to be written
+	        self.pending_data = data
+	        self.pending_offset = offset
+		mycontext['undo_valid'] = True
+
+	# self.lock.release()
+    # ==================================================================
+
+
+    # ==================================================================
+    def undo(self):
+	# self.lock.acquire(True)
+
+	with self.lock:
+		# if file is not already closed, otherwise do nothing
+		if mycontext['close_valid']:
+			if mycontext['undo_valid']:
+				self.file_size = self.file_size - len(self.pending_data) + 1
+				self.pending_data = mycontext['old_data']
+	        		self.pending_offset = mycontext['old_offset']
+				mycontext['undo_valid'] = False
+	# self.lock.release()
+    # ==================================================================
+
+
+    # ==================================================================
+    def close(self):
+	# self.lock.acquire(True)
+
+	if mycontext['close_valid']:
+		# commit values on valid close
+		self.writeat(self.pending_data, self.pending_offset, True)
+		mycontext['close_valid'] = False
+        self.LPfile.close()
+
+	# self.lock.release()
+    # ==================================================================
+
+
+# ============== Global Variables ===============
+mycontext['writeat_valid'] = False
+mycontext['undo_valid'] = False
+mycontext['close_valid'] = True
+mycontext['old_data'] = ""
+mycontext['old_offset'] = 0
+# ===============================================
+
+
+
+def LPopenfile(filename, create):
+    return LPFile(filename, create)
+
+# The code here sets up type checking and variable hiding for you.
+# You should not need to change anything below here.
+sec_file_def = {
+    "obj-type": LPFile,
+    "name": "LPFile",
+    "writeat": {"type": "func", "args": (str, (int, long)), "exceptions": Exception, "return": (int, type(None)), "target": LPFile.writeat},
+    "readat": {"type": "func", "args": ((int, long, type(None)), (int, long)), "exceptions": Exception, "return": str, "target": LPFile.readat},
+    "undo": {"type": "func", "args": None, "exceptions": None, "return": type(None), "target": LPFile.undo},
+    "close": {"type": "func", "args": None, "exceptions": Exception, "return": (bool, type(None)), "target": LPFile.close}
+}
+
+CHILD_CONTEXT_DEF["openfile"] = {
+    TYPE: OBJC,
+    ARGS: (str, bool),
+    EXCP: Exception,
+    RETURN: sec_file_def,
+    TARGET: LPopenfile
+}
+
+# Execute the user code
+secure_dispatch_module()

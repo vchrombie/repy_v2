@@ -1,0 +1,21 @@
+# Calling write with negative offset should raise exception
+# Should fail with writeat exception specific for invalid min offset
+# Call to write with negative min value is delayed becaues we don't
+# actually write until another writeat or close is called. There is no
+# constraint on negative values in the provided type definition.
+# Specific exception raised should be RepyArgumentError
+try:
+  if "testfile.txt" in listfiles():
+    removefile("testfile.txt")
+  myfile=openfile("testfile.txt", True)
+  myfile.writeat("12345678", 0)
+  # Trigger the exception
+  myfile.writeat("Hi!", -1)
+  # Close prevents log from being
+  # called for some reason
+  myfile.close()
+  # Logged if no exception
+  log("Failed test 7\n")
+except RepyArgumentError:
+  # Do nothing
+  pass

@@ -1,0 +1,23 @@
+# Attack 1
+# Accuracy check
+# ---------------------------
+# opening the file
+# performing two writes
+# performing undo
+# check if the contents of the file match with first write.
+# ---------------------------
+# Pass: no exception raise
+# Fail: any exception raised including assertion errors.
+
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+try:
+  myfile=openfile("testfile.txt",True)
+  myfile.writeat("12345678", 0)
+  myfile.writeat("None",0) 
+  myfile.undo()
+  assert("12345678" == myfile.readat(8,0))
+  myfile.close()
+except Exception as e:
+    log("LOG - FAILED - ATTACK 1\n")
+    

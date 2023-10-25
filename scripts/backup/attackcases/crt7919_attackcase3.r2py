@@ -1,0 +1,8 @@
+def multiple_write_test():
+    f = openfile("testfile.txt", True)
+    f.writeat("Hello", 0)
+    f.writeat("World", 5)
+    assert f.readat(None, 0) == "HelloWorld", "Multiple writes before close failed."
+    f.close()
+
+multiple_write_test()

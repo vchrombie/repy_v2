@@ -1,0 +1,90 @@
+# Ethan Shieh
+
+# Create 350 threads that continuously write valid data to a valid offset in a
+# a file and 350 threads that call undo() on the file object.
+
+# The goal is to hit a condition where the writeat() in one thread makes it
+# through all of the offset checks, but just before it's about to send the
+# write to the sandbox writeat(), an undo() call from another thread destroys
+# the pending data. Then, the writeat() in the original thread will raise an
+# exception about sending None types to the sandbox writeat() despite having
+# been given valid arguments.
+
+# In the normal repy sandbox, this would not happen because there is no mechanism
+# to alter the arguments given to the sandbox writeat() once a call to the
+# sandbox writeat() has been made.
+
+# If this attack case times out, then that means it takes >4 seconds to cleanup,
+# which should not happen. It can also time out if, for some reason, the
+# reference monitor acquires a lock and then returns, leaving function calls
+# in other threads to wait to acquire a lock that will never be released.
+
+# If their code hits an exception in the child threads, then it is an ERROR.
+
+# this doesn't work if their code uses locks. locks are cool.
+
+def sleep_then_call(pause_in_seconds, call_function, call_args):
+  # This function returns a function that takes no arguments. Yet
+  # the returned function "remembers" (via a closure) the variables
+  # defined in the outside scope.
+  # This construction is required as we cannot pass arguments to
+  # the function that we supply to createthread.
+  def configured_timer_function():
+    sleep(pause_in_seconds)
+    call_function(*call_args)
+  return configured_timer_function
+
+# This thread spams undo() at the myfile object. After 6 seconds from the start
+# time, the thread exits.
+def undo_thread(myfile, starttime):
+    while True:
+      # exit if 6 seconds after start time, else do normal operation
+      if (getruntime() - starttime > 6):
+        return
+
+      try:
+        myfile.undo()
+      except Exception as e:
+        msg = str(e) + "\nERROR: es5185_attackcase8 got an exception when calling undo()!\n"
+        log(msg)
+        exitall()
+
+# This thread spams wrteat() at the myfile object. The thread gives always-valid
+# arguments to writeat(). After 6 seconds from the start time, the thread exits.
+def write_thread(myfile, starttime):
+    while True:
+      # exit if 6 seconds after start time, else do normal operation
+      if (getruntime() - starttime > 6):
+        return
+
+      try:
+        myfile.writeat("123456789", 0)
+      except Exception as e:
+        msg = str(e) + "\nERROR: es5185_attackcase8 got an exception when calling writeat() at offset 0 with valid bytes!\n"
+        log(msg)
+        exitall()
+
+# time that the script starts
+starttime = getruntime()
+
+# clean up if the file exists
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# create a file
+myfile=openfile("testfile.txt",True)
+
+undo_thread_func = sleep_then_call(0, undo_thread, [myfile, starttime])
+write_thread_func = sleep_then_call(0, write_thread, [myfile, starttime])
+
+# call a 350 undo threads and 350 write threads in alternating order.
+# this will likely not hit a resource limit using restrictions.default because
+# you can have up to ~800 concurrent events.
+# If this attack works, then an exception will be raised after ~8 threads have
+# started and the entire program (and all threads) will exit.
+for i in range(350):
+  createthread(undo_thread_func)
+  createthread(write_thread_func)
+
+# main function exits here, child threads will exit by themselves if no
+# exception is hit

@@ -1,0 +1,4 @@
+# test closing a file twice
+myfile = openfile("testfile1.txt", True)
+myfile.close()
+myfile.close()

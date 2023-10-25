@@ -1,0 +1,17 @@
+if "testfile9.txt" in listfiles():
+  removefile("testfile9.txt")
+
+myfile=openfile("testfile9.txt",True)
+
+
+myfile.writeat("HELLO",0)
+
+try:
+    myfile.readat(5,0)
+except:
+   pass
+
+myfile.undo()
+
+myfile.close()
+

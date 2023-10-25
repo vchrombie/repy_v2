@@ -1,0 +1,22 @@
+try:
+    # Clean up if the file exists.
+    if "testfile.txt" in listfiles():
+      removefile("testfile.txt")
+
+    # Create a file
+    myfile=openfile("testfile.txt",True)
+
+    # Initial write to the file
+    myfile.writeat("12345678", 0)
+
+    # Trying to read the file at a negative offset
+    myfile.readat(8,-1)
+
+    # Close the file
+    myfile.close()
+except RepyArgumentError:
+    pass
+except Exception as e:
+    log("Reading a file at a negative offset should have thrown a RepyArgumentError but " + repr(e) + " was thrown")
+else:
+    log("Reading a file at a negative offset should have thrown a RepyArgumentError but no error was thrown")

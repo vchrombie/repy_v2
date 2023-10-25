@@ -1,0 +1,25 @@
+#Reading an invalid number of bytes
+
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# create a file
+myfile=openfile("testfile.txt",True)
+
+# first valid write
+myfile.writeat("hello", 0)
+
+myfile.close()
+
+#open the file again to read
+myfile = openfile("testfile.txt", True)
+
+#read file to check that writeat was valid
+try:
+    assert("hello" == myfile.readat(-7,0))
+    myfile.close()
+except RepyArgumentError:
+    pass
+else:
+    log("Error! Read invalid byte!")

@@ -1,0 +1,29 @@
+def beforeEach():
+  # clean up if the file exists.
+  if "testfile.txt" in listfiles():
+    removefile("testfile.txt")
+
+def terminate(t):
+  def sleep_for():
+    # after sleeping t sec, terminate the attack
+    sleep(t)
+    raise RuntimeError("reference monitor took more than 5 seconds => a bug was detected!")
+  return sleep_for
+
+createthread(terminate(10))
+
+#Accuracy Testing
+def readWriteCheck():
+  #setup
+  beforeEach() #Remove the file
+  myfile = openfile("testfile.txt", True)
+  myfile.writeat("first", 0)
+  myfile.writeat("second", 4)
+  myfile.close()
+  myfile = openfile("testfile.txt", False)
+  assert "firssecond" == myfile.readat(10, 0) #overwrite check
+  myfile.close()
+
+readWriteCheck()
+
+exitall()

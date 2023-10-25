@@ -1,0 +1,47 @@
+include_repyv2("repyv2")
+
+def test_large_file_handling():
+    """
+    Tests the security layer's ability to handle large files. This is a stress test designed to
+    check the performance and stability of the system when working with large amounts of data.
+    """
+    test_filename = "test_large_file.txt"
+    large_content = "A" * 1024 * 1024  # 1 Megabyte of data
+
+    try:
+        # Step 1: Create a large file using the LPopenfile function
+        secure_file = LPopenfile(test_filename, True)
+
+        # Step 2: Write a large amount of data to the file
+        print("Writing large content to the file...")
+        secure_file.writeat(large_content, 0)
+
+        # Optional: You might want to add some delay or perform some operations here
+        # to check the behavior during long-running write operations.
+
+        # Step 3: Read the data from the file and check its integrity
+        print("Reading content from the file...")
+        read_content = secure_file.readat(len(large_content), 0)
+
+        if read_content == large_content:
+            print("Test Passed: Successfully wrote and read large content from the file.")
+        else:
+            print("Test Failed: There was an issue handling the large content.")
+
+        # Step 4: Close the file
+        secure_file.close()
+
+    except Exception as e:
+        print(f"An error occurred during the test: {e}")
+
+    finally:
+        # Cleanup: Delete the test file
+        try:
+            removefile(test_filename)
+        except:
+            # The file might already be removed, wasn't created at all, or some error occurred.
+            pass
+
+# Execute the test
+if __name__ == "__main__":
+    test_large_file_handling()

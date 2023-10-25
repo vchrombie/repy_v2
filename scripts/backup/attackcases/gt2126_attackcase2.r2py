@@ -1,0 +1,25 @@
+##
+# Write, write, write
+##
+
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# create a file
+myfile=openfile("testfile.txt",True)
+
+# intial write to the file
+myfile.writeat("12345678\n",0)
+
+# add a second line of text to the file
+myfile.writeat("Hi!\n",9) 
+
+# add a third line of text to the file
+myfile.writeat("Bye!",13) 
+
+# the contents should be "12345678\nHi!\n" as the overwrite was undone
+assert("12345678\nHi!\n" == myfile.readat(13,0))
+
+# close the file
+myfile.close()

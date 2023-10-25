@@ -1,0 +1,171 @@
+"""
+
+Modified by: Farhan Khan
+Submission Date: 17 Oct, 2023
+Course Title: CS-UY 3923 Computer Security
+Course Instructor: Prof. Justin Cappos
+
+Original Repository: https://github.com/SeattleTestbed/docs/blob/master/EducationalAssignments/UndoPartOne.md#choice-of-file-names
+
+This security layer attempts to adequately handle the undo functionality.
+
+Note:
+    This security layer uses encasementlib.r2py, restrictions.default, repy.py and Python
+    Also you need to give it an application to run.
+    python repy.py restrictions.default encasementlib.r2py [security_layer].r2py [attack_program].r2py 
+    
+"""
+
+
+
+TYPE = "type"
+ARGS = "args"
+RETURN = "return"
+EXCP = "exceptions"
+TARGET = "target"
+FUNC = "func"
+OBJC = "objc"
+
+
+class LPFile():
+    def __init__(self, filename, create):
+      # globals
+      mycontext['debug'] = False
+      
+      # Check if the filename is a valid string
+      try:
+          if not isinstance(filename, str) or filename == "" or "/" in filename or "\\" in filename:
+            raise RepyArgumentError("RepyArgumentError: Invalid filename\n")
+      except Exception as e:
+            log(str(e))
+      
+
+      # Try to open the file and catch any error, could be merged into a single try/catch block but I kept it like this for ease
+      
+      try:
+        self.LPfile = openfile(filename, create)
+      except Exception as e:
+        log(str(e) + "\n")
+        # Set the initialized flag to False
+        self.initialized = False
+        return
+      
+      # Continue globals
+      self.pending_data = None
+      self.pending_offset = None
+
+      # Setting the file_size attribute
+      # Read all the characters in the file to a single string
+      data = self.LPfile.readat(None, 0)
+      # Set the file size to the length of the string
+      self.file_size = len(data)
+      # Set the initialized flag to True
+      self.initialized = True
+
+
+    def readat(self, bytes, offset):
+        # Minimally modified for checking initialization. Still has potential vulnerabilities
+        try:
+            # Check if the file is initialized
+            if not self.initialized:
+              raise RepyArgumentError("RepyArgumentError: The file is not initialized\n")
+            # Read from the file using the sandbox's readat...
+            return self.LPfile.readat(bytes, offset)
+        except Exception as e:
+            log(str(e))
+
+    def writeat(self, data, offset):
+        # Check if the file is initialized
+        try:
+            if not self.initialized:
+              raise RepyArgumentError("RepyArgumentError: The file is not initialized\n")
+            else:
+                #check for negative offsets
+                if offset < 0:
+                    raise RepyArgumentError("RepyArgumentError: Offset must be non-negative\n")
+                #check for offset being too big
+                if offset > self.file_size:
+                    raise SeekPastEndOfFileError("SeekPastEndofFileError: Offset is beyond the end of file, the offset being: " + str(self.file_size) + " Bytes\n")
+                # check if no data is entered or string is empty
+                if data is None or data == "":
+                    raise RepyArgumentError("RepyArgumentError: Data must be a non-empty string\n")
+                if self.pending_data is not None and self.pending_offset is not None:
+                    self.LPfile.writeat(self.pending_data, self.pending_offset)
+                    #updating the file size upon writing
+                    self.file_size = max(self.file_size, self.pending_offset + len(self.pending_data))
+
+                self.pending_data = data
+                self.pending_offset = offset
+        except Exception as e:
+            log(str(e))
+
+    def undo(self):
+        try:
+            # Check if the file is initialized
+            if not self.initialized:
+              raise RepyArgumentError("RepyArgumentError: The file is not initialized\n")
+            else:
+              if self.pending_data is not None and self.pending_offset is not None:
+                  self.file_size = max(self.file_size, self.pending_offset - len(self.pending_data))
+                  self.pending_data = None
+                  self.pending_offset = None
+              else:
+                  log("Nothing to undo. Cannot undo twice or if nothing is there in the file yet\n")
+        except Exception as e:
+            log(str(e))
+
+    def close(self):
+        # Check if the file is initialized
+        try:
+            if not self.initialized:
+              raise RepyArgumentError("RepyArgumentError: The file is not initialized\n")
+            #Writing down the last changes on the file before closing
+            if self.pending_data is not None and self.pending_offset is not None:
+                self.LPfile.writeat(self.pending_data, self.pending_offset)
+                # Update the file size after writing
+                self.file_size = max(self.file_size, self.pending_offset + len(self.pending_data))
+                self.LPfile.close()
+                # Set the initialized flag to False
+                self.initialized = False
+        except Exception as e:
+            log(str(e))
+
+
+
+
+#This was modified to prevent crashing due to attempted concurrent access
+def LPopenfile(filename, create):
+    # Create a new LPFile object
+    lpfile = LPFile(filename, create)
+    # Try to open the file and catch any error
+    try:
+        lpfile.LPfile = openfile(filename, create)
+    except FileInUseError as e:
+        log("FileInUseError: " + str(e) + "\n")
+        # Set the initialized flag to False
+        lpfile.initialized = False
+    return lpfile
+
+
+# The code here sets up type checking and variable hiding for you.
+# You should not need to change anything below here.
+sec_file_def = {
+    "obj-type": LPFile,
+    "name": "LPFile",
+    "writeat": {"type": "func", "args": (str, (int, long)), "exceptions": Exception, "return": (int, type(None)), "target": LPFile.writeat},
+    "readat": {"type": "func", "args": ((int, long, type(None)), (int, long)), "exceptions": Exception, "return": str, "target": LPFile.readat},
+    "undo": {"type": "func", "args": None, "exceptions": None, "return": type(None), "target": LPFile.undo},
+    "close": {"type": "func", "args": None, "exceptions": Exception, "return": (bool, type(None)), "target": LPFile.close}
+
+}
+
+CHILD_CONTEXT_DEF["openfile"] = {
+    TYPE: OBJC,
+    ARGS: (str, bool),
+    EXCP: Exception,
+    RETURN: sec_file_def,
+    TARGET: LPopenfile
+}
+
+# Execute the user code
+secure_dispatch_module()

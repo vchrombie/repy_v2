@@ -1,0 +1,39 @@
+try:
+  if "testfile.txt" in listfiles():
+    removefile("testfile.txt")
+except Exception as e:
+  log("Error during file cleanup.\n")
+  raise
+
+try:
+  myfile=openfile("testfile.txt",True)
+except Exception as e:
+  log("An error occurred while creating the file.\n")
+  raise
+
+def write_data(file, data):
+  def _write_helper():
+    offset = 0
+    length = 8
+    times = 1000
+    for _ in range(times):
+        file.writeat(data,offset)
+        offset += length
+  return _write_helper
+
+try:
+  # write with multithread
+  createthread(write_data(myfile, "12345678"))
+  createthread(write_data(myfile, "abcdefgh"))
+except Exception as e:
+  log("Error during file operations.\n")
+  raise
+
+try:
+  # Close the file immediately instead of sleeping for 2s like attackcase6
+  myfile.close()
+except Exception as e:
+  log("Error while closing the file.\n")
+  raise
+
+log("execution time: " + str(getruntime()) + "s\n")

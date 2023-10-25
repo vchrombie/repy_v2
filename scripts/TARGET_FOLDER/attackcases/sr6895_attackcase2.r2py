@@ -1,0 +1,50 @@
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+def start_timer(t):
+  def sleep_for():
+    sleep(t)
+    log("Error: Unsuccessful Operation as Program Triggered Race Condition / Infinite Loop\n")
+    exitall()
+  return sleep_for
+terminate_program = start_timer(4)
+createthread(terminate_program)
+
+try:
+    myfile=openfile("testfile.txt",True)
+    myfile.writeat("12345678",0)
+    myfile.writeat("Hi!",2) 
+except Exception:
+    log("Error: case2 failed: No error should have been thrown for open and write\n")
+
+try:
+    assert("234" == myfile.readat(3,1))
+    myfile.writeat("Hi",8)
+    assert("2Hi" == myfile.readat(3,1))
+    myfile.undo()
+    myfile.undo()
+    myfile.undo()
+    assert("12Hi!678" == myfile.readat(None,0))
+    myfile.undo()
+    assert("12Hi!678" == myfile.readat(None,0))
+    myfile.writeat("hellloooo",8)
+    assert("12Hi!678" == myfile.readat(None,0))
+    myfile.writeat("45678",5)
+    assert("12Hi!678hellloooo" == myfile.readat(None,0))
+    assert("12Hi!678hellloooo" == myfile.readat(30,0))
+    myfile.close()
+    myfile = openfile("testfile.txt",False)
+    assert("5678ll" == myfile.readat(6,6))
+except AssertionError:
+    log("Error: case2 failed: write, read, undo operations should alter file properly\n")
+except Exception:
+    log("Error: case2 failed: No error should have been thrown\n")
+else:
+    pass
+
+try:
+    myfile.close()
+except Exception:
+    log("Error: case2 failed: No error should have been thrown for close\n")
+
+exitall()

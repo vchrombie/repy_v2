@@ -1,0 +1,29 @@
+# clean up if the file exists.
+if "testfile1.txt" in listfiles():
+  removefile("testfile1.txt")
+
+# create a file
+myfile=openfile("testfile1.txt",True)
+
+# intial write to the file
+myfile.writeat("12345678",0)
+
+# attempt to overwrite the beginning of the file
+myfile.writeat("Hi!",0) 
+
+# now, undo the previous write
+myfile.undo()
+
+# the contents should still be "12345678" as the overwrite was undone
+try:
+  assert("12345678" == myfile.readat(8,0))
+except:
+  log("Error! Undo is unsuccesful\n")
+
+
+# close the file
+myfile.close()
+
+
+
+

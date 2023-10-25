@@ -1,0 +1,24 @@
+
+### Test 4: Data is not string Exception Correct
+
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+
+try:
+  # create a file
+    myfile=openfile("testfile.txt",True)
+    myfile.writeat(123, 0)
+except Exception as e:
+  if not isinstance(e, RepyArgumentError):
+     log("Data is not string writeat exception wrong type!")
+finally:
+    try:
+        myfile.close();
+    except:
+        log("Exception in the wrong spot!")
+
+
+
+

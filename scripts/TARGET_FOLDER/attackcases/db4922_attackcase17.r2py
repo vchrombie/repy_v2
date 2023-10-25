@@ -1,0 +1,13 @@
+# check for invalid file name
+
+# Clean up of existing file
+if "testfil$e.txt" in listfiles():
+    removefile("testfil$e.txt")
+
+try:
+    myfile=openfile("testfil$e.txt",True)
+    myfile.close()
+except RepyArgumentError:
+    pass
+else:
+    log("Error! Wrong file name allowed.\n")

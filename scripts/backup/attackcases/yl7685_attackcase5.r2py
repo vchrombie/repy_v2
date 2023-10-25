@@ -1,0 +1,15 @@
+# This is the Attack Case 5
+
+#First, clean up the existing file
+while "testfile.txt" in listfiles():
+    removefile("testfile.txt")
+
+#Now, open the file
+try:
+    myfile = LPopenfile("testfile.txt", True)
+except:
+    pass
+
+#TestCase 5: Try to undo an empty file
+    myfile.undo()
+    myfile.close()

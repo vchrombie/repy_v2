@@ -1,0 +1,13 @@
+# Test case 4: Undo the most recent write
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+# create a file
+myfile=openfile("testfile.txt",True)
+myfile.writeat("Hello, World!", 0)
+myfile.writeat("I love earth", 0)
+myfile.undo()
+myfile.writeat("me too", 0)
+assert (myfile.readat(None, 0) == "Hello, World!")
+myfile.close()
+
+

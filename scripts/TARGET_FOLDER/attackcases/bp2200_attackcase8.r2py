@@ -1,0 +1,27 @@
+
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+myfile=openfile("testfile.txt",True)
+
+
+myfile.writeat("Hello",0)
+myfile.writeat("Undo this",0)
+
+myfile.undo()
+
+myfile.writeat("Hello",0)
+myfile.writeat("Now Undo This",0)
+myfile.writeat("Hello",0)
+
+myfile.undo()
+myfile.undo()
+
+myfile.writeat("Now Undo This",0)
+myfile.writeat("Now Undo This",0)
+myfile.writeat("Now Undo This",0)
+
+myfile.undo()
+myfile.undo()
+myfile.undo()
+
+myfile.close()

@@ -1,0 +1,20 @@
+# Attack 3
+# Accuracy check
+# ---------------------------
+# opening empty file
+# performing undo
+# performing close
+# ---------------------------
+# Pass: No Exception raised
+# Fail: any Exception raised.
+
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+myfile=openfile("testfile.txt",True)
+try:
+  myfile.undo()
+except Exception as error:
+    log("LOG - FAILED - ATTACK 3\n")
+else:
+    myfile.close()

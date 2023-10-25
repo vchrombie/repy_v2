@@ -1,0 +1,109 @@
+"""
+This security layer inadequately handles the undo functionality
+
+Note:
+    This security layer uses encasementlib.r2py, restrictions.default, repy.py and Python
+    Also you need to give it an application to run.
+    python repy.py restrictions.default encasementlib.r2py [security_layer].r2py [attack_program].r2py 
+    
+"""
+TYPE = "type"
+ARGS = "args"
+RETURN = "return"
+EXCP = "exceptions"
+TARGET = "target"
+FUNC = "func"
+OBJC = "objc"
+
+
+class LPFile():
+    def __init__(self, filename, create):
+        # globals
+        # store file, pending data and offset, closed flag
+        # and ind after last cahr
+        mycontext['debug'] = False
+        self.LPfile = openfile(filename, create)
+        self.pending_data = None
+        self.pending_offset = None
+        self.is_closed = False
+        self.file_len = len(self.LPfile.readat(None, 0))
+
+    def readat(self, bytes, offset):
+        return self.LPfile.readat(bytes, offset)
+
+    def writeat(self, data, offset):
+        # RepyArgumentError
+        # offset must be positive and data must be a string
+        if (offset < 0) or (type(data) != str):
+            raise RepyArgumentError
+        
+        # FileClosedError
+        # check if the file open
+        if self.is_closed:
+            raise FileClosedError
+        
+        # SeekPastEndOfFileError
+        # check if offset beyond EOF
+        if self.pending_data is not None:
+            end_of_file = max(self.file_len, self.pending_offset + len(self.pending_data))
+        else:
+            end_of_file = self.file_len
+        if offset > end_of_file:
+            raise SeekPastEndOfFileError
+
+        # commit pending write if there is one
+        if self.pending_data != None:
+            self.LPfile.writeat(self.pending_data, self.pending_offset)
+            pending_file_end = self.pending_offset + len(self.pending_data)
+            self.file_len = max(self.file_len, pending_file_end)
+            
+            # wipe pending data and offset
+            self.pending_data = None
+            self.pending_offset = None
+        
+        # update pending data
+        self.pending_data = data
+        self.pending_offset = offset
+
+    def undo(self):
+        # wipe pending data and offset if open
+        if self.is_closed:
+            return
+        self.pending_data = None
+        self.pending_offset = None
+
+    def close(self):
+        # commit pending write if there is one
+        if self.pending_data != None:
+            self.LPfile.writeat(self.pending_data, self.pending_offset)
+            self.pending_data = None
+            self.pending_offset = None
+
+        # set close flag and close
+        self.is_closed = True
+        self.LPfile.close()
+
+def LPopenfile(filename, create):
+    return LPFile(filename, create)
+
+# The code here sets up type checking and variable hiding for you.
+# You should not need to change anything below here.
+sec_file_def = {
+    "obj-type": LPFile,
+    "name": "LPFile",
+    "writeat": {"type": "func", "args": (str, (int, long)), "exceptions": Exception, "return": (int, type(None)), "target": LPFile.writeat},
+    "readat": {"type": "func", "args": ((int, long, type(None)), (int, long)), "exceptions": Exception, "return": str, "target": LPFile.readat},
+    "undo": {"type": "func", "args": None, "exceptions": None, "return": type(None), "target": LPFile.undo},
+    "close": {"type": "func", "args": None, "exceptions": Exception, "return": (bool, type(None)), "target": LPFile.close}
+}
+
+CHILD_CONTEXT_DEF["openfile"] = {
+    TYPE: OBJC,
+    ARGS: (str, bool),
+    EXCP: Exception,
+    RETURN: sec_file_def,
+    TARGET: LPopenfile
+}
+
+# Execute the user code
+secure_dispatch_module()

@@ -1,0 +1,11 @@
+#test write at to close file
+try:
+    if "testfile.txt" in listfiles():
+        removefile("testfile.txt")
+    myfile=openfile("testfile.txt",True)
+    myfile.close(); 
+    myfile.writeat("asdf",0)
+except Exception as e:
+    pass
+else:
+    log("should have errored\n")

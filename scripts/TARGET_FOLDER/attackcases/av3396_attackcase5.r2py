@@ -1,0 +1,20 @@
+# Clean up of existing file
+if "test.txt.a" in listfiles():
+  removefile("test.txt.a")
+if "test.txt.b" in listfiles():
+  removefile("test.txt.b")
+if "test.txt" in listfiles():
+ removefile("test.txt")
+
+# Open File Function Call
+myfile=openfile("test.txt",True)  #Create an AB file
+
+# Write valid data to the file
+try:
+ myfile.writeat("Anish",0)
+ #log("pass")
+except:
+ log("Write operation not permitted!")
+finally:
+#Close the file
+ myfile.close()

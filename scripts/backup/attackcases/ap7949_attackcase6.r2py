@@ -1,0 +1,15 @@
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+    removefile("testfile.txt")
+  
+# create a file
+myfile=openfile("testfile.txt",True)
+
+myfile.writeat("12345678", 0)
+# close the file
+myfile.close()
+
+try:
+    myfile.undo()
+except Exception as e:
+    log('undo after close should not raise an exception')

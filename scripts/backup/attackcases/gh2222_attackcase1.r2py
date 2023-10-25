@@ -1,0 +1,11 @@
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+
+myfile=openfile("testfile.txt",True)
+
+try:
+    myfile.writeat("12345678",-1)
+
+except:
+    exitall()

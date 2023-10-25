@@ -1,0 +1,55 @@
+# This test attack case simulates an attack scenario where two files are created, data is written to them,
+# and the contents of the files are later checked.
+# The test case checks whether the files retain the expected data and logs an "Attack executed" if the data is not as expected.
+# It is intended to assess the security of the system with respect to handling multiple files and write operations.
+
+# Function to create a thread to bypass Infinite Loop or Race Conditions
+def delay(t):
+  def sleep_for():
+    # after sleeping for t seconds, exit the program
+    sleep(t)
+    log("Operation Unsuccessful as Program Stuck in Infinite Loop or Triggered Race Condition\n")
+    exitall()
+  return sleep_for
+terminate_program = delay(10) #Taking 10 seconds as that is the max time allowed
+createthread(terminate_program)
+
+# Clean up of existing file
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+if "testfile2.txt" in listfiles():
+  removefile("testfile2.txt")
+
+
+# Open File
+myfile1=openfile("testfile.txt",True)  #Create a file
+myfile2=openfile("testfile2.txt",True)  #Create a file
+
+# Write data to the file
+myfile1.writeat("Hello1",0)
+myfile2.writeat("Hello2",0)
+
+#Close the file
+myfile1.close()
+myfile2.close()
+
+# Open File Function Call
+myfile1=openfile("testfile.txt",True)
+myfile2=openfile("testfile2.txt",True)
+
+# Read the file to check the contents
+try:
+ assert('Hello1' == myfile1.readat(6,0))
+ assert('Hello2' == myfile2.readat(6,0))
+ #Close the file
+ myfile1.close()
+ myfile2.close()
+
+except:
+ #Close the file
+ myfile1.close()
+ myfile2.close()
+ log("Attack case 1 executed. This Reference Monitor is unable to Handle Multiple Files! \n")
+
+finally:
+ exitall()

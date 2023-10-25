@@ -1,0 +1,21 @@
+# Tests thousands of writes and undos
+
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# create a file
+myfile=openfile("testfile.txt",True)
+
+# intial write to the file
+myfile.writeat("abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz",0)
+
+for i in range(1025):
+  myfile.writeat(str(i), i%52)
+  myfile.undo()
+
+# the content should be unchanged same as the overwrites were undone
+assert('abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz' == myfile.readat(52,0))
+
+# close the file
+myfile.close()

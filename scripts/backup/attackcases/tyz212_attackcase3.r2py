@@ -1,0 +1,38 @@
+"""
+Author: Tom Zhang, tyz212
+
+Description
+    - Creates a file and invokes the 'close' method twice. Exploits reference monitors that sets the pending data to None upon closing the file.
+Objective
+    - Attempt to cause an RepyArgumentError when 'close' is invoked on a file object.
+Errors
+    - RepyArgumentError
+Notes
+    - A logs from this attack will contain an [ATTACK_3 SUCCESS] identifier. Any log without this identifier was not produced by this attack.
+"""
+
+FILENAME = "test.txt"
+CREATE = True
+
+
+def log_success(message):
+    log("[ATTACK_3 SUCCESS] %s\n" % message)
+
+
+def main():
+    try:
+        if FILENAME in listfiles():
+            removefile(FILENAME)
+        test_file = openfile(FILENAME, CREATE)
+        test_file.close()
+        test_file.close()
+
+    except RepyArgumentError as err:
+        log_success(str(err))
+
+    except Exception:
+        pass
+
+
+if callfunc == "initialize":
+    main()

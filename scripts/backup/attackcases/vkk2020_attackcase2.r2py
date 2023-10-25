@@ -1,0 +1,11 @@
+try:
+    # clean up if the file exists.
+    myfile = openfile("testfile.txt", True)
+
+
+
+    # close the file
+    myfile.close()
+
+except Exception:
+    log("Error! The reference monitor is not working as intended \n")

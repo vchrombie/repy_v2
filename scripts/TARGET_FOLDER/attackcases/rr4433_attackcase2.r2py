@@ -1,0 +1,29 @@
+def timeout_thread_func():
+  timeout_seconds = 10
+  sleep(timeout_seconds)
+  assert False, "Timed out after " + str(timeout_seconds) + " seconds"
+  exitall()
+
+createthread(timeout_thread_func)
+
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# create a file
+myfile = openfile("testfile.txt",True)
+
+# Assumption: Reading from offset 0 should be valid and return an empty string
+assert("" == myfile.readat(0, 0))
+assert("" == myfile.readat(None, 0))
+assert("" == myfile.readat(1, 0))
+assert("" == myfile.readat(1000, 0))
+
+myfile.close()
+
+# clean up the file afterwards.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+exitall()
+

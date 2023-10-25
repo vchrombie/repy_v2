@@ -1,0 +1,77 @@
+TYPE = "type"
+ARGS = "args"
+RETURN = "return"
+EXCP = "exceptions"
+TARGET = "target"
+FUNC = "func"
+OBJC = "objc"
+
+
+open_files = {} # Dictionary that shows whether a file has been opened or not
+
+class LPFile():
+    def __init__(self, filename, create):
+        if filename in open_files: # if file is already open
+            return  # don't do anything, its already open
+
+        # otherwise, open file and create instances
+        self.LPfile = openfile(filename, create)
+        self.temp_write = None  # temporarily holds a write operation until a secondary one occurs, this way 'undo' works
+        open_files[filename] = True  # open file
+        self.is_closed = False  # set flag to open
+
+    def readat(self, bytes, offset):
+        if self.temp_write and self.temp_write[1] == offset: # check if there is a pending write 
+                                                             # and if its going to write to the correct position in the file
+            original_data = self.LPfile.readat(bytes, offset)  # get data before the pending write
+            return original_data # return data before pending write
+        return self.LPfile.readat(bytes, offset)  # otherwise just read and return it
+
+    def writeat(self, data, offset):
+        if self.temp_write: # if pending write
+            self.LPfile.writeat(*self.temp_write)  # commit the pending write
+        self.temp_write = (data, offset)  # store the new write in its correct position in the file
+
+    def undo(self): 
+        if self.is_closed:  # if file is closed
+            return # don't do anything
+        self.temp_write = None  # deletw the pending write that we didn't commit to mem yet
+
+    def close(self):
+        if self.temp_write: # if pending write
+            self.LPfile.writeat(*self.temp_write)  # commit it
+        self.LPfile.close() # close the file
+        self.is_closed = True  # update our flag to closed
+        for filename, status in open_files.items():
+            if status is True:
+                del open_files[filename]  # remove my open file from the dictionary
+                break
+
+def LPopenfile(filename, create):
+    if filename in open_files: # if we've already opened the file
+        return None  # don't do anything, don't open it
+    else:
+        return LPFile(filename, create)  # return new instance of LPFile
+
+# The code here sets up type checking and variable hiding for you.
+# You should not need to change anything below here.
+sec_file_def = {
+    "obj-type": LPFile,
+    "name": "LPFile",
+    "writeat": {"type": "func", "args": (str, (int, long)), "exceptions": Exception, "return": (int, type(None)), "target": LPFile.writeat},
+    "readat": {"type": "func", "args": ((int, long, type(None)), (int, long)), "exceptions": Exception, "return": str, "target": LPFile.readat},
+    "undo": {"type": "func", "args": None, "exceptions": None, "return": type(None), "target": LPFile.undo},
+    "close": {"type": "func", "args": None, "exceptions": Exception, "return": (bool, type(None)), "target": LPFile.close}
+}
+
+CHILD_CONTEXT_DEF["openfile"] = {
+    TYPE: OBJC,
+    ARGS: (str, bool),
+    EXCP: Exception,
+    RETURN: sec_file_def,
+    TARGET: LPopenfile
+}
+
+# Execute the user code
+secure_dispatch_module()
+

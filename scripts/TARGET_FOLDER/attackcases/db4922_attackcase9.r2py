@@ -1,0 +1,17 @@
+# write past the end of the file
+
+# Clean up of existing file
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+myfile=openfile("testfile.txt",True)
+myfile.close()
+myfile=openfile("testfile.txt",True)
+
+try:
+  myfile.writeat("Hi!",1234567)
+  myfile.close()
+except SeekPastEndOfFileError:
+  pass
+else:
+  log("Error! Write past the end of the file should not be allowed.\n")

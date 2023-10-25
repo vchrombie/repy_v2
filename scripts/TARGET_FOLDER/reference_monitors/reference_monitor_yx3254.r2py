@@ -1,0 +1,100 @@
+"""
+This security layer handles the undo functionality for file writes.
+
+Note:
+    This security layer uses encasementlib.r2py, restrictions.default, repy.py and Python
+    Also, you need to give it an application to run.
+    python repy.py restrictions.default encasementlib.r2py [security_layer].r2py [attack_program].r2py
+"""
+
+TYPE = "type"
+ARGS = "args"
+RETURN = "return"
+EXCP = "exceptions"
+TARGET = "target"
+FUNC = "func"
+OBJC = "objc"
+
+# Initialize the lock for synchronization
+mycontext['lock'] = createlock()
+
+class LPFile():
+    def __init__(self, filename, create):
+        # Enable debugging (if required)
+        mycontext['debug'] = False
+
+        # Open the file using the sandbox's openfile
+        self.LPfile = openfile(filename, create)
+
+        # Buffer for pending data and offset for 'writeat' operation
+        self.pending_data = None
+        self.pending_offset = None
+
+    def readat(self, bytes, offset):
+        # Read from the file using the sandbox's readat
+        return self.LPfile.readat(bytes, offset)
+
+    def writeat(self, data, offset):
+        # Lock to ensure atomic operation
+        mycontext['lock'].acquire(True)
+
+        # If there is a previous write, make it permanent
+        if self.pending_data is not None:
+            self.LPfile.writeat(self.pending_data, self.pending_offset)
+
+        # Save the current write operation in buffer
+        self.pending_data = data
+        self.pending_offset = offset
+
+        # Release the lock
+        mycontext['lock'].release()
+
+    def undo(self):
+        # Lock to ensure atomic operation
+        mycontext['lock'].acquire(True)
+
+        # Remove the pending write operation
+        self.pending_data = None
+        self.pending_offset = None
+
+        # Release the lock
+        mycontext['lock'].release()
+
+    def close(self):
+        # Lock to ensure atomic operation
+        mycontext['lock'].acquire(True)
+
+        # If there's a buffered write, make it permanent
+        if self.pending_data is not None:
+            self.LPfile.writeat(self.pending_data, self.pending_offset)
+
+        # Close the file
+        self.LPfile.close()
+
+        # Release the lock
+        mycontext['lock'].release()
+
+def LPopenfile(filename, create):
+    return LPFile(filename, create)
+
+# The code here sets up type checking and variable hiding for you.
+# You should not need to change anything below here.
+sec_file_def = {
+    "obj-type": LPFile,
+    "name": "LPFile",
+    "writeat": {"type": "func", "args": (str, (int, long)), "exceptions": Exception, "return": (int, type(None)), "target": LPFile.writeat},
+    "readat": {"type": "func", "args": ((int, long, type(None)), (int, long)), "exceptions": Exception, "return": str, "target": LPFile.readat},
+    "undo": {"type": "func", "args": None, "exceptions": None, "return": type(None), "target": LPFile.undo},
+    "close": {"type": "func", "args": None, "exceptions": Exception, "return": (bool, type(None)), "target": LPFile.close}
+}
+
+CHILD_CONTEXT_DEF["openfile"] = {
+    TYPE: OBJC,
+    ARGS: (str, bool),
+    EXCP: Exception,
+    RETURN: sec_file_def,
+    TARGET: LPopenfile
+}
+
+# Execute the user code
+secure_dispatch_module()

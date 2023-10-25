@@ -1,0 +1,15 @@
+# Checking correct calling of writeat on close
+# Pending contents should be written to disk
+# Includes two writes which aren't always handled
+try:
+  if "testfile.txt" in listfiles():
+    removefile("testfile.txt")
+  myfile=openfile("testfile.txt", True)
+  myfile.writeat("12345678", 0)
+  myfile.writeat("Hi!", 0)
+  myfile.close()
+  myfile=openfile("testfile.txt", False)
+  assert("Hi!45678" == myfile.readat(8, 0))
+  myfile.close()
+except:
+  log("Failed test 4\n")

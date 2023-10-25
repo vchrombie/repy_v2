@@ -1,0 +1,21 @@
+#setup for the testcase
+if "testfile.txt" in listfiles():
+    removefile("testfile.txt")
+myfile = openfile("testfile.txt", True)
+myfile.close()
+
+#test case
+myfile = openfile("testfile.txt", False)
+
+try:
+    myfile.writeat("hehehehehe", 0)
+    log("ERROR: Writing is  being done when write permission is denied")
+
+except RepyArgumentError:
+    pass
+
+except Exception:
+    pass
+
+finally:
+    myfile.close()

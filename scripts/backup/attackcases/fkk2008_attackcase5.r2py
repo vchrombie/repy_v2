@@ -1,0 +1,39 @@
+# Test Case 5
+# Trying to write and read large amounts of data
+
+
+'''
+Debugging information: I'm not entirely certain how to handle this case, better ask the professor/the TA on how to handle this in case it raises an error
+
+'''
+
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# create a file
+myfile=openfile("testfile.txt",True)
+
+# generate a large string
+large_string = "Hello" * 1000000
+
+# write the large string to the file
+myfile.writeat(large_string,0)
+
+# close the file
+myfile.close()
+
+# open the file for reading
+myfile=openfile("testfile.txt",False)
+
+# read the large string from the file
+data=myfile.readat(None,0)
+
+# close the file
+myfile.close()
+
+# check if the data read from the file is equal to the large string
+if data == large_string:
+    pass
+else:
+    log("Test failed: The data read from the file is not equal to the large string.\n")

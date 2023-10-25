@@ -1,0 +1,26 @@
+# Attack Case 8: Unicode attack
+# for referencemonitor in reference_monitor_j*; do echo $referencemonitor under test; for testcase in jl14678_attackcase8*; do python repy.py restrictions.default encasementlib.r2py $referencemonitor $testcase; done; done
+
+# clean up if the file exists.
+filename = u"attack7_unicodé.txt"
+if filename in listfiles():
+    removefile(filename)
+
+def unicode_attack():
+    try:
+        
+        f = openfile(filename, True)
+        f.writeat("Data", 0)
+        f.close()
+        
+        if file_exists(filename):
+            log("[*]Attack Case 8 failed\n")
+            
+        else:
+            log("[!]Attack Case 8 successful\n")
+
+    except Exception as e:
+        log("Unexpected error during the attack: " + str(e))
+        return
+
+unicode_attack()

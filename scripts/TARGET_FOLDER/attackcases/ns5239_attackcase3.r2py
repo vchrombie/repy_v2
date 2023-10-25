@@ -1,0 +1,12 @@
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+# create a file
+myfile=openfile("testfile.txt",True)
+
+myfile.writeat("newword", 0)
+myfile.writeat("second", 0)
+
+myfile.undo()
+assert("newword" == myfile.readat(7,0))
+
+myfile.close

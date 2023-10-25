@@ -1,0 +1,112 @@
+"""
+This security layer inadequately handles the undo functionality
+
+Note:
+    This security layer uses encasementlib.r2py, restrictions.default, repy.py and Python
+    Also you need to give it an application to run.
+    python repy.py restrictions.default encasementlib.r2py [security_layer].r2py [attack_program].r2py
+
+"""
+TYPE = "type"
+ARGS = "args"
+RETURN = "return"
+EXCP = "exceptions"
+TARGET = "target"
+FUNC = "func"
+OBJC = "objc"
+
+
+class LPFile():
+    def __init__(self, filename, create):
+        # globals
+        mycontext['debug'] = False
+        self.LPfile = openfile(filename, create)
+        self.pending_data = None
+        self.pending_offset = None
+        self.allow_write = create
+
+
+
+
+    def readat(self, bytes, offset):
+        read_lock=createlock()
+        read_lock.acquire(True)
+        try:
+            if not isinstance(offset, (int, long)):
+                raise Exception("Invalid read offset")
+            if offset < 0:
+                raise Exception("Invalid read offset")
+            # Read from the file using the sandbox's readat...
+            return self.LPfile.readat(bytes, offset)
+
+        finally:
+            read_lock.release()
+
+
+
+    def writeat(self, data, offset):
+        write_lock=createlock()
+        write_lock.acquire(True)
+        try:
+            # Checking if the offset is an integer or long integer
+            if not isinstance(offset, (int, long)):
+                raise Exception("Invalid write offset: Offset must be an integer or long integer")
+
+            # Check for negative offset
+            if offset < 0:
+                raise Exception("Invalid write offset: Negative offset is not allowed")
+            if not self.allow_write:
+                raise Exception("File is opened in read-only mode. Write operations are not allowed.")
+
+
+            if self.pending_data is not None:
+                self.LPfile.writeat(self.pending_data, self.pending_offset)
+            self.pending_data = data
+            self.pending_offset = offset
+
+        finally:
+            write_lock.release()
+
+
+
+    def undo(self):
+
+        if self.pending_offset is not None and self.pending_offset < 0:
+            raise Exception("Invalid undo offset")
+        self.pending_data = None
+        self.pending_offset = None
+
+    def close(self):
+        # Write any pending changes before closing the file
+        if self.pending_data is not None:
+            self.LPfile.writeat(self.pending_data, self.pending_offset)
+        self.LPfile.close()
+
+
+def LPopenfile(filename, create):
+
+    return LPFile(filename, create)
+
+
+# The code here sets up type checking and variable hiding for you.
+# You should not need to change anything below here.
+sec_file_def = {
+    "obj-type": LPFile,
+    "name": "LPFile",
+    "writeat": {"type": "func", "args": (str, (int, long)), "exceptions": Exception, "return": (int, type(None)), "target": LPFile.writeat},
+    "readat": {"type": "func", "args": ((int, long, type(None)), (int, long)), "exceptions": Exception, "return": str, "target": LPFile.readat},
+    "undo": {"type": "func", "args": None, "exceptions": None, "return": type(None), "target": LPFile.undo},
+    "close": {"type": "func", "args": None, "exceptions": Exception, "return": (bool, type(None)), "target": LPFile.close}
+}
+
+CHILD_CONTEXT_DEF["openfile"] = {
+    TYPE: OBJC,
+    ARGS: (str, bool),
+    EXCP: Exception,
+    RETURN: sec_file_def,
+    TARGET: LPopenfile
+}
+
+# Execute the user code
+secure_dispatch_module()
+

@@ -1,0 +1,21 @@
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+myfile=openfile("testfile.txt",True)
+
+def writefunc():
+  myfile.writeat("dhan", 0)
+  myfile.writeat("raj", 4)
+
+def writefunc2():
+  myfile.writeat("ABCDE", 0)
+  myfile.writeat("FGHIJ", 5)
+
+def writefunc3():
+  myfile.writeat("newyork", 0)
+  myfile.writeat("uni", 7)
+  assert("newyorkHIJ" == myfile.readat(10,0))
+
+createthread(writefunc)
+createthread(writefunc2)
+createthread(writefunc3)

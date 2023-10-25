@@ -1,0 +1,33 @@
+# efficiency_test.r2py
+
+# Check if testfile_extended.txt exists and remove it
+if "testfile_extended.txt" in listfiles():
+    try:
+        removefile("testfile_extended.txt")
+    except:
+        log("EFFICIENCY COMPROMISED: Monitor failed to remove existing file.\n")
+
+try:
+    myfile = openfile("testfile_extended.txt", True)
+except:
+    log("EFFICIENCY COMPROMISED: Monitor failed to allow normal file creation.\n")
+
+# Large write and read test
+large_data = "X" * 5000
+
+try:
+    myfile.writeat(large_data, 0)
+except:
+    log("EFFICIENCY COMPROMISED: Monitor failed during large write operation.\n")
+
+try:
+    read_data = myfile.readat(5000, 0)
+    if read_data != large_data:
+        log("EFFICIENCY COMPROMISED: Large read doesn't match write.\n")
+except:
+    log("EFFICIENCY COMPROMISED: Monitor failed during large read operation.\n")
+
+try:
+    myfile.close()
+except:
+    log("EFFICIENCY COMPROMISED: Monitor failed to close the file.\n")

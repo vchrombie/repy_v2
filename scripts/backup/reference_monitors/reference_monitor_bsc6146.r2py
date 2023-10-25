@@ -1,0 +1,113 @@
+"""
+This security layer inadequately handles the undo functionality
+
+Note:
+    This security layer uses encasementlib.r2py, restrictions.default, repy.py and Python
+    Also you need to give it an application to run.
+    python repy.py restrictions.default encasementlib.r2py [security_layer].r2py [attack_program].r2py
+
+"""
+TYPE = "type"
+ARGS = "args"
+RETURN = "return"
+EXCP = "exceptions"
+TARGET = "target"
+FUNC = "func"
+OBJC = "objc"
+
+
+class LPFile():
+    def __init__(self, filename, create):
+        # globals
+        mycontext['debug'] = False
+        self.LPfile = openfile(filename, create)
+        self.is_closed = False
+        self.max_offset = 0
+        self.offset_delta = 0
+        self.pending_data = None
+        self.pending_offset = None
+
+    def writeat(self, data, offset):
+        # We need to check if writeat is valid. Consider
+        # what exceptions can exist calling writeat. Closed
+        # file exceptions are implicitly handled.
+        if offset < 0:
+          # Calling original API for same error
+          self.LPfile.writeat(data, offset)
+        if offset > self.max_offset:
+          # Not allowed to write past the EOF
+          # Calling original API for same error
+          self.LPfile.writeat(data, offset)
+
+        # Check if closed after parameter checks
+        # since it's how the original API works
+        if self.is_closed:
+          self.LPfile.close()
+
+        # Write first time means no pending data or offset
+        # These values are expected to be set together
+        if self.pending_data != None and self.pending_offset != None:
+          self.LPfile.writeat(self.pending_data, self.pending_offset)
+
+        self.pending_data = data
+        self.pending_offset = offset
+
+        calculated_offset = offset + len(data)
+        is_offset_changed = calculated_offset > self.max_offset
+        # Update the offset based on data length
+        if is_offset_changed:
+          self.max_offset = calculated_offset
+        else:
+          self.offset_delta = 0
+
+        # Update offset delta separately
+        if is_offset_changed:
+          self.offset_delta = calculated_offset - self.max_offset
+
+    def readat(self, bytes, offset):
+        # Read from the file using the sandbox's readat...
+        return self.LPfile.readat(bytes, offset)
+
+    def undo(self):
+        self.pending_data = None
+        self.pending_offset = None
+        # Revert the max_offset and reset the delta
+        self.max_offset -= self.offset_delta
+        self.offset_delta = 0
+
+    def close(self):
+        # Check if closed first
+        if self.is_closed:
+          self.LPfile.close()
+        else:
+          self.is_closed = True
+
+        # Close but we might not asked to write anything
+        if self.pending_data != None and self.pending_offset != None:
+          self.LPfile.writeat(self.pending_data, self.pending_offset)
+        self.LPfile.close()
+
+def LPopenfile(filename, create):
+    return LPFile(filename, create)
+
+# The code here sets up type checking and variable hiding for you.
+# You should not need to change anything below here.
+sec_file_def = {
+    "obj-type": LPFile,
+    "name": "LPFile",
+    "writeat": {"type": "func", "args": (str, (int, long)), "exceptions": Exception, "return": (int, type(None)), "target": LPFile.writeat},
+    "readat": {"type": "func", "args": ((int, long, type(None)), (int, long)), "exceptions": Exception, "return": str, "target": LPFile.readat},
+    "undo": {"type": "func", "args": None, "exceptions": None, "return": type(None), "target": LPFile.undo},
+    "close": {"type": "func", "args": None, "exceptions": Exception, "return": (bool, type(None)), "target": LPFile.close}
+}
+
+CHILD_CONTEXT_DEF["openfile"] = {
+    TYPE: OBJC,
+    ARGS: (str, bool),
+    EXCP: Exception,
+    RETURN: sec_file_def,
+    TARGET: LPopenfile
+}
+
+# Execute the user code
+secure_dispatch_module()

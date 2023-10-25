@@ -1,0 +1,113 @@
+"""
+This security layer inadequately handles the undo functionality
+
+Note:
+    This security layer uses encasementlib.r2py, restrictions.default, repy.py and Python
+    Also you need to give it an application to run.
+    python repy.py restrictions.default encasementlib.r2py reference_monitor_sl9052.r2py application.r2py
+
+"""
+TYPE = "type"
+ARGS = "args"
+RETURN = "return"
+EXCP = "exceptions"
+TARGET = "target"
+FUNC = "func"
+OBJC = "objc"
+
+class LPFile():
+    def __init__(self, filename, create):
+        # globals
+        mycontext['debug'] = False
+        self.LPfile = openfile(filename, create)
+        self.pending_data = None
+        self.pending_offset = None
+        self.closed = False
+        self.file_size = 0
+
+    def readat(self, bytes, offset):
+        # If file is closed, do nothing
+        if self.closed:
+            return
+
+        # If want to include uncommitted changes
+        # if self.pending_data is not None and offset <= self.pending_offset:
+        #     original_data = self.LPfile.readat(bytes, offset)
+        #     data_before_pending_changes = original_data[:self.pending_offset - offset]
+        #     return data_before_pending_changes + self.pending_data
+
+        # Read from the file using the sandbox's readat...
+        return self.LPfile.readat(bytes, offset)
+
+    def writeat(self, data, offset):
+        if self.closed:
+            return
+
+        # If file has nothing, can only write to position 0
+        if self.file_size == 0 and offset != 0:
+            return
+
+        # Do nothing when the offset is out of bounds
+        if offset < 0 or offset > self.file_size + 1:
+            return
+
+        # Check for data type
+        if type(data) is not str:
+            return
+
+        # The changes from the previous writeat have not been applied yet.
+        if self.pending_data is not None:
+            # Apply the pending changes before executing the new writeat.
+            self.LPfile.writeat(self.pending_data, self.pending_offset)
+
+        # Calculate the new file size if the write operation extends beyond the current file size.
+        if offset + len(data) > self.file_size:
+            self.file_size = offset + len(data)
+
+        self.pending_data = data
+        self.pending_offset = offset
+
+    def undo(self):
+        if self.closed:
+            return
+
+        if self.pending_data is not None:
+            # Undo the last writeat operation.
+            self.pending_data = None
+            self.pending_offset = None
+
+    def close(self):
+        if self.closed:
+            return
+
+        if self.pending_data is not None:
+            # Apply any pending changes before closing the file.
+            self.LPfile.writeat(self.pending_data, self.pending_offset)
+
+        self.LPfile.close()
+        self.closed = True
+
+def LPopenfile(filename, create):
+    return LPFile(filename, create)
+
+# The code here sets up type checking and variable hiding for you.
+# You should not need to change anything below here.
+sec_file_def = {
+    "obj-type": LPFile,
+    "name": "LPFile",
+    "writeat": {"type": "func", "args": (str, (int, long)), "exceptions": Exception, "return": (int, type(None)), "target": LPFile.writeat},
+    "readat": {"type": "func", "args": ((int, long, type(None)), (int, long)), "exceptions": Exception, "return": str, "target": LPFile.readat},
+    "undo": {"type": "func", "args": None, "exceptions": None, "return": type(None), "target": LPFile.undo},
+    "close": {"type": "func", "args": None, "exceptions": Exception, "return": (bool, type(None)), "target": LPFile.close}
+}
+
+CHILD_CONTEXT_DEF["openfile"] = {
+    TYPE: OBJC,
+    ARGS: (str, bool),
+    EXCP: Exception,
+    RETURN: sec_file_def,
+    TARGET: LPopenfile
+}
+
+# Execute the user code
+secure_dispatch_module()

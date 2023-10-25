@@ -1,0 +1,28 @@
+try:
+  if "testfile!@#.txt" in listfiles():
+    removefile("testfile!@#.txt")
+except Exception as e:
+  log("Error during file cleanup.\n")
+  raise
+
+# create a file, which file name is invalid
+try:
+  myfile=openfile("testfile!@#.txt",True)
+except Exception as e:
+  log("An error occurred while creating the file.\n")
+  raise
+
+try:
+  myfile.writeat("12345678",0)
+  myfile.writeat("Hi!",0)
+  myfile.undo()
+  assert("12345678" == myfile.readat(8,0))
+except Exception as e:
+  log("Error during file operations.\n")
+  raise
+
+try:
+  myfile.close()
+except Exception as e:
+  log("Error while closing the file.\n")
+  raise

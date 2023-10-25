@@ -1,0 +1,24 @@
+# testing ignore invalid writes
+
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# create a file
+myfile=openfile("testfile.txt",True)
+
+# initial write
+myfile.writeat("Hi!",0) 
+
+# attempt to overwrite the beginning of the file with invalid data type
+myfile.writeat(12345678,0)
+
+# now, undo the previous write, which should be 'Hi!' since that is the last valid write
+myfile.undo()
+
+# the contents should still be "" as the overwrite was undone
+if ("Hi!" == myfile.readat(3,0)):
+  print("Detect invalid data type Failed")
+
+# close the file
+myfile.close()

@@ -1,0 +1,14 @@
+# Attack case for undo on empty file.
+
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# create a file
+myfile=openfile("testfile.txt",True)
+
+myfile.undo()
+
+assert(len(myfile.readat(1, 0)) == 0)
+
+myfile.close()

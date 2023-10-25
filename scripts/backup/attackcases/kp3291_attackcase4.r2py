@@ -1,0 +1,50 @@
+# In this test case, the "Attack case 4 executed. File Update Failed!" message is logged when an assertion failure occurs.
+# This assertion checks whether the file's content matches the expected value after reading the file post appending valid data to it.
+
+# Function to create a thread to bypass Infinite Loop or Race Conditions
+def delay(t):
+  def sleep_for():
+    # after sleeping t sec, exit the program
+    sleep(t)
+    log("Operation Unsuccessful as Program Stuck in Infinite Loop or Triggered Race Condition\n")
+    exitall()
+  return sleep_for
+terminate_program = delay(10)
+createthread(terminate_program)
+
+# Clean up of existing file
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# Open File
+myfile=openfile("testfile.txt",True)
+
+# Writing valid data to the file
+myfile.writeat("hello",0)
+
+#Close the file
+myfile.close()
+
+# Open File Function Call
+myfile=openfile("testfile.txt",True)
+
+# Appending Valid Data to the File
+myfile.writeat("Kaartikeya",5)
+
+#Close the file
+myfile.close()
+
+# Reopen file again to read
+myfile=openfile("testfile.txt",True)
+
+# Reading the file to check it's contents
+try:
+ assert('helloKaartikeya' == myfile.readat(None,0))
+ #Close the file
+ myfile.close()
+except:
+ #Close the file
+ myfile.close()
+ log("Attack case 4 executed. File Update Failed! \n")
+finally:
+  exitall()

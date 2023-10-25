@@ -1,0 +1,21 @@
+#Reading from closed file
+
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# create a file
+myfile=openfile("testfile.txt",True)
+
+# first valid write
+myfile.writeat("hello", 0)
+
+myfile.close()
+
+#read file to check that writeat was valid from a closed file
+try:
+    assert("hello" == myfile.readat(5,0))
+except FileClosedError:
+    pass
+else:
+    log("Error! Reading from closed file!")

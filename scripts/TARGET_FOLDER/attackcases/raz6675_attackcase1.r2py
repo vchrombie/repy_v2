@@ -1,0 +1,16 @@
+# Ricky Zapata
+# Professor Cappos
+# Computer Security
+
+
+if "testfile.txt" in listfiles():
+	removefile("testfile.txt")
+
+test_file = openfile("testfile.txt", True)
+test_file.readat(9999999999999, 0)
+
+test_file.close()
+test_file.readat(10, 0)  # should not be allowed
+test_file.writeat("data", 0)    # should not be allowed
+# Should give an error or not do anything, shouldn't allow the user to read/write after closing the file
+

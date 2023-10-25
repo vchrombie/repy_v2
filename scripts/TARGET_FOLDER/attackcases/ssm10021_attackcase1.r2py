@@ -1,0 +1,3 @@
+# Attack Case 1: Empty File
+
+# for referencemonitor in reference_monitor_sv*; do echo $referencemonitor under test; for testcase in ssm10021_*; do python repy.py restrictions.default encasementlib.r2py $referencemonitor $testcase; done; done

@@ -1,0 +1,174 @@
+# Ethan Shieh
+
+"""
+This security layer adequately handles the undo functionality (I hope)
+
+Note:
+    This security layer uses encasementlib.r2py, restrictions.default, repy.py and Python
+    Also you need to give it an application to run.
+
+    Typically you should use:
+    python2 repy.py restrictions.default encasementlib.r2py reference_monitor_es5185.r2py reference_monitor_es5185_attack.r2py 
+
+    Generic:
+    python2 repy.py restrictions.default encasementlib.r2py [security_layer].r2py [attack_program].r2py 
+    
+"""
+
+
+TYPE = "type"
+ARGS = "args"
+RETURN = "return"
+EXCP = "exceptions"
+TARGET = "target"
+FUNC = "func"
+OBJC = "objc"
+
+class LPFile():
+    def __init__(self, filename, create):
+        # globals
+        mycontext['debug'] = False
+        self.LPfile = openfile(filename, create)
+        self.closed = False
+
+        self.pending_data = None
+        self.pending_offset = None
+
+        self.lock = createlock()
+
+
+    def readat(self, bytes, offset):
+        # just read straight from the file since we only need to read
+        # uncommitted changes. the sandbox will take care of the argument
+        # checking and checking if the file is open or closed
+
+        # make sure file is unlocked before doing stuff to it
+        # block if the lock is being used
+        # also make sure to release lock before returning or excepting
+        self.lock.acquire(True)
+        try:
+            return self.LPfile.readat(bytes, offset)
+        finally:
+            self.lock.release()
+            
+
+    def writeat(self, data, offset):
+        # make sure file is unlocked before doing stuff to it
+        # block if the lock is being used
+        # also make sure to release lock before returning or excepting
+        self.lock.acquire(True)
+        try:
+            # This argument check is taken from the original writeat call 
+            # implementation. We need to check the data here so that we don't write
+            # invalid data to the history. Without this, we can potentially write
+            # bad data to the history and not immediately get an exception
+            # until that write is being committed.
+
+            # An example of an invalid write is an offset of -1. This gets past type
+            # checking because it's an int, but -1 is an invalid value of offset.
+            # If we didn't check the arguments, then something with a -1 offset can
+            # be written and force the current history to be written as well.
+
+            # Check the arguments.  (from sandbox implementation)
+            if offset < 0:
+                raise RepyArgumentError("Negative read offset speficied!")
+            if type(data) is not str:
+                raise RepyArgumentError("Data must be specified as a string!")
+                # this should never get raised because of type checking (see end of this file)
+
+            # Raise error if file is closed. In sandbox implementation, a similar
+            # error is raised for this call. We need to do this, otherwise someone 
+            # can write to the empty history of a closed file. We just call a simple
+            # write so that we can use the sandbox's exception raising behavior. This
+            # write should never actually do anything and will never write to history
+            # or to the file.
+            if self.closed:
+                self.LPfile.writeat("", 0) # call sandbox exception
+
+            # If there is nothing in history, then save change to history
+            if self.pending_offset == None:
+                self.pending_data = data
+                self.pending_offset = offset
+
+            # If there is something in history, perma-write change in history and 
+            # save recent change to history
+            else:
+                self.LPfile.writeat(self.pending_data, self.pending_offset)
+                self.pending_data = data
+                self.pending_offset = offset
+        finally:
+            self.lock.release()
+
+
+    def undo(self):
+        # make sure file is unlocked before doing stuff to it
+        # block if the lock is being used
+        # also make sure to release lock before returning or excepting
+        self.lock.acquire(True)
+
+        # no return or checking needed anywhere here. don't need to check if
+        # the file is closed because the behavior should not change if the file
+        # is closed.
+
+        # this denotes that history is empty
+        self.pending_offset = None
+
+        # these two aren't needed in practice but it's good to clear out the
+        # data in case there's a weird attack where a user can retrieve it
+        self.pending_data = None
+
+        # no finally here because setting vars should never throw exception
+        self.lock.release() 
+
+
+    def close(self):
+        # We don't need to check if the file is actually closed because if it
+        # is, then the excecption will be raised from within the writeat() or
+        # the close() call
+
+        # make sure file is unlocked before doing stuff to it
+        # block if the lock is being used
+        # also make sure to release lock before returning or excepting
+        self.lock.acquire(True)
+        try:
+            # write history if there is an entry
+            if self.pending_offset != None:
+                self.LPfile.writeat(self.pending_data, self.pending_offset)
+
+            # clear history in case somehow the file reference changes
+            self.pending_data = None
+            self.pending_offset = None
+
+            self.LPfile.close()
+            self.closed = True
+        finally:
+            self.lock.release()
+
+
+def LPopenfile(filename, create):
+    # We don't need to validate filenames because emulfile.py contains a
+    # a function to validate the filename and raises an exception if the
+    # filename is not allowed
+    return LPFile(filename, create)
+
+# The code here sets up type checking and variable hiding for you.
+# You should not need to change anything below here.
+sec_file_def = {
+    "obj-type": LPFile,
+    "name": "LPFile",
+    "writeat": {"type": "func", "args": (str, (int, long)), "exceptions": Exception, "return": (int, type(None)), "target": LPFile.writeat},
+    "readat": {"type": "func", "args": ((int, long, type(None)), (int, long)), "exceptions": Exception, "return": str, "target": LPFile.readat},
+    "undo": {"type": "func", "args": None, "exceptions": None, "return": type(None), "target": LPFile.undo},
+    "close": {"type": "func", "args": None, "exceptions": Exception, "return": (bool, type(None)), "target": LPFile.close}
+}
+
+CHILD_CONTEXT_DEF["openfile"] = {
+    TYPE: OBJC,
+    ARGS: (str, bool),
+    EXCP: Exception,
+    RETURN: sec_file_def,
+    TARGET: LPopenfile
+}
+
+# Execute the user code
+secure_dispatch_module()

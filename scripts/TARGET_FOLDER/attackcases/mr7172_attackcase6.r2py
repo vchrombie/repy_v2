@@ -1,0 +1,48 @@
+# check whether close after write works
+# check whether open, undo, close works
+# check whether open, write at offset, undo, close works
+# check whether open, write at offset, close works
+
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+# create a file
+myfile=openfile("testfile.txt",True)
+
+# case 1
+myfile.writeat("12345678",0)
+myfile.close()
+# verify 1
+myfile=openfile("testfile.txt", False)
+assert("12345678" == myfile.readat(None,0))
+myfile.close()
+
+# case 2
+myfile=openfile("testfile.txt",False)
+myfile.undo()
+myfile.close()
+# verify 2
+myfile=openfile("testfile.txt", False)
+assert("12345678" == myfile.readat(None,0))
+myfile.close()
+
+# case 3
+myfile=openfile("testfile.txt",False)
+myfile.writeat("mayank",5) 
+myfile.undo()
+myfile.close()
+
+# verify 3
+myfile=openfile("testfile.txt",False)
+assert("12345678" == myfile.readat(None,0))
+myfile.close()
+
+# case 4
+myfile=openfile("testfile.txt",False)
+myfile.writeat("ramnani",6) 
+myfile.close()
+
+# verify 4
+myfile=openfile("testfile.txt",False)
+assert("123456ramnani" == myfile.readat(None,0))
+myfile.close()

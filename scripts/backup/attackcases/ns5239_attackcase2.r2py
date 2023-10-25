@@ -1,0 +1,25 @@
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+# create a file
+myfile=openfile("testfile.txt",True)
+try:
+  myfile.writeat("remaining", -1)
+  log("INVALID CASE")
+except:
+  pass
+myfile.undo()
+myfile.close()
+
+myfile=openfile("testfile.txt",True)
+myfile.writeat("remaining", 0)
+
+myfile.writeat("newWord", 9)
+try:
+  myfile.writeat("INVALID", 100)
+  log("INVALID CASE")
+  log("\n")
+except:
+  pass
+myfile.undo()
+myfile.close()
+

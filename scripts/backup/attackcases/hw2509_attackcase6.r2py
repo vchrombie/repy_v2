@@ -1,0 +1,20 @@
+if "testfile6.txt" in listfiles():
+  removefile("testfile6.txt")
+
+myfile=openfile("testfile6.txt",True)
+
+myfile.writeat("HELLO",0)
+
+myfile.undo()
+
+# writing to offset value after undo
+try:
+  myfile.writeat("HELLO",3)
+except:
+  pass
+
+myfile.undo()
+
+assert("" == myfile.readat(0,0))
+
+myfile.close()

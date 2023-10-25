@@ -1,0 +1,15 @@
+#Attack Case to check if writing to a negative offset correctly raises an exception.
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# create a file
+myfile=openfile("testfile.txt",True)
+# Attempt to write to a negative offset, should raise an exception.
+try:
+	myfile.writeat("1234",-4)
+	myfile.close()
+	log("Error in Attack Case 8")
+except RepyArgumentError:
+	pass
+

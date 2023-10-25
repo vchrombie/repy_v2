@@ -1,0 +1,24 @@
+# clean up if the file exists.
+if "testfile3.txt" in listfiles():
+  removefile("testfile3.txt")
+
+# create a file
+myfile=openfile("testfile3.txt",True)
+
+# intial write to the file
+myfile.writeat("12345678",0)
+
+# close the file
+myfile.close()
+
+# reopen file
+myfile=openfile("testfile3.txt",False)
+
+# check if writeat is written after closing the file
+try:
+  assert("12345678" == myfile.readat(8,0))
+except:
+  log("Error! Writeat is not written after closing the file\n")
+
+# close the file again
+myfile.close()

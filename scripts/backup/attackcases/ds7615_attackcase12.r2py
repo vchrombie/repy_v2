@@ -1,0 +1,27 @@
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+try:
+  # create a file
+  myfile=openfile("testfile.txt",False)
+
+  # intial write to the file
+  myfile.writeat("12345678",0)
+
+  # attempt to overwrite the beginning of the file
+  myfile.writeat("Hi!",0) 
+
+  # now, undo the previous write
+  myfile.undo()
+except FileNotFoundError:
+  pass
+else:
+  log("Attack - 12: Creating File even when Create Flag is False")
+finally:
+  exitall()
+
+# close the file
+myfile.close()
+
+#open non existant file using create false

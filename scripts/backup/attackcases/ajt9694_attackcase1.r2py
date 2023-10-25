@@ -1,0 +1,13 @@
+# Clean up if the file exists.
+if "testfile.txt" in listfiles():
+    removefile("testfile.txt")
+
+# Create a file using the reference monitor
+secure_file = openfile("testfile.txt", True)
+
+try:
+    # Attempt to read from a closed file
+    secure_file.close()
+    secure_file.readat(8, 0)
+except Exception as e:
+    assert "File is closed" in str(e)

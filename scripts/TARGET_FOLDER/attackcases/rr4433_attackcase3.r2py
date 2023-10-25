@@ -1,0 +1,59 @@
+def timeout_thread_func():
+  timeout_seconds = 10
+  sleep(timeout_seconds)
+  assert False, "Timed out after " + str(timeout_seconds) + " seconds"
+  exitall()
+
+createthread(timeout_thread_func)
+
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# create a file
+myfile = openfile("testfile.txt",True)
+
+# Assumption: Undo before any writeat() should be valid
+myfile.undo()
+
+# Assumption: Trying to read a file from an invalid offset or reading an invalid number of bytes (negative) should raise exceptions
+try:
+  temp = myfile.readat(None,1)
+except SeekPastEndOfFileError:
+  pass
+else:
+  assert False, "SeekPastEndOfFileError not raised when reading past EOF"
+
+try:
+  temp = myfile.readat(-1,0)
+except RepyArgumentError:
+  pass
+else:
+  assert False, "RepyArgumentError not raised when reading negative number of bytes"
+
+try:
+  temp = myfile.readat(5,-3)
+except RepyArgumentError:
+  pass
+else:
+  assert False, "RepyArgumentError not raised from reading from negative offset"
+
+try:
+  temp = myfile.readat(0,None)
+except RepyArgumentError:
+  pass
+else:
+  assert False, "RepyArgumentError not raised when reading from 'None' offset"
+
+
+# Assertion: Readat should still work as usual
+assert("" == myfile.readat(10,0)) 
+
+myfile.close()
+
+# clean up the file afterwards.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+exitall()
+

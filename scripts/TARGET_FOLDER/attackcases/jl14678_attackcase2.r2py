@@ -1,0 +1,40 @@
+# Attack Case 2: Threading Attacks
+# for referencemonitor in reference_monitor_j*; do echo $referencemonitor under test; for testcase in jl14678_attackcase2*; do python repy.py restrictions.default encasementlib.r2py $referencemonitor $testcase; done; done
+
+# clean up if the file exists.
+if "attack2.txt" in listfiles():
+    removefile("attack2.txt")
+
+def write_data():
+    try:
+        # Open a file and write some data
+        f = openfile("attack2.txt", True)
+        f.writeat("AttackData", 0)
+        f.close()
+    except Exception as e:
+        log("Error in write_data: " + str(e) + "\n")
+
+def undo_last_write():
+    try:
+        # Open the same file and undo the last write operation
+        f = openfile("attack2.txt", False)
+        f.undo()
+        f.close()
+    except Exception as e:
+        log("Error in undo_last_write: " + str(e) + "\n")
+
+# Create threads to run the write_data and undo_last_write functions concurrently
+createthread(write_data)
+createthread(undo_last_write)
+
+# Sleep for a while to ensure threads have finished their tasks
+sleep(2)
+
+# Check the content of the file to see if the data was written and then successfully undone
+f = openfile("attack2.txt", False)
+data = f.readat(None, 0)
+f.close()
+if data == "":
+    log("[*]Attack Case 2: Failed! Threading attack did not compromise the reference monitor.\n")
+else:
+    log("[!]Attack Case 2: Successful! Threading attack compromised the reference monitor. Data in file: " + data + "\n")

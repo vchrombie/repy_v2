@@ -1,0 +1,11 @@
+#Tests opening and closing a file
+
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# create a file
+myfile=openfile("testfile.txt",True)
+
+# close the file
+myfile.close()

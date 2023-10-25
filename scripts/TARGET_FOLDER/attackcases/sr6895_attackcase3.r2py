@@ -1,0 +1,22 @@
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+try:
+    myfile=openfile("testfile.txt",True)
+    myfile.writeat("",0)
+    myfile.undo()
+    myfile.writeat("0",0) 
+    assert("" == myfile.readat(None,0))
+except AssertionError:
+    log("Error: case3 failed: possible data values shoul be written and read properly\n")
+except Exception:
+    log("Error: case3 failed: No error should have been thrown\n")
+else:
+    pass
+
+try:
+    myfile.close()
+except Exception:
+    log("Error: case3 failed: No error should have been thrown\n")
+
+exitall()

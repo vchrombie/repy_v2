@@ -1,0 +1,23 @@
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# create a file
+myfile=openfile("testfile.txt",True)
+assert("" == myfile.readat(5,0))
+myfile.writeat("Hello",0)
+myfile.writeat("FZ",-2)
+
+try:
+    # Attempt to close the file
+    myfile.close()
+
+    # If no exception is raised by this point, raise an error
+    assert False, "Expected a RepyArgumentError, but didn't get one."
+
+except RepyArgumentError as e:
+    # Assert that the exception message matches the expected message
+    assert str(e) == "Min value is 0.", "Unexpected RepyArgumentError: " + str(e)
+
+except Exception as e:
+    assert False, "Unexpected exception occurred: " + str(e)

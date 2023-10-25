@@ -1,0 +1,14 @@
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+    removefile("testfile.txt")
+  
+myfile = openfile("testfile.txt", True)
+
+myfile.writeat("Things", 0)
+myfile.writeat("Stings", 0)
+
+# A reference monitor that incorrectly implements the writeat() method would
+# incorrectly throw an AssertionError
+assert("Things" == myfile.readat(6, 0))
+
+myfile.close()

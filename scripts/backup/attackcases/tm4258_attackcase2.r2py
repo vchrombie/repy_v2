@@ -1,0 +1,21 @@
+# This test case tests double closing scenario
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# create a file
+myfile=openfile("testfile.txt",True)
+
+# intial write to the file
+myfile.writeat("12345678",0)
+
+# close the file
+myfile.close()
+
+# Trying to close the file again and checking if we are getting the expected exception
+try:
+  myfile.close()
+except FileClosedError:
+  pass
+else:
+  log("ERROR: FileClosedError should be thrown, but it is not being thrown\n")

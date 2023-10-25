@@ -1,0 +1,36 @@
+#This file is checking multiple readat scenarios
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+myfile=openfile("testfile.txt",True)
+
+
+
+var = 0
+for i in range(10):
+    myfile.writeat("Hi!",var)
+    var+=3
+
+
+myfile.undo()
+for i in range(10):
+  myfile.undo()
+  myfile.writeat("Hi!",0)
+  
+#readat -
+myfile.readat(None,-99)
+myfile.readat(-99,-99)
+myfile.readat(3,-99)
+myfile.readat(-99,3)
+myfile.writeat(3,None)
+
+#EOF
+
+myfile.readat(5, 999)
+myfile.readat(5, 999)
+myfile.close()
+
+#File closed
+myfile.readat(None,0)
+myfile.readat(3,-3)
+myfile.readat(3,999)
+myfile.readat(-3,999)

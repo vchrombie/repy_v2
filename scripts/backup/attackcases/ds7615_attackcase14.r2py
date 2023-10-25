@@ -1,0 +1,20 @@
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# create a file
+myfile=openfile("testfile.txt",True)
+
+# intial write to the file
+myfile.writeat("12345678",0)
+
+myfile.close()
+
+try:
+    myfile.close()
+except AssertionError:
+    pass
+else:
+    log("ATTACK - 14: system allowing to close an already closed file.")
+
+#check if system allowing to close the file 2 times.

@@ -1,0 +1,22 @@
+#Reopening an existing file with create as True
+
+
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# create a file
+myfile=openfile("testfile.txt",True)
+
+# valid write
+myfile.writeat("hello", 0)
+
+myfile.close()
+
+#reopening a closed file
+try:
+    myfile = openfile("testfile.txt", True)
+except:
+    log("Error! Not opening an existing file!")
+
+myfile.close()

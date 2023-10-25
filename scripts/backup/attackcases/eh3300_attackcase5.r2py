@@ -1,0 +1,44 @@
+include_repyv2("repyv2")
+
+def test_read_operation():
+    """
+    Tests the 'readat' operation of the security layer. It checks if reading functionality
+    works as expected under normal circumstances and at the edges of the file content.
+    """
+    test_passed = False
+    original_content = "This is some test content for reading"
+    filename = "test_read_file.txt"
+
+    try:
+        # Set up the environment by creating a file and writing content to it.
+        testfile = openfile(filename, True)
+        testfile.writeat(original_content, 0)
+        testfile.close()
+
+        # Test reading with the security layer.
+        secured_file = LPopenfile(filename, False)
+
+        # Try reading the content from the file.
+        read_content = secured_file.readat(None, 0)  # Read the whole file.
+
+        # Verify if the content read is the same as the original content.
+        if read_content == original_content:
+            test_passed = True
+        else:
+            log("Read content does not match original content.")
+
+        secured_file.close()  # Always ensure to close the file.
+
+    except Exception as e:
+        log("Error during read operation test: " + str(e))
+
+    finally:
+        # Clean up the environment.
+        try:
+            removefile(filename)
+        except:
+            pass  # Handle the exception as per your test's requirements.
+
+    return test_passed
+
+# You can structure your main execution similarly to the first example.

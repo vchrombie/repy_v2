@@ -1,0 +1,23 @@
+# A8: Write something to the file and close it. Then, reopen the file and read it. If what was written is same as expected string then it is right, otherwise, it is incorrect
+
+# NOTE: This code is contingent to the fact that the writeat commands work wihtout causing any issues. 
+# Otherwise, Attackcase1 itself fails, rendering subsequent tests unnecessary as they will be bound to fail anyway
+
+# If the testfile exists in the directory, remove it
+if "testfile.txt" in listfiles():
+    removefile("testfile.txt")
+
+# Create a new testfile
+myfile1=openfile("testfile.txt", True)
+
+# Write to the file
+myfile1.writeat("12345678", 0)
+myfile1.close()  # Close the file
+
+# Now, the file is opened again and read.
+myfile2=openfile("testfile.txt", False)
+try:
+    assert("12345678" == myfile2.readat(8,0))   # If the readat is same as the string written before, then it is right. 
+except Exception as e:
+    log("Attack 8 - ERROR | The text written does not match the text read.\n\n")
+myfile2.close()  # Close the file

@@ -1,0 +1,26 @@
+try:
+    # clean up if the file exists.
+    if "testfile.txt" in listfiles():
+      removefile("testfile.txt")
+
+    # create a file
+    myfile=openfile("testfile.txt",True)
+
+    # intial write to the file
+    myfile.writeat("12345678",0)
+    myfile.undo()
+
+    # attempt to overwrite the beginning of the file
+    myfile.writeat("Hi!",0)
+    myfile.writeat("hello",6)
+
+    # now, undo the previous write
+    myfile.undo()
+
+    # close the file
+    myfile.close()
+
+    # file is supposed to be empty after immediate undo's after writeat
+
+except Exception:
+    log("Code error")

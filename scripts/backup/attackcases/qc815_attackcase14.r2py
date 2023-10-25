@@ -1,0 +1,27 @@
+def undotest1():
+  if "testfile.txt" in listfiles():
+    removefile("testfile.txt")
+
+  # create a file
+  myfile=openfile("testfile.txt",True)
+  myfile.writeat("12345678",0)
+
+  myfile.writeat("233", 0) #23345678
+
+  assert("12345678" == myfile.readat(None, 0))
+
+  myfile.writeat("23212", 5) #2334523212
+
+  assert("23345678" == myfile.readat(None, 0))
+
+  myfile.undo()
+
+  assert("23345678" == myfile.readat(None, 0))
+
+  myfile.undo()
+  
+  assert("23345678" == myfile.readat(None, 0))
+
+  myfile.close()
+
+undotest1()

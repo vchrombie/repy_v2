@@ -1,0 +1,39 @@
+# Attack Case 7: Delete file and write to it
+# Check if the reference monitor can handle rapid file deletion followed by creation, ensuring that the monitor doesn't retain stale or outdated information.
+# This attack case is similar to attack case 6, but the file is deleted and recreated immediately before writing to it.
+
+# for referencemonitor in reference_monitor_j*; do echo $referencemonitor under test; for testcase in jl14678_attackcase7*; do python repy.py restrictions.default encasementlib.r2py $referencemonitor $testcase; done; done
+
+# clean up if the file exists.
+if "attack7.txt" in listfiles():
+    removefile("attack7.txt")
+
+
+def deletion_create_file():
+    try:
+        # Create and write to the file
+        f = openfile("attack7.txt", True)
+        f.writeat("Initial Data", 0)
+        f.close()
+        
+        # Delete the file
+        removefile("attack7.txt")
+
+        # Immediately recreate and write new data
+        f = openfile("attack7.txt", True)
+        f.writeat("New Data", 0)
+        
+        # Read the contents to check if new data is present
+        content = f.readat(20, 0)
+
+        if content == "Initial Data":
+            log("[!]Attack Case 7 successful\n")
+        else:
+            log("[*]Attack Case 7 failed\n")
+        f.close()
+
+    except Exception as e:
+        log("Unexpected error during the attack: " + str(e)+ "\n")
+        return
+
+deletion_create_file()

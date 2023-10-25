@@ -1,0 +1,29 @@
+#Attack Case to test multiple writes.
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# create a file
+myfile=openfile("testfile.txt",True)
+
+# intial write to the file
+myfile.writeat("12345678",0)
+
+# attempt to overwrite the beginning of the file
+myfile.writeat("Hi!",0) 
+# now, undo the previous write
+
+#Multiple writes
+myfile.writeat("Hello",0)
+myfile.writeat("12345678",0)
+myfile.writeat("Brooklyn",0)
+myfile.writeat("Tandon",0)
+
+# the contents should still be "Brooklyn" as the previous write has not been confirmed yet
+try:
+	assert("Brooklyn" == myfile.readat(8,0))
+except AssertionError:
+	log("Error in Attack Case 4")
+# close the file
+myfile.close()
+

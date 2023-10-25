@@ -1,0 +1,25 @@
+# attack case 2: check if undo() works properly
+
+if "testfile.txt" in listfiles():
+    removefile("testfile.txt")
+
+myfile = openfile("testfile.txt", True)
+
+myfile.writeat("12345678", 0)
+
+myfile.writeat("Hi!", 0)
+
+myfile.undo()
+
+try:
+    # the contents should still be "12345678" as the second writeat() was undone
+    assert ("12345678" == myfile.readat(8, 0))
+except AssertionError:
+    log('Failed: contents of the file should be "12345678" after undoing the writeat() operation')
+    log()
+else:
+    pass
+finally:
+    exitall()
+
+myfile.close()

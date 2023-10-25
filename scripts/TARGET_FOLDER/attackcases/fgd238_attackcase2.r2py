@@ -1,0 +1,28 @@
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# create a file
+myfile=openfile("testfile.txt",True)
+myfile.writeat("12345678",0)
+
+#define thread functions
+def undo():
+    myfile.undo()
+def writeat(text, num):
+    myfile.writeat(text, num)
+#define how to call threads
+def sleep_then_call(pause, call_function, call_args):
+    def config_timerfunc():
+        sleep(pause)
+        call_function(*call_args)
+    return config_timerfunc
+
+#create threads
+thread1 = sleep_then_call(1, undo, [])
+thread2 = sleep_then_call(1, writeat, ["hello", 0])
+createthread(thread1)
+createthread(thread2)
+
+#close file
+myfile.close()

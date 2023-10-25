@@ -1,0 +1,15 @@
+# append string to the end of file
+
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+file = openfile("testfile.txt", True)
+
+file.writeat("Hello, World!", 0)
+file.writeat("Hello, World!", len("Hello, World!"))
+file.writeat("Hello, World!", 1)
+file.undo();
+
+assert("Hello, World!Hello, World!" == file.readat(26, 0))
+
+file.close()

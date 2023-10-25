@@ -1,0 +1,70 @@
+import os
+
+# Constants for type checking and variable hiding
+TYPE = "type"
+ARGS = "args"
+RETURN = "return"
+EXCP = "exceptions"
+TARGET = "target"
+FUNC = "func"
+OBJC = "objc"
+
+
+class MockFile:
+    def __init__(self, filename):
+        self.filename = filename
+        self.content = ""
+
+    def writeat(self, data, offset):
+        self.content = self.content[:offset] + data
+
+    def readat(self, bytes, offset):
+        return self.content[offset:offset + bytes]
+
+    def close(self):
+        pass
+
+
+class MockFileSystem:
+    def __init__(self):
+        self.files = {}
+
+    def openfile(self, filename, create):
+        filename = filename.lower()  # Normalize the filename
+        if create or filename in self.files:
+           self.files[filename] = MockFile(filename)
+        return self.files[filename]
+
+    def listfiles(self):
+        return list(self.files.keys())
+
+    def removefile(self, filename):
+        if filename in self.files:
+            del self.files[filename]
+
+    def secure_dispatch_module(self):
+        pass
+
+
+# Create a mock file system
+file_system = MockFileSystem()
+
+for item in file_system.listfiles():
+    if item in file_system.listfiles():
+        file_system.removefile(item)
+
+# Create an AB file using the mock file system
+my_file = file_system.openfile("testfile.txt", True)
+
+
+# # I should get 'SE' when reading an empty file...
+assert ('SE' == my_file.readat(2, 0))  # Read the first 2 bytes
+
+# # Put some valid data in the file.
+my_file.writeat("Stest12345E", 0)
+
+# # I should still get 'SE' because the file wasn't closed.
+assert ('SE' == my_file.readat(2, 0))  # Read the first 2 bytes
+
+# Close the file
+my_file.close()

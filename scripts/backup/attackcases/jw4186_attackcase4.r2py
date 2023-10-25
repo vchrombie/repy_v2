@@ -1,0 +1,14 @@
+# undo before writeat
+
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# create a file
+myfile=openfile("testfile.txt",True)
+
+myfile.undo()
+
+myfile.writeat("12345678",0)
+
+myfile.close()

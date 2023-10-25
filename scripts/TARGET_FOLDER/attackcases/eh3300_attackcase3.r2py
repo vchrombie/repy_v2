@@ -1,0 +1,50 @@
+include_repyv2("repyv2")
+
+def test_error_handling():
+    """
+    Tests the security layer's error handling by performing operations that should trigger errors.
+    This test checks if appropriate exceptions are raised when attempting to read from or write to a closed file.
+    """
+    test_filename = "test_error_handling.txt"
+    initial_data = "Some initial content."
+
+    try:
+        # Setup: Create a new file and write some initial content to it
+        setup_file = open(test_filename, 'w')
+        setup_file.write(initial_data)
+        setup_file.close()
+
+        # Step 1: Open the file using the security layer's LPopenfile function
+        secure_file = LPopenfile(test_filename, False)
+
+        # Step 2: Close the file
+        secure_file.close()
+
+        # Step 3: Attempt to read from the closed file. This should raise an exception.
+        try:
+            secure_file.readat(10, 0)  # Trying to read 10 bytes from the start
+            print("Test Failed: No exception was raised when attempting to read from a closed file.")
+        except Exception as e:
+            print("Test Passed: An exception was correctly raised when reading from a closed file:", str(e))
+
+        # Step 4: Attempt to write to the closed file. This should raise an exception.
+        try:
+            secure_file.writeat("Attempting to write this.", 0)  # Trying to write at the start
+            print("Test Failed: No exception was raised when attempting to write to a closed file.")
+        except Exception as e:
+            print("Test Passed: An exception was correctly raised when writing to a closed file:", str(e))
+
+    except Exception as e:
+        print(f"An error occurred during the test setup or execution: {e}")
+
+    finally:
+        # Cleanup: Ensure we do not leave test files around
+        try:
+            removefile(test_filename)
+        except:
+            # The file might already be removed or wasn't created at all. No action is needed here.
+            pass
+
+# Execute the test
+if __name__ == "__main__":
+    test_error_handling()

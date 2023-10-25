@@ -1,0 +1,17 @@
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+myfile=openfile("test.txt",True)
+
+def configure_write(myfile, data, offset):
+	def funcToCall():
+		myfile.writeat(data, offset)
+	return funcToCall
+
+def configure_read(myfile, bytes, offset):
+	def funcToCall():
+		myfile.readat(bytes, offset)
+	return funcToCall
+
+createthread(configure_write(myfile, "1234", 0))
+createthread(configure_read(myfile, 4, 0))

@@ -1,0 +1,20 @@
+# clean up if the file exists.
+if "testfile6.txt" in listfiles():
+  removefile("testfile6.txt")
+
+# create a file
+myfile=openfile("testfile6.txt",True)
+
+# intial write to the file
+myfile.writeat("12345678",0)
+
+# close the file
+myfile.close()
+
+# attempt to read after file is closed
+try:
+  myfile.readat(8,0)
+except FileClosedError:
+  pass
+else:
+  log("Error! Not handling FileClosed Error correctly\n")

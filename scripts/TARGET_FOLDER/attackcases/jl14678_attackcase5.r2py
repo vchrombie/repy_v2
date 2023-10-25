@@ -1,0 +1,31 @@
+# Attack Case 5: Undo without a preceding writeat operation
+
+# for referencemonitor in reference_monitor_j*; do echo $referencemonitor under test; for testcase in jl14678_attackcase5*; do python repy.py restrictions.default encasementlib.r2py $referencemonitor $testcase; done; done
+
+# clean up if the file exists.
+if "attack5.txt" in listfiles():
+    removefile("attack5.txt")
+
+
+def invalid_undo_attack():
+    try:
+        # Open a file to perform the attack
+        f = openfile("attack5.txt", True)
+        
+        # Call undo without a preceding writeat operation
+        f.undo()
+
+        # Write something or pass
+        # f.writeat("This is a test", 0)
+
+        # If we've reached here, it means there was no crash or unexpected behavior
+        log("[*]"Attack Case 5 failed: Invalid undo operation was handled properly by the reference monitor.")
+
+        f.close()
+
+    except Exception as e:
+        log("[!]Attack Case 5 successful: Invalid undo operation caused an error - " + str(e))
+        return
+
+
+invalid_undo_attack()

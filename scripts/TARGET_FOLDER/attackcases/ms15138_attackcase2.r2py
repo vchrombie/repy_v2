@@ -1,0 +1,32 @@
+#### A2: Check if undo works:
+# EXPECTATION: Calling undo() should remove the text written before at a specified offset in the previous writeat. 
+# This means, if we write x to the file, followed by y, then call undo, y will be removed leaving only x in the file. 
+# This code will check if only x remains.
+
+# If the testfile exists, remove it from the directory
+if "testfile.txt" in listfiles():
+    removefile("testfile.txt")
+
+# Open a testfile
+myfile=openfile("testfile.txt",True)
+
+# Write to it at a valid offset
+myfile.writeat("12345678",0)
+
+# Write something else now
+myfile.writeat("Hi",0)
+
+# Undo the write operation
+myfile.undo()
+
+# If the value read from the file is 12345678, then it is right. 
+# This is because the 2nd writeat "Hi" is stored in the pending data which is not committed to the testfile yet!
+try:
+    assert("12345678" == myfile.readat(8,0))
+except Exception as e:
+    log("Attack 2 - ERROR | This attack has failed at the assert statement above.\n\n")
+finally:
+    exitall()
+
+# Close the file
+myfile.close()

@@ -1,0 +1,21 @@
+# attackcase1
+# multiple writes and undos
+
+if "testfile.txt" in listfiles():
+	removefile("testfile.txt")
+
+aFile = openfile("testfile.txt", True)
+
+aFile.writeat("test", 0)
+aFile.writeat("test", 0)
+aFile.writeat("test", 0)
+aFile.writeat("test", 0)
+
+aFile.undo()
+aFile.undo()
+
+aFile.writeat("test", 0)
+aFile.undo()
+aFile.writeat("test", 0)
+
+aFile.close()

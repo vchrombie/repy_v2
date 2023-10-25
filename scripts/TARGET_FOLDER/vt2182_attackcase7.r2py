@@ -1,0 +1,21 @@
+# attack case 7: writeat() with offset past EOF should raise SeekPastEndOfFileError
+
+if "testfile.txt" in listfiles():
+    removefile("testfile.txt")
+
+myfile = openfile("testfile.txt", True)
+
+try:
+    # invalid writeat (EOF)
+    myfile.writeat("12345678", 1)
+
+    # valid writeat
+    myfile.writeat("Hi!", 0)
+except SeekPastEndOfFileError:
+    pass
+else:
+    log("Failed: writeat() with offset past EOF should raise SeekPastEndOfFileError", '\n')
+finally:
+    exitall()
+
+myfile.close()

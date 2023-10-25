@@ -1,0 +1,25 @@
+# This test case tests assertion for writeat after closing and reopening scenario
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# create a file
+myfile=openfile("testfile.txt",True)
+
+# intial write to the file
+myfile.writeat("12345678",0)
+
+# Closing the opened file
+myfile.close()
+
+# Opening the file again to read the content from that file
+myfile=openfile("testfile.txt",True)
+
+# the contents should still be "12345678" as the file was closed and reopened
+try:
+   assert("12345678" == myfile.readat(None,0))
+except AssertionError:
+   log("AssertionError: The file content should be '12345678' but it is not, so it is an Assertion Error\n")
+
+# close the file
+myfile.close()

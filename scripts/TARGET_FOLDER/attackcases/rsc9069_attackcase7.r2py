@@ -1,0 +1,15 @@
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+    removefile("testfile.txt")
+
+# create/open a file
+myfile = openfile("testfile.txt",True)
+
+try:
+    # intial write to the file at negative offset
+    myfile.writeat("0",-1)
+except RepyArgumentError: #expected behavior
+    pass
+else:  # unexpected behavior
+    raise Exception("RepyArgumentError not raised")
+myfile.close()

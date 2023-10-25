@@ -1,0 +1,11 @@
+# Open File & Undo -- That's it!
+# 17 Cases
+
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+myfile=openfile("testfile.txt",True)
+
+myfile.undo()
+
+myfile.close()

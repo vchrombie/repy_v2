@@ -1,0 +1,54 @@
+def timeout_thread_func():
+  timeout_seconds = 10
+  sleep(timeout_seconds)
+  assert False, "Timed out after " + str(timeout_seconds) + " seconds"
+  exitall()
+
+createthread(timeout_thread_func)
+
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# create a file
+myfile = openfile("testfile.txt",True)
+
+# Assertion: An undo before any operation should still be valid
+myfile.undo()
+
+apple_string = "An apple is green in color."
+assert(27 == len(apple_string))
+
+myfile.writeat(apple_string, 0)
+
+assert("" == myfile.readat(None,0)) # writeat() not committed yet
+
+# Assertion: This should be a valid operation and data should be held in buffer correctly
+myfile.writeat("red", 12)
+assert(apple_string == myfile.readat(None,0))
+assert("." == myfile.readat(None,26))
+assert("" == myfile.readat(500,27))
+
+myfile.writeat("blue", 12)
+assert("An apple is reden in color." == myfile.readat(None,0))
+assert("reden in color." == myfile.readat(None,12))
+assert("" == myfile.readat(0,12))
+assert("red" == myfile.readat(3,12))
+
+# Assertion: Multiple continuous undos() should be equivalent to a single undo()
+myfile.undo()
+myfile.undo()
+myfile.undo()
+assert("An apple is reden in color." == myfile.readat(None,0))
+myfile.writeat("",0) # flush with empty write
+assert("An apple is reden in color." == myfile.readat(None,0)) # blue isn't written
+
+
+myfile.close()
+
+# clean up the file afterwards.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+exitall()
+

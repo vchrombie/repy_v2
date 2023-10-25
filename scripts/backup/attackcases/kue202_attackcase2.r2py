@@ -1,0 +1,16 @@
+# create a file
+myfile = openfile("testfile.txt", True)
+
+# initial write to the file
+myfile.writeat("12345678", 0)
+
+# close the file
+myfile.close()
+
+# now, attempt to undo the previous write after closing the file
+try:
+    myfile.writeat("123", 0)
+except FileClosedError as e:
+    pass
+else:
+    raise Exception("Security Layer not Intact")

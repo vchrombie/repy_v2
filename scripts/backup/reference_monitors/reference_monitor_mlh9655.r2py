@@ -1,0 +1,159 @@
+"""
+This security layer inadequately handles the undo functionality
+
+Note:
+    This security layer uses encasementlib.r2py, restrictions.default, repy.py and Python
+    Also you need to give it an application to run.
+    python2 repy.py restrictions.default encasementlib.r2py reference_monitor_mlh9655.r2py attack.r2py 
+    
+"""
+TYPE = "type"
+ARGS = "args"
+RETURN = "return"
+EXCP = "exceptions"
+TARGET = "target"
+FUNC = "func"
+OBJC = "objc"
+
+
+class LPFile():
+    def __init__(self, filename, create):
+        
+        mycontext['debug'] = False
+        
+        try:
+            if type(create) != type(True) :
+                raise RepyArgumentError("Create has to be of type Boolean");
+            if type(filename) != type("string") :
+                raise RepyArgumentError("Filename has to be of type String");
+            #if # FILE ALREADY OPEN FileInUseError
+            #if # FILENAME INVALID 
+            #if # CREATE FALSE AND FILE NOT FOUND FileNotFoundError
+            self.LPfile = openfile(filename, create)
+        except: 
+            return
+        else:
+            self.closed = False
+            self.pending_data = None
+            self.pending_offset = None
+
+            # Original EOF setting so that readat can be called
+            self.eof = 0;
+
+            # find/track real EOF
+            num = len(self.readat(None, 0))
+            if num == 0 :
+                self.eof = 0;
+            else :
+                self.eof = num +1
+            self.pending_eof = self.eof
+
+
+    def readat(self, bytes, offset):
+        # Read from the file using the sandbox's readat...
+        
+        # Exception checking 
+        try:
+            if offset < 0 :
+                raise RepyArgumentError("Offset cannot be less than zero");
+            if bytes != None :
+                if bytes < 0 :
+                    raise RepyArgumentError("Size to read cannot be less than zero");
+            if self.closed :
+                raise FileClosedError("File is closed") 
+            if offset > self.eof :
+                raise SeekPastEndOfFileError("Cannot read past End Of FIle")
+        except:
+            return ""
+        else:
+            return self.LPfile.readat(bytes, offset)
+        
+
+    def writeat(self, data, offset):
+        
+        try: 
+            # ADD EXCEPTION CHECKING HERE
+            if type(data) != type("string") :
+                raise RepyArgumentError("Data has to be of type String");
+            if type(offset) != type(3) :
+                raise RepyArgumentError("Offset has to be of type int or long");
+            if offset < 0 :
+                raise RepyArgumentError("Offset cannot be less than zero");
+            if self.closed :
+                raise FileClosedError("File is closed") 
+            if offset >= self.pending_eof :
+                raise RepyArgumentError("Offset cannot exceed the End Of File");
+        except: 
+            return
+        else:
+            # IF pending data exists, WRITE
+            # write to the file, update the ACTUAL eof
+            if self.pending_data != None :
+                self.LPfile.writeat(self.pending_data, self.pending_offset)
+                self.eof = self.pending_eof
+
+            # UPDATE pending data
+            self.pending_data = data
+            self.pending_offset = offset
+
+            # CALCULATE NEW PENDING eof
+            if self.eof - self.pending_offset > len(self.pending_data) :
+                self.pending_eof = self.eof
+                # overwrite without extending, no change in eof
+            else :
+                num = self.eof - self.pending_offset - 1
+                self.pending_eof = self.eof + ( len(self.pending_data) - num )
+            
+
+    def undo(self):
+        if self.closed :
+            return
+        self.pending_data = None
+        self.pending_offset = None
+        self.pending_eof = self.eof
+        
+
+    def close(self):
+        try:
+            if self.closed :
+                raise FileClosedError("File is closed") 
+        except:
+            return 
+        else:
+            # IF pending data exists, WRITE
+            if self.pending_data != None :
+                self.LPfile.writeat(self.pending_data, self.pending_offset)
+                self.eof = self.pending_eof
+
+            # UPDATE pending data
+            # self.pending = false
+            self.pending_data = None
+            self.pending_offset = None
+
+            self.LPfile.close()
+            self.closed = True
+
+def LPopenfile(filename, create):  
+    return LPFile(filename, create)
+
+# The code here sets up type checking and variable hiding for you.
+# You should not need to change anything below here.
+sec_file_def = {
+    "obj-type": LPFile,
+    "name": "LPFile",
+    "writeat": {"type": "func", "args": (str, (int, long)), "exceptions": Exception, "return": (int, type(None)), "target": LPFile.writeat},
+    "readat": {"type": "func", "args": ((int, long, type(None)), (int, long)), "exceptions": Exception, "return": str, "target": LPFile.readat},
+    "undo": {"type": "func", "args": None, "exceptions": None, "return": type(None), "target": LPFile.undo},
+    "close": {"type": "func", "args": None, "exceptions": Exception, "return": (bool, type(None)), "target": LPFile.close}
+}
+
+CHILD_CONTEXT_DEF["openfile"] = {
+    TYPE: OBJC,
+    ARGS: (str, bool),
+    EXCP: Exception,
+    RETURN: sec_file_def,
+    TARGET: LPopenfile
+}
+
+# Execute the user code
+secure_dispatch_module()

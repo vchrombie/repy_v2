@@ -1,0 +1,61 @@
+def timeout_thread_func():
+  timeout_seconds = 10
+  sleep(timeout_seconds)
+  assert False, "Timed out after " + str(timeout_seconds) + " seconds"
+  exitall()
+
+createthread(timeout_thread_func)
+
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# create a file
+myfile = openfile("testfile.txt",True)
+
+apple_string = "An apple is green in color."
+assert(27 == len(apple_string))
+
+myfile.writeat(apple_string, 0)
+
+# Buffer is not empty here, but file is empty
+
+# Multi-threading and efficiency test. Running it for 3000 iterations. 
+# Completes under ~3s on my laptop everytime - 
+for i in range(3000):
+
+  thread_locker = createlock()
+  mycontext['thread_count'] = 2
+
+  def file_write_task_1():
+    myfile.writeat("Hello World",0)
+    thread_locker.acquire(True)
+    mycontext['thread_count'] -= 1
+    thread_locker.release()
+
+  def file_write_task_2():
+    myfile.undo()
+    thread_locker.acquire(True)
+    mycontext['thread_count'] -= 1
+    thread_locker.release()
+
+  # These two threads must never raise an exception as long as only one operation is done at a time
+  createthread(file_write_task_1)
+  createthread(file_write_task_2)
+
+  while True:
+    thread_locker.acquire(True)
+    if mycontext['thread_count'] == 0:
+      # if undo happened first, then 
+      thread_locker.release()
+      break
+    thread_locker.release()
+
+myfile.close()
+
+# clean up the file afterwards.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+exitall()
+

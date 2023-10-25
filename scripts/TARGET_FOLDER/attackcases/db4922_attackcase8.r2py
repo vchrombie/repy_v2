@@ -1,0 +1,14 @@
+# double open
+
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+ removefile("testfile.txt")
+# create a file
+myfile=openfile("testfile.txt",True)
+
+try:
+    myfile=openfile("testfile.txt",True)
+except FileInUseError:
+    pass
+else:
+    log("Error! Double open of a file should not be allowed.\n")

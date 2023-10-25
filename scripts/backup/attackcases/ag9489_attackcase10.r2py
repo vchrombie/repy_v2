@@ -1,0 +1,33 @@
+def beforeEach():
+  # clean up if the file exists.
+  if "testfile.txt" in listfiles():
+    removefile("testfile.txt")
+
+def terminate(t):
+  def sleep_for():
+    # after sleeping t sec, terminate the attack
+    sleep(t)
+    raise RuntimeError("reference monitor took more than 5 seconds => a bug was detected!\n")
+  return sleep_for
+
+createthread(terminate(10))
+
+#Reading at negative offset. RepyArgumentError Exception is thrown (Expected)
+def fileClosed():
+  #setup
+  beforeEach()
+  myfile = openfile("testfile.txt", True)
+  myfile.writeat("hello", 0)
+  myfile.close()
+  try:
+    myfile = openfile("testfile.txt", True)
+    log(myfile.readat(None, -1))
+    myfile.close()
+  except RepyArgumentError:
+    pass
+  else:
+    log("ERROR ATTACK | RepyArgumentError Exception is swallowed or not thrown.\n")
+
+fileClosed()
+
+exitall()
