@@ -33,6 +33,7 @@ import time
 import signal # using SIGKILL
 import sys
 
+start_time = time.time()
 
 rootdir = os.getcwd()  # get current working directory
 
@@ -42,6 +43,14 @@ path_AttackFolder = os.path.join(rootdir, sys.argv[2])
 
 # Paths  to temp folder where the attack is run
 path_TempFolder = os.path.join(rootdir, sys.argv[3])
+
+# Path to the folder where we will move attacks that cause timeouts
+path_HaltFolder = os.path.join(rootdir, "halt")
+
+# Move the attack file to a "halt" directory
+if not os.path.exists(path_HaltFolder):
+    os.mkdir(path_HaltFolder)
+
 
 #part of filename to look for
 attack_ext = "*.r2py"       #extension of attack programs will be r2py
@@ -103,7 +112,7 @@ def did_this_attack_succeed(attackFilename, defenseFilename):
     False otherwise
     '''
 
-    timeout=30
+    timeout=2
 
     os.mkdir(path_TempFolder)  # make a temp folder
     os.chdir(path_TempFolder)  # cd to temp folder at this point
@@ -128,6 +137,9 @@ def did_this_attack_succeed(attackFilename, defenseFilename):
             file("Repy_stop_this","w").close()
             # wait for it to stop...
             pobj.wait()
+
+            shutil.move(os.path.join(path_AttackFolder, attackFilename), os.path.join(path_HaltFolder, attackFilename))
+
             stdout = "timeout"
             stderr = "timeout"
             break
@@ -230,6 +242,8 @@ def main():
 
 if __name__ == "__main__":
     main()
+    print 'Done'
+    print "--- %s seconds ---" % (time.time() - start_time)
 
 
 
