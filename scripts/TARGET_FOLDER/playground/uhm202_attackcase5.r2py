@@ -1,0 +1,10 @@
+# checking for undo with nothing to undo
+
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# create a file
+myfile=openfile("testfile.txt",True)
+myfile.undo() # checking undo with nothing to do
+myfile.close()

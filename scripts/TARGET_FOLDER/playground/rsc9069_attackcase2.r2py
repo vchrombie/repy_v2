@@ -1,0 +1,9 @@
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+    removefile("testfile.txt")
+
+# create/open a file
+myfile = openfile("testfile.txt",True)
+
+# close the file
+myfile.close()

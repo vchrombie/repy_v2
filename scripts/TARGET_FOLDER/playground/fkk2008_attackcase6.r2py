@@ -1,0 +1,30 @@
+# Test Case 6
+# Trying to perform operations that should not be allowed by the permissions set on the file
+
+'''
+Debugging Information: Check the writeat function to determine whether it has any loopholes that allow writing on non-permitted files
+
+'''
+
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# create a file with read-only permissions
+myfile=openfile("testfile.txt",True)
+myfile.close()
+
+# try to open the file with write permissions
+try:
+    myfile=openfile("testfile.txt",False)
+    myfile.writeat("Hello",0)
+    
+except Exception as e:
+    # log any exception that occurs
+    pass
+else:
+    data = myfile.readat(None,0)
+    if data == "Hello":
+        log("Test Failed: Writing not permitted\n")
+# close the file
+myfile.close()

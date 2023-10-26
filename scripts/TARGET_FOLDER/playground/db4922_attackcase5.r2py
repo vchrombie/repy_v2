@@ -1,0 +1,17 @@
+# read with negative offset
+
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+ removefile("testfile.txt")
+# create a file
+myfile=openfile("testfile.txt",True)
+myfile.writeat("Hi!",0)
+myfile.close()
+myfile=openfile("testfile.txt",True)
+
+try:
+    myfile.readat(3,-1)
+except RepyArgumentError:
+    pass
+else:
+    log("Error! Read with negative offset should not be allowed.\n")

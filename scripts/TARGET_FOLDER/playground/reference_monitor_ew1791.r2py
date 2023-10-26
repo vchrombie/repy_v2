@@ -1,0 +1,115 @@
+"""
+Emma Wilkins - ew1791
+Assignment 2 part 1 
+Computer Security CSUY 3923  
+"""
+TYPE = "type"
+ARGS = "args"
+RETURN = "return"
+EXCP = "exceptions"
+TARGET = "target"
+FUNC = "func"
+OBJC = "objc"
+
+import threading
+
+prev_writes = {}
+file_locks = {}
+
+# define two files to keep track of current and last valid state
+class LPFile():
+    def __init__(self, filename, create):
+        # globals
+        mycontext['debug'] = False
+        self.LPfile = open(filename, create)
+        self.pending_data = None
+        self.pending_offset = None
+        self.valid = filename + ".v"
+        self.notvalid = filename + "nv"
+
+        # use lock already created for file or create new lock
+        if self.LPfile in file_locks:
+            self.lock = file_locks.get(self.LPfile, threading.Lock())
+        else: 
+            self.lock = threading.Lock()
+            file_locks[self.LPfile] = self.lock
+
+
+    def readat(self, bytes, offset):
+        # Read from the file using the sandbox's readat...
+        return self.LPfile.readat(bytes, offset)
+
+    # write operations should not imediatley change the file 
+    # store previous value
+    # only commit if another write operation happens or if file is closed
+    def writeat(self, data, offset):
+        # if there is pending data, add it to dictionary 
+        with self.lock: 
+            if self.pending_data is not None: 
+                prev_writes[self.LPfile] = (self.pending_data, self.pending_offset)
+
+            self.pending_data = data
+            self.pending_offset = offset 
+
+            # Save the current content to the "notvalid" version
+            current_content = self.LPfile.readat(len(data), offset)
+            self.LPfile.writeat(current_content, offset, self.notvalid)
+        
+        self.lock.release()
+
+    # this is for if the file is closed the most recent pending write is made valid
+    def commit_write(self): 
+        with self.lock:
+            if self.pending_data is not None:
+                # changes from "notvalid" to "valid"
+                self.LPfile.writeat(self.pending_data, self.pending_offset, self.valid)
+                self.pending_data = None
+                self.pending_offset = None
+
+    # can undo the last writeat operation - only the most recent operation
+    # if no operations undo will do nothing
+    #  revert to last valid write at 
+    def undo(self):
+        with self.lock:
+            if self.LPfile in prev_writes: 
+                data, offset = prev_writes[self.LPfile]
+
+                # curr = self.LPfile.readat(len(data), offset)
+                # undone = curr[:offset] + data + curr[offset + len(data):]
+                # self.LPfile.writeat(undone, offset)
+
+                # Restore the "notvalid" content to the file
+                self.LPfile.writeat(data, offset, self.LPfile)
+        
+        self.lock.release()
+
+
+    def close(self):
+        self.commit_write()
+        self.LPfile.close()
+        self.lock.release() # end of critcal section 
+
+def LPopenfile(filename, create):
+    return LPFile(filename, create)
+
+# The code here sets up type checking and variable hiding for you.
+# You should not need to change anything below here.
+sec_file_def = {
+    "obj-type": LPFile,
+    "name": "LPFile",
+    "writeat": {"type": "func", "args": (str, (int, long)), "exceptions": Exception, "return": (int, type(None)), "target": LPFile.writeat},
+    "readat": {"type": "func", "args": ((int, long, type(None)), (int, long)), "exceptions": Exception, "return": str, "target": LPFile.readat},
+    "undo": {"type": "func", "args": None, "exceptions": None, "return": type(None), "target": LPFile.undo},
+    "close": {"type": "func", "args": None, "exceptions": Exception, "return": (bool, type(None)), "target": LPFile.close}
+}
+
+CHILD_CONTEXT_DEF["openfile"] = {
+    TYPE: OBJC,
+    ARGS: (str, bool),
+    EXCP: Exception,
+    RETURN: sec_file_def,
+    TARGET: LPopenfile
+}
+
+# Execute the user code
+secure_dispatch_module()

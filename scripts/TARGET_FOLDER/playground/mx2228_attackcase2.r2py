@@ -1,0 +1,24 @@
+# clean up if the file exists.
+if "attackfile2.txt" in listfiles():
+    removefile("attackfile2.txt")
+
+# create a file
+myfile2 = openfile("attackfile2.txt", True)
+
+# initial write to the file
+myfile2.writeat("one", 0)
+
+# overwrite the file multiple times
+myfile2.writeat("two", 0)
+myfile2.writeat("three", 0)
+
+# undo the previous write
+myfile2.undo()
+
+# check the contents
+if "two" != myfile2.readat(3,0):
+    log("Undo after consecutive writes failed!\n")
+
+# close the file
+myfile2.close()
+

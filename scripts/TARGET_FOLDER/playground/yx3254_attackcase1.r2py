@@ -1,0 +1,34 @@
+# accuracy_test.r2py
+
+# Check if testfile.txt exists and remove it
+if "testfile.txt" in listfiles():
+    try:
+        removefile("testfile.txt")
+    except:
+        log("ACCURACY COMPROMISED: Monitor failed to remove existing file.\n")
+
+try:
+    # Create a file
+    myfile = openfile("testfile.txt", True)
+except:
+    log("ACCURACY COMPROMISED: Monitor failed to allow normal file creation.\n")
+
+try:
+    # Write to the file
+    myfile.writeat("Hello World", 0)
+except:
+    log("ACCURACY COMPROMISED: Monitor failed during write operation.\n")
+
+try:
+    # Read from the file
+    data = myfile.readat(11, 0)
+    if data != "Hello World":
+        log("ACCURACY COMPROMISED: Unexpected read data after write.\n")
+except:
+    log("ACCURACY COMPROMISED: Monitor failed during read operation.\n")
+
+try:
+    # Close the file
+    myfile.close()
+except:
+    log("ACCURACY COMPROMISED: Monitor failed to close the file.\n")

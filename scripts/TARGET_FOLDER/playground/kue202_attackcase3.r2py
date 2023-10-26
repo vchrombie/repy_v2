@@ -1,0 +1,22 @@
+
+# create a file
+myfile = openfile("testfile.txt", True)
+
+# initial write to the file
+myfile.writeat("12345678", 0)
+
+# multiple overwrites
+myfile.writeat("ABCDEFGH", 0)
+myfile.writeat("IJKLMNOP", 0)
+
+myfile.undo()
+myfile.undo()
+
+# check the contents of the file
+file_contents = myfile.readat(8, 0)
+
+# the contents should still be "12345678" as the overwrite was undone
+assert "12345678" == file_contents, "Test failed: File contents are not as expected after undo."
+
+# close the file
+myfile.close()

@@ -1,0 +1,109 @@
+"""
+This security layer inadequately handles the undo functionality
+
+Note:
+    This security layer uses encasementlib.r2py, restrictions.default, repy.py and Python
+    Also you need to give it an application to run.
+    python repy.py restrictions.default encasementlib.r2py [security_layer].r2py [attack_program].r2py 
+    
+"""
+
+
+TYPE = "type"
+ARGS = "args"
+RETURN = "return"
+EXCP = "exceptions"
+TARGET = "target"
+FUNC = "func"
+OBJC = "objc"
+
+
+class LPFile():
+    def __init__(self, filename, create):
+        # globals
+        #mycontext['debug'] = False  # don't think this is needed
+        #self._lock = threading.Lock()  # concurrent access safety purposes
+        
+        self.LPfile = openfile(filename, create) #opens file
+        self.undo_stack = [] #stack to keep track of data for undo
+        self.log = [] #logging to keep track of things more easily
+        
+        self.pending_write = None #stores last unconditional write (added after last announcement)
+    
+    def _log_action(self, action, data=None, offset=None): # function to log actions so I can understand what is happening
+        self.log.append((action, data, offset)) #for debugging purposes
+
+    def readat(self, bytes, offset):
+
+        #more secure code, making sure the arguments are valid
+        if not isinstance(bytes, (int, long)) or not isinstance(offset, (int, long)):
+            raise ValueError("Invalid arguments for readat")
+        
+        if self.pending_write:
+            write_offset, _, _ = self.pending_write
+            if write_offset == offset:
+                # Skip the uncommitted write by reading directly from the file without using the buffer
+                return self.LPfile.readat(bytes, offset)
+        
+        #with self._lock:  # thread-safe access purposes
+        return self.LPfile.readat(bytes, offset)
+
+
+    def writeat(self, data, offset):
+        if not isinstance(data, str) or not isinstance(offset, (int, long)):
+            raise ValueError("Invalid arguments for writeat")
+
+        #with self._lock:
+        
+        current_data = self.LPfile.readat(len(data), offset)  # Read current data to be saved for undo.
+        self.undo_stack.append((current_data, offset))  # Add current data to undo stack.
+        self.pending_write = (offset, len(data), data)  # Store the uncommitted write
+        #self.LPfile.writeat(data, offset)
+        self._log_action("write", data, offset)
+
+    def undo(self):
+        if self.LPfile.closed:  # Check if the file is closed
+            return
+        #with self._lock:
+        
+        if not self.undo_stack:
+            raise ValueError("No previous data to undo.")
+
+        data, offset = self.undo_stack.pop()  # get the last write data and offset.
+        self.LPfile.writeat(data, offset)
+        self._log_action("undo", data, offset)
+
+    def close(self):
+        #with self._lock:  #thread-safe access.
+        
+        if self.pending_write:
+            offset, _, data = self.pending_write
+            self.LPfile.writeat(data, offset)
+            self.pending_write = None
+
+        self.LPfile.close()  # file closes
+
+def LPopenfile(filename, create):
+    return LPFile(filename, create)
+
+# The code here sets up type checking and variable hiding for you.
+# You should not need to change anything below here.
+sec_file_def = {
+    "obj-type": LPFile,
+    "name": "LPFile",
+    "writeat": {"type": "func", "args": (str, (int, long)), "exceptions": Exception, "return": (int, type(None)), "target": LPFile.writeat},
+    "readat": {"type": "func", "args": ((int, long, type(None)), (int, long)), "exceptions": Exception, "return": str, "target": LPFile.readat},
+    "undo": {"type": "func", "args": None, "exceptions": None, "return": type(None), "target": LPFile.undo},
+    "close": {"type": "func", "args": None, "exceptions": Exception, "return": (bool, type(None)), "target": LPFile.close}
+}
+
+CHILD_CONTEXT_DEF["openfile"] = {
+    TYPE: OBJC,
+    ARGS: (str, bool),
+    EXCP: Exception,
+    RETURN: sec_file_def,
+    TARGET: LPopenfile
+}
+
+# Execute the user code
+secure_dispatch_module()

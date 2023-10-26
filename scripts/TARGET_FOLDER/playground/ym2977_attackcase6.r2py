@@ -1,0 +1,35 @@
+# # case 6: Read after file is closed should have the last write reflected
+
+def close_after(t):
+  def sleep_for():
+    # Terminated the program after sleeping t sec
+    sleep(t)
+    log("ATTACK 6 | Unsuccessful Operation as Program Triggered Race Condition / Infinite Loop\n")
+    exitall()
+  return sleep_for
+terminate_program = close_after(10)
+createthread(terminate_program)
+
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+try:
+    myfile=openfile("testfile.txt",True)
+
+    myfile.writeat("12345678",0)
+
+    myfile.writeat("Hi!",3)
+    myfile.undo()
+    myfile.writeat("Hi!",5) 
+
+    myfile.close()
+
+    myfile2 = openfile("testfile.txt", False)
+    assert("12345Hi!" == myfile2.readat(None,0))
+    myfile2.close()
+except:
+    log("ATTACK 6 | ERROR | Last write should be written after file close!\n")
+
+finally:
+    #Exit operation
+    exitall()

@@ -1,0 +1,19 @@
+# Attack case for FileClosedError.
+
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# create a file
+myfile=openfile("testfile.txt",True)
+myfile.close()
+
+try:
+  myfile.writeat("Hello", 0)
+except FileClosedError:
+  pass
+except Exception:
+  log("Unexpected Exception Raised!\n")
+else:
+  log("Should throw FileClosedError since the File is closed!\n")
+

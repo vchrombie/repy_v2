@@ -1,0 +1,12 @@
+# Attempt to perform readat after writeat
+# Should not show the change
+
+if "testfile.txt" in listfiles():
+    removefile("testfile.txt")
+
+# create a file
+file = openfile("testfile.txt", True)
+file.writeat("Hello, World!", 0)
+data = file.readat(13, 0)
+assert("Hello, World!" != data)
+file.close()

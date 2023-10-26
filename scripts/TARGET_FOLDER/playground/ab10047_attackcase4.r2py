@@ -1,0 +1,18 @@
+
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+myfile=openfile("testfile.txt",True)
+myfile.writeat("5678",0)
+myfile.writeat("abc",0)
+myfile.writeat("9012",4)
+myfile.undo()
+myfile.undo()
+myfile.undo()
+myfile.writeat("123",0)
+try:
+    assert("abc8"== myfile.readat(4,0))
+    myfile.close()
+except:
+  myfile.close()
+  log("Multiple write and undo not handled! \n")

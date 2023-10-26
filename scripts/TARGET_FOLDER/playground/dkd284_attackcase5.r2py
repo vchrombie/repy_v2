@@ -1,0 +1,40 @@
+#DKD284 Fourth attack case
+#Attempt at thread attack
+
+# clean up if the file exists. - copied from example given, seems like good practive
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# create a file - copied from example given, seems like good practive
+myfile=openfile("testfile.txt",True)
+
+#---------------------------------------
+#This attack script is running test
+#log("STARTING")
+
+# intial write to the file
+myfile.writeat("initial data", 0)
+
+last_writeop = [0] #to keep track of write attack numbers
+
+def w_thread():
+    for x in range(500):  # Only doing 500 so it finishes before 10 secs are up
+        data = "PANDA BITE_" + str(x)
+        myfile.writeat(data, 0)
+        last_writeop[0] = x
+
+def r_thread():
+    for x in range(500):
+        content = myfile.readat(12, 0) 
+        if "PANDA BITE_" in content:
+            index = int(content.split("_")[1])
+            if index != last_writeop[0]:
+                 log("Race detected! Read " + str(index) + " while expecting " + str(last_writeop[0]))
+
+# Calling the thread functions
+createthread(w_thread)
+createthread(r_thread)
+
+#---------------------------------------
+# close the file 
+myfile.close()

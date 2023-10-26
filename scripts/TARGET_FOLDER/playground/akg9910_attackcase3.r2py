@@ -1,0 +1,35 @@
+#ATTACK 3: write race condition
+#creating new testfile
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+testfile=openfile("testfile.txt", True)
+
+def t1():
+    testfile.writeat("12345", 0)
+    sleep(2)
+    try:
+        testfile.close()
+    except:
+        pass
+
+def t2():
+    try:
+        testfile.writeat("abcde", 0)
+        testfile.close()
+    except:
+        pass
+
+createthread(t1)
+createthread(t2)
+try:
+    testfile.close()
+except:
+    pass
+
+testfile=openfile("testfile.txt", True)
+#seeing if correct data was written
+if testfile.readat(5, 0) != "12345":
+    log("FAILED ATTACK 3: write race condition\n")
+    
+testfile.close()

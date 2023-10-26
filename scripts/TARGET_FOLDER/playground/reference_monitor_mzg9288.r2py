@@ -1,0 +1,106 @@
+"""
+This security layer inadequately handles the undo functionality
+
+Note:
+    This security layer uses encasementlib.r2py, restrictions.default, repy.py and Python
+    Also you need to give it an application to run.
+    python repy.py restrictions.default encasementlib.r2py [security_layer].r2py [attack_program].r2py
+    python repy.py restrictions.default encasementlib.r2py reference_monitor_mzg9288.r2py attack.r2py  
+    
+"""
+TYPE = "type"
+ARGS = "args"
+RETURN = "return"
+EXCP = "exceptions"
+TARGET = "target"
+FUNC = "func"
+OBJC = "objc"
+
+
+class LPFile():
+    def __init__(self, filename, create):
+        
+        mycontext['debug'] = False
+        self.lpfile_reference = openfile(filename, create)
+        self.file_lock = createlock()
+        self.data_in_queue = None
+        self.offset_in_queue = None
+        self.total_size = len(self.lpfile_reference.readat(None, 0));
+
+    def readat(self, bytes, offset):
+        if (bytes != None and bytes < 0):
+            raise RepyArgumentError("Negative sizelimit specified!")
+        if(offset < 0):
+            raise RepyArgumentError("Min value is 0.")
+        if(offset > self.total_size):
+            raise SeekPastEndOfFileError("Seek offset extends past the EOF! 2")
+        self.file_lock.acquire(True)
+        try:
+            ret = self.lpfile_reference.readat(bytes, min(self.total_size,offset) )
+        except Exception as e:
+            self.file_lock.release() 
+            raise e
+        self.file_lock.release()
+        return ret
+
+    def writeat(self, data, offset):
+        if(type(data) is not str):
+            raise RepyArgumentError("Invalid type <type '" + str(type(data)) + "'>")
+        if(offset < 0):
+            raise RepyArgumentError("Min value is 0.")
+        posible_max_size = 0; 
+        if(self.data_in_queue != None and self.offset_in_queue != None):
+            posible_max_size = self.offset_in_queue+len(self.data_in_queue)
+        if(offset > max(self.total_size, posible_max_size)):
+            raise SeekPastEndOfFileError("Seek offset extends past the EOF!")
+        if self.data_in_queue != None and self.offset_in_queue != None:
+            self.file_lock.acquire(True)
+            try:
+                self.lpfile_reference.writeat(self.data_in_queue, self.offset_in_queue)
+            except Exception as e: 
+                self.file_lock.release() 
+                raise e
+            self.total_size = max(self.total_size, self.offset_in_queue+len(self.data_in_queue))
+            self.file_lock.release()
+        self.data_in_queue = data
+        self.offset_in_queue = offset
+
+    def undo(self):
+        self.data_in_queue = None
+        self.offset_in_queue = None
+
+    def close(self):
+        if self.data_in_queue != None and self.offset_in_queue != None: 
+            self.file_lock.acquire(True)
+            try:
+                self.lpfile_reference.writeat(self.data_in_queue, self.offset_in_queue)
+            except Exception as e: 
+                self.file_lock.release() 
+                raise e
+            self.file_lock.release()
+        self.lpfile_reference.close()
+
+def LPopenfile(filename, create):
+    return LPFile(filename, create)
+
+# The code here sets up type checking and variable hiding for you.
+# You should not need to change anything below here.
+sec_file_def = {
+    "obj-type": LPFile,
+    "name": "LPFile",
+    "writeat": {"type": "func", "args": (str, (int, long)), "exceptions": Exception, "return": (int, type(None)), "target": LPFile.writeat},
+    "readat": {"type": "func", "args": ((int, long, type(None)), (int, long)), "exceptions": Exception, "return": str, "target": LPFile.readat},
+    "undo": {"type": "func", "args": None, "exceptions": None, "return": type(None), "target": LPFile.undo},
+    "close": {"type": "func", "args": None, "exceptions": Exception, "return": (bool, type(None)), "target": LPFile.close}
+}
+
+CHILD_CONTEXT_DEF["openfile"] = {
+    TYPE: OBJC,
+    ARGS: (str, bool),
+    EXCP: Exception,
+    RETURN: sec_file_def,
+    TARGET: LPopenfile
+}
+
+# Execute the user code
+secure_dispatch_module()

@@ -1,0 +1,57 @@
+# Ethan Shieh
+
+# check whether an invalid write will wipe the contents of pending. an invalid
+# write should NOT wipe the contents of pending.
+
+# If we execute a program that performs these functions in this order:
+#
+# write1 (valid)
+# write2 (valid)
+# try: invalid write
+#
+# Then the file should have the contents of write1 (and write2 should be in pending)
+# because the invalid write should not write write2 to the file. Writes should
+# only be done when a valid writeat() has been called. Then, to verify that the
+# valid write is still in pending (write2), we do:
+#
+# write3 (valid)
+#
+# This should write write2 into the file. So, the file should contain
+# write1 and write2.
+#
+# If the file doesn't only contain the contents of write1 and write2, then it is 
+# an ERROR.
+
+
+# clean up if the file exists
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# create a file
+myfile=openfile("testfile.txt",True)
+
+myfile.writeat("123456789", 0)
+myfile.writeat("abc", 3)
+
+# try an invalid write. this should fail and the contents of pending should
+# remain intact (it should be "abc" as the data)
+try:
+  myfile.writeat("hello", 16)
+except:
+  pass
+
+# write abc to file
+try:
+  myfile.writeat("", 0)
+except:
+  pass
+
+if (myfile.readat(None, 0) != "123abc789"):
+  log("ERROR: es5185_attackcase6 determined that an invalid write cleared the contents of pending!\n")
+  exitall()
+
+
+try:
+  myfile.close()
+except:
+  pass

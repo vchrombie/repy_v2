@@ -1,0 +1,45 @@
+mycontext["_test_start"] = False
+
+def simplewriter(w_string, w_offset, myfile, loop):
+	def write():
+		try:
+			for i in range(loop):
+				myfile.writeat(w_string, w_offset)
+		except FileClosedError:
+			pass
+		except:
+			raise
+
+	return write
+
+def simpleundoer(myfile, loop):
+	def undo():
+		try:
+			for i in range(loop):
+				myfile.undo()
+		except FileClosedError:
+			pass
+		except:
+			raise
+
+	return undo
+
+def threadtest():
+	if "testfile.txt" in listfiles():
+	    removefile("testfile.txt")
+
+	myfile=openfile("testfile.txt",True)
+
+	str_1 = "111111111111111111111111111"
+
+	for i in range(4):
+		createthread(simpleundoer(myfile, 10000))
+		createthread(simplewriter(str_1, 0, myfile, 10000))
+
+	mycontext["_test_start"] = True
+
+	sleep(7)
+
+	myfile.close()
+
+threadtest()

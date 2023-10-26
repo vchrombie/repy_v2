@@ -1,0 +1,29 @@
+# A7: Call an API after closing the file
+# EXPECTATION: FileClosedError should be raised if writeat, undo or readat are invoked after closing the file.
+
+# If the testfile exists in the directory, remove it
+if "testfile.txt" in listfiles():
+    removefile("testfile.txt")
+
+# Create a new testfile
+myfile=openfile("testfile.txt",True)
+
+# Close the file
+myfile.close()
+
+# Now, try to call an API on the file as though it was never closed. The expecation is that a FileClosedError must be raised.
+# This is the normal behaviour. If no error is raised or if something else is raised, then it is incorrect.
+try:
+    # Write to the file
+    myfile.writeat("hi", 0)
+except FileClosedError:
+    # Appropriate error is raised so simply pass
+    pass
+except Exception as e:
+    # Wrong exception is raised. A general Exception() with a message such as "File is closed" is also regarded as incorrect.
+    # This is because the default behaviour of Repy when writeat is called after closing a file is FileClosedError, not Exception("File is closed").
+    # Similarly, there was also another Reference Monitor with ValueError("cannot write to a closed file"), and for the same reason, this is deemed incorrect too.
+    log("Attack 7 - ERROR | The fileClosedError must have been raised when the API is called after closing the file\n\n")
+else:
+    # No exception is raised
+    log("Attack 7 - ERROR | The fileClosedError must have been raised when the API is called after closing the file. No error was raised!\n\n")

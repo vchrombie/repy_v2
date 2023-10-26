@@ -1,0 +1,36 @@
+## ATTACK CASE 3: Tests whether the changes made by a multiple writeat() operation become permanent 
+#only after a subsequent valid writeat() operation
+
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+    removefile("testfile.txt")
+
+# Create a file
+myfile = openfile("testfile.txt", True)  
+
+# intial write to the file
+myfile.writeat("123456",0)
+myfile.writeat("12345678",0)
+myfile.writeat("Hi!",0)
+#close file
+myfile.close()
+
+#now reopen the file(since we closed the file, "Hi! should be a permanant change")
+myfile = openfile("testfile.txt", True)
+
+try:
+    #check if "Hi!" is permanent on the file
+    assert("Hi!" == myfile.readat(3,0))
+
+except Exception:
+    #it should not throw an error if ref monitor correct, if it does than:
+    log("ATTACKED - 3 | file did not save last writeat() after calling .close() \n")
+finally:
+    
+    myfile.close()
+    exitall()
+
+#close file
+
+
+

@@ -1,0 +1,113 @@
+TYPE = "type"
+ARGS = "args"
+RETURN = "return"
+EXCP = "exceptions"
+TARGET = "target"
+FUNC = "func"
+OBJC = "objc"
+
+def is_valid_filename(filename):
+    """
+    Check if the filename starts with a lowercase alphanumeric string and ends with 'txt'.
+    """
+    components = filename.split('.')
+    if len(components) == 2:
+        prefix, extension = components
+        return prefix.isalnum() and prefix.islower() and extension == 'txt'
+    return False
+
+class LPFile():
+    def __init__(self, filename, create):
+        if not is_valid_filename(filename):
+            raise ValueError("Invalid filename. Filename must start with a lowercase alphanumeric string and end with 'txt'.")
+        self._validate_file_path(filename)
+        self.Afn = filename + '.a'
+        self.Bfn = filename + '.b'
+        self.temp_file = filename
+
+        # make the files and add 'SE' to the readat file...
+        self.Afile = openfile(self.Afn, create)
+        self.Bfile = openfile(self.Bfn, create)
+
+        if create:
+            self.Afile.writeat('SE', 0)
+            self.Bfile.writeat('SE', 0)
+
+        self.temp_file = openfile(self.temp_file, create)
+        self.closed = False
+        self.pending_data = None
+        self.pending_offset = None
+        self.is_closed = False
+        self.Afile.filelock = createlock()
+        self.Bfile.filelock = createlock()
+
+    def _validate_file_path(self, filename):
+        # Basic file path validation and sanitization
+        for char in r'\/:*?"<>|':
+            if char in filename:
+                raise Exception("Invalid characters in file path")
+
+    def readat(self, bytes, offset):
+        self._check_file_state()
+        self.Afile.filelock.acquire(True)
+        data = self.Afile.readat(bytes, offset)
+        self.Afile.filelock.release()
+        return data
+
+    def writeat(self, data, offset):
+        self._check_file_state()
+        self.Afile.filelock.acquire(True)
+        current_data = self.Afile.readat(len(data), offset)
+        self.pending_data = current_data
+        self.pending_offset = offset
+        self.Afile.writeat(data, offset)
+        self.Afile.filelock.release()
+
+
+    def undo(self):
+        self._check_file_state()
+        self.Afile.filelock.acquire(True)
+        if self.pending_data is not None and self.pending_offset is not None:
+            self.Afile.writeat(self.pending_data, self.pending_offset)
+            self.pending_data = None
+            self.pending_offset = None
+        self.Afile.filelock.release()
+
+
+    def close(self):
+        self._check_file_state()
+        if not self.is_closed:  # Check if the file is not already closed
+            self.Afile.close()
+            self.Bfile.close()
+            self.closed = True
+            self.is_closed = True
+
+    def _check_file_state(self):
+        if self.closed:
+            raise Exception("File is closed")
+
+def LPopenfile(filename, create):
+  return LPFile(filename,create)
+
+
+sec_file_def = {
+    "obj-type": LPFile,
+    "name": "LPFile",
+    "writeat": {"type": "func", "args": (str, (int, long)), "exceptions": Exception, "return": (int, type(None)), "target": LPFile.writeat},
+    "readat": {"type": "func", "args": ((int, long, type(None)), (int, long)), "exceptions": Exception, "return": str, "target": LPFile.readat},
+    "undo": {"type": FUNC, "args": None, "exceptions": None, "return": None, "target": LPFile.undo},
+    "close": {"type": "func", "args": None, "exceptions": Exception, "return": (bool, type(None)), "target": LPFile.close}
+}
+
+CHILD_CONTEXT_DEF["openfile"] = {
+    TYPE: OBJC,
+    ARGS: (str, bool),
+    EXCP: Exception,
+    RETURN: sec_file_def,
+    TARGET: LPopenfile
+}
+
+secure_dispatch_module()
+
+
+

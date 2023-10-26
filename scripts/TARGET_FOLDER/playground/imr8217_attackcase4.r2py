@@ -1,0 +1,30 @@
+# Tests thousands of writes
+
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# create a file
+myfile=openfile("testfile.txt",True)
+
+# intial write to the file
+myfile.writeat("12345678",0)
+
+current_location = 0
+
+expected_result = []
+
+for i in range(10001):
+  myfile.writeat(str(i) + ' ', current_location)
+  expected_result.append(str(i) + ' ')
+  current_location += len(str(i)) + 1
+
+expected_result.pop()
+
+expected_result = ''.join(expected_result)
+
+# Content should be the same as expected_result
+assert(expected_result == myfile.readat(len(expected_result) + 1000,0))
+
+# close the file
+myfile.close()

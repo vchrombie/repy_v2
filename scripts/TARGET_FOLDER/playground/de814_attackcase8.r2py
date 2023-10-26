@@ -1,0 +1,18 @@
+#iffy
+
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+    removefile("testfile.txt")
+  
+# Just testing different sequences of the repy file handling methods
+myfile = openfile("testfile.txt", True)
+myfile.close()
+
+myfile.undo()
+
+myfile = openfile("testfile.txt", True)
+
+
+assert("" == myfile.readat(None, 0))
+
+myfile.close()

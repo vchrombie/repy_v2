@@ -1,0 +1,26 @@
+## ATTACK CASE 4: Tests the file is empty when there is no subsequent valid writeat operation is executed or the file is not closed().
+
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+    removefile("testfile.txt")
+
+# Create a file
+myfile = openfile("testfile.txt", True)  
+
+# intial write to the file
+myfile.writeat("Hi!",0)
+
+try:
+    #check if "Hi!" is permanent on the file (it should throw an error)
+    assert("Hi!" == myfile.readat(3,0))
+
+except RepyArgumentError:
+    pass
+
+else:
+    #it should throw an error if ref monitor is correct, if it does not than:
+    log("ATTACKED - 4 | file should not have made changes permanent w/ no subsequent write() or file was not closed\n")
+finally:
+    exitall()
+#close file
+myfile.close()

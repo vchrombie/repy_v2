@@ -1,0 +1,19 @@
+#Open existing file
+
+# Clean up of existing file
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# Open File 
+myfile=openfile("testfile.txt",True)
+
+#Close the file
+myfile.close()
+
+try:
+  myfile=openfile("testfile.txt",False)
+except:
+  log("Bug Detected: Not Allowing to open existing file! \n")
+
+#Close the file
+myfile.close()

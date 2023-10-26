@@ -1,0 +1,33 @@
+# # case 3: read after multiple writes should have updated data except the last write
+
+def close_after(t):
+  def sleep_for():
+    # Terminated the program after sleeping t sec
+    sleep(t)
+    log("ATTACK 3 | Unsuccessful Operation as Program Triggered Race Condition / Infinite Loop\n")
+    exitall()
+  return sleep_for
+terminate_program = close_after(10)
+createthread(terminate_program)
+
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+myfile=openfile("testfile.txt", True)
+try:
+  myfile.writeat("12345678",0)
+  myfile.writeat("Hi!",0)
+  myfile.writeat("Bye!",7)
+  assert("Hi!45678" == myfile.readat(None, 0))
+  myfile.writeat("ok",4)
+  assert("Hi!4567Bye!" == myfile.readat(None, 0))
+
+  # close the file
+  myfile.close()
+
+except:
+    log("ATTACK 3 | ERROR | Last write should not be in file!\n")
+
+finally:
+    #Exit operation
+    exitall()

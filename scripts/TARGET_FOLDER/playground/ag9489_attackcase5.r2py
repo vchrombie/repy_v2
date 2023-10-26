@@ -1,0 +1,34 @@
+def beforeEach():
+  # clean up if the file exists.
+  if "testfile.txt" in listfiles():
+    removefile("testfile.txt")
+
+def terminate(t):
+  def sleep_for():
+    # after sleeping t sec, terminate the attack
+    sleep(t)
+    raise RuntimeError("reference monitor took more than 5 seconds => a bug was detected!")
+  return sleep_for
+
+createthread(terminate(10))
+
+#Accuracy Testing
+def fileReopenAndUndo():
+  #setup
+  beforeEach()
+  myfile = openfile("testfile.txt", True)
+  myfile.writeat("first", 0)
+  myfile.close()
+
+  #file reopen, undo should not have any effect.
+  myfile = openfile("testfile.txt", False)
+  myfile.undo()
+  try:
+    assert "first" == myfile.readat(5, 0),"fileReopenAndUndo not working properly."
+  except:
+    log("ERROR ATTACK | fileReopenAndUndo is not working properly.\n")
+  myfile.close()
+
+fileReopenAndUndo()
+
+exitall()

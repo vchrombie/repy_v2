@@ -1,0 +1,20 @@
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# create a file
+myfile=openfile("testfile.txt",True)
+
+myfile.writeat("123456",0)
+myfile.writeat("Hi!",5)
+myfile.writeat("Hello", 0)
+
+myfile.undo()
+myfile.undo()
+
+assert("12345Hi!" == myfile.readat(8,0))
+
+myfile.close()
+
+
+# changes should be permanent after another writeat, 2 undos should not work

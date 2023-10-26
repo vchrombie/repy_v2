@@ -1,0 +1,11 @@
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+    removefile("testfile.txt")
+  
+# create a file
+myfile=openfile("testfile.txt",True)
+
+myfile.writeat("somethingGibberishToBewritten in the file", 0)
+myfile.writeat("hello", 4)
+myfile.writeat("sampletext", 0)
+assert("somehell" == myfile.readat(8, 0))

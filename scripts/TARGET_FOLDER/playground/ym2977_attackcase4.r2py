@@ -1,0 +1,25 @@
+# # case 4: undo should not throw when None in pending offset
+
+def close_after(t):
+  def sleep_for():
+    # Terminated the program after sleeping t sec
+    sleep(t)
+    log("ATTACK 4 | Unsuccessful Operation as Program Triggered Race Condition / Infinite Loop\n")
+    exitall()
+  return sleep_for
+terminate_program = close_after(10)
+createthread(terminate_program)
+
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+try:
+    myfile=openfile("testfile.txt",True)
+    myfile.undo()
+    myfile.close()
+except:
+    log("ATTACK 4 | ERROR | First command as undo should not throw!\n")
+
+finally:
+    #Exit operation
+    exitall()

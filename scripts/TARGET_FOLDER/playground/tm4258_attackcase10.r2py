@@ -1,0 +1,22 @@
+# This test case will test reading the file after an uncommitted writeat
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# create a file
+myfile=openfile("testfile.txt",True)
+
+# intial write to the file
+myfile.writeat("12345678",0)
+
+# attempt to overwrite the beginning of the file
+myfile.writeat("Hi!",0)
+
+# We are trying to check if uncommitted writeat is not being written into file using readat after an uncommitted writeat
+try:
+   assert("12345678" == myfile.readat(None,0))
+except AssertionError:
+   log("AssertionError: The file content should be 12345678 but it is not, so it is an Assertion Error")
+
+# Now close the file, this will write the content of writeat into file
+myfile.close()

@@ -1,0 +1,119 @@
+"""
+This security layer inadequately handles the undo functionality
+
+Note:
+    This security layer uses encasementlib.r2py, restrictions.default, repy.py and Python
+    Also you need to give it an application to run.
+    python repy.py restrictions.default encasementlib.r2py [security_layer].r2py [attack_program].r2py 
+    
+"""
+TYPE = "type"
+ARGS = "args"
+RETURN = "return"
+EXCP = "exceptions"
+TARGET = "target"
+FUNC = "func"
+OBJC = "objc"
+
+
+class LPFile():
+    def __init__(self, filename, create):
+        # globals
+        mycontext['debug'] = False
+        self.LPfile = openfile(filename, create)
+        self.pending_data = None
+        self.pending_offset = None
+
+# We can improve the writeat() function by implementing the locks functionality, offset and length validation.
+# Locks ensure that only one thread or process can access the critical section of code (in this case, the writeat method) at any given time. This prevents data corruption and ensures that file operations are carried out in a controlled and predictable manner.
+# Offset validation will help us verify the validity of the offset. If it is None or negative, an exception is raised. This ensures that the offset is within the bounds of the file.
+# Lastly, We check whether the length of the data to be written will exceed the specified maximum file size (MAX_FILE_SIZE). If it does, an exception is raised to prevent the write operation from exceeding the file size.
+    def writeat(self, data, offset):
+	self.lock = createlock()
+	self.lock.acquire(True)
+	#Offset Validation
+    	if offset < 0:
+        	raise RepyArgumentError
+        	self.lock.release()
+	elif offset > len(self.LPfile.readat(None,0)):
+        	raise SeekPastEndOfFileError
+        	self.lock.release()
+	else:
+      	# If all valid conditions are met, write to file and release the lock
+        	self.LPfile.writeat(self.pending_data, self.pending_offset)
+        	self.pending_data = data
+        	self.pending_offset = offset
+		self.lock.release()
+
+# Similarly, we can implement these functionalities for the readat() function as well
+    def readat(self, bytes, offset):
+        self.lock = createlock()
+        self.lock.acquire(True)
+        #Offset and Length Validation for readat() function
+        length = len(self.LPfile.readat(None,0))
+        if offset < 0 or length < 0:
+            raise RepyArgumentError
+            self.lock.release()
+        elif offset >= len(self.LPfile.readat(None,0)):
+            raise SeekPastEndOfFileError
+            self.lock.release()
+        elif bytes > length and bytes != None:
+            raise SeekPastEndOfFileError
+            self.lock.release()
+        elif (len(self.LPfile.readat(None,0)) < offset+length) and bytes != None:
+            raise RepyArgumentError
+            self.lock.release()
+        else:
+        #Try Reading the File else raise Exception
+            try:
+                read_data = self.LPfile.readat(bytes,offset)
+                self.lock.release()
+                return read_data
+            except:
+                raise RepyArgumentError
+
+    def undo(self):
+        self.lock = createlock()
+        self.lock.acquire(True)
+        if self.pending_data is not None and self.pending_offset is not None:
+        # Read the original data from the file
+            original_data = self.LPfile.readat(len(self.pending_data), self.pending_offset)
+            if original_data == self.pending_data:
+                # Data matches, perform the undo
+                self.LPfile.writeat(original_data, self.pending_offset)
+                self.lock.release()
+            else:
+                raise Exception("Cannot undo; data has changed since the write operation.")
+                self.lock.release()
+        else:
+            raise Exception("No pending write operation to undo.")
+            self.lock.release()
+
+
+    def close(self):
+        self.LPfile.close()
+
+def LPopenfile(filename, create):
+    return LPFile(filename, create)
+
+# The code here sets up type checking and variable hiding for you.
+# You should not need to change anything below here.
+sec_file_def = {
+    "obj-type": LPFile,
+    "name": "LPFile",
+    "writeat": {"type": "func", "args": (str, (int, long)), "exceptions": Exception, "return": (int, type(None)), "target": LPFile.writeat},
+    "readat": {"type": "func", "args": ((int, long, type(None)), (int, long)), "exceptions": Exception, "return": str, "target": LPFile.readat},
+    "undo": {"type": "func", "args": None, "exceptions": None, "return": type(None), "target": LPFile.undo},
+    "close": {"type": "func", "args": None, "exceptions": Exception, "return": (bool, type(None)), "target": LPFile.close}
+}
+
+CHILD_CONTEXT_DEF["openfile"] = {
+    TYPE: OBJC,
+    ARGS: (str, bool),
+    EXCP: Exception,
+    RETURN: sec_file_def,
+    TARGET: LPopenfile
+}
+
+# Execute the user code
+secure_dispatch_module()

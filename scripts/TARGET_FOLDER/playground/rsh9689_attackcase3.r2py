@@ -1,0 +1,12 @@
+#Checking for creation of a new file when create is set to False
+# clean up if the file exists
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+try:
+    myfile = openfile("test.txt", False)
+# should be raised when file is not found and create is False
+except FileNotFoundError:
+    pass
+else:
+    log("Error! File exists when it should not.\n")

@@ -1,0 +1,27 @@
+# This test case will test reading after the EOF
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# create a file
+myfile=openfile("testfile.txt",True)
+
+# intial write to the file
+myfile.writeat("12345678",0)
+
+# We are commiting whatever we are trying to write into the file
+myfile.close()
+
+# We are reopening the file to read from it
+myfile=openfile("testfile.txt",True)
+
+# We are trying to read from offset that is greater than the end of file, so we are expecting a SeekPastEndOfFileError
+try:
+   myfile.readat(9,0)
+except SeekPastEndOfFileError:
+   pass
+else:
+   log("ERROR: It should throw a SeekPastEndOfFileError, but it doesnt throw that here\n")
+
+# close the file
+myfile.close()

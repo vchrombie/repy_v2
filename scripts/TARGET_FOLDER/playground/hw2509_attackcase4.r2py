@@ -1,0 +1,19 @@
+if "testfile4.txt" in listfiles():
+  removefile("testfile4.txt")
+
+myfile=openfile("testfile4.txt",True)
+
+# writing after file close
+
+myfile.writeat("HELLO",0)
+
+myfile.undo()
+
+myfile.close()
+
+try:
+  myfile.writeat("HELLO",5)
+except FileClosedError:
+  pass
+
+assert("" == myfile.readat(0,0))

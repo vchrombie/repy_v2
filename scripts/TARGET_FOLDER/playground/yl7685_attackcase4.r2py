@@ -1,0 +1,15 @@
+# This is the Attack Case 4
+
+#First, clean up the existing file
+while "testfile.txt" in listfiles():
+    removefile("testfile.txt")
+
+#Now, open the file
+try:
+    myfile = LPopenfile("testfile.txt", True)
+except:
+    pass
+
+#TestCase 4: trying to write at invalid offset
+myfile.writeat("Hello, this is a test.", 1000)
+myfile.close()

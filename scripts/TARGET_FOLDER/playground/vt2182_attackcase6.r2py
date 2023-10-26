@@ -1,0 +1,21 @@
+# attack case 6: writeat() with negative offset should raise RepyArgumentError
+
+if "testfile.txt" in listfiles():
+    removefile("testfile.txt")
+
+myfile = openfile("testfile.txt", True)
+
+try:
+    # valid writeat
+    myfile.writeat("12345678", 0)
+
+    # invalid writeat (negative offset)
+    myfile.writeat("Hi!", -1)
+except RepyArgumentError:
+    pass
+else:
+    log("Failed: writeat() with negative offset should raise RepyArgumentError", '\n')
+finally:
+    exitall()
+
+myfile.close()

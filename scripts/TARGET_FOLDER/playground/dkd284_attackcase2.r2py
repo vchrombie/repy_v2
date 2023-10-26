@@ -1,0 +1,50 @@
+#DKD284 Second attack case
+#Targeting read after uncommitted writeat from the TA's annoucement of how things should react. Actual annoucement:
+#readat after uncommitted writeat
+# If you perform a readat operation from a position, where there was a writeat which has not been committed (i.e., it's still pending due to the enhanced write behavior), the read operation should not reflect the changes of that uncommitted writeat.
+# In other words, until the writeat operation is committed (either by a subsequent writeat or the closing of the file), the changes are not visible during reads.
+# When I say "commit", here I meant, actual writing to the file.
+
+
+
+# clean up if the file exists. - copied from example given, seems like good practive
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# create a file - copied from example given, seems like good practive
+myfile=openfile("testfile.txt",True)
+
+
+
+#---------------------------------------
+#This attack script is running test
+#log("STARTING")
+
+# intial write to the file
+myfile.writeat("digital shark attack", 0) 
+myfile.writeat("DIGITAL", 0)  # this should be an uncommitted write
+
+# reading to see if its unchanged or not
+content = myfile.readat(None, 0)  # read content of the file
+
+# Check the content and append the string "- unchanged" if needed.
+if content == "digital shark attack":
+    myfile.writeat(" - unchanged", len(content))
+
+# Find the position to append the next string.
+position_to_write = len(myfile.readat(None, 0))
+myfile.writeat(" - SHARK ATTACK ENDS", position_to_write)
+
+result = myfile.readat(None, 0)  # read the final text
+
+if result == "digital shark attack - unchanged - SHARK ATTACK ENDS":
+    log("Attack successful! Logic based on uncommitted writes failed!")
+#else:  #Comment out before submitting, just here to test if this attack file could run
+#    log("attack failed!")
+
+
+#---------------------------------------
+# close the file 
+myfile.close()
+
+

@@ -1,0 +1,77 @@
+"""
+Author: Tom Zhang, tyz212
+
+Description
+    - Run multiple writes in parallel, all with offset=0 and data='Hello world'.
+Objective
+    - Cause the reference monitor to commit bad data to the file. The read should output 'Hello world' after all code is executed, but the attack attempts to create a different output.
+Errors
+    - AssertionError
+Notes
+    - A logs from this attack will contain an [ATTACK_1 SUCCESS] identifier. Any log without this identifier was not produced by this attack.
+"""
+
+CREATE = True
+FILENAME = "test.txt"
+DONE = 65535
+THREAD_NAME = "write"
+WRITE_DATA = "Hello world"
+WRITE_OFFSET = 0
+TIMEOUT = 10
+
+
+def log_success(message):
+    log("[ATTACK_1 SUCCESS] %s\n" % message)
+
+
+def write_wrapper(thread_name, func, arg1, arg2):
+    def call_rw():
+        try:
+            func(arg1, arg2)
+            mycontext[thread_name] = DONE
+        except Exception:
+            pass
+
+    return call_rw
+
+
+def main():
+    try:
+        if FILENAME in listfiles():
+            removefile(FILENAME)
+        test_file = openfile(FILENAME, CREATE)
+        
+        start_time = getruntime()
+        thread_names = []
+        for i in range(10):
+            tname = THREAD_NAME + "%d" % i
+            # Always write to beginning of file
+            createthread(write_wrapper(tname, test_file.writeat, WRITE_DATA, WRITE_OFFSET))
+            thread_names.append(tname)
+        
+        # Wait for threads to finish
+        is_timed_out = False
+        for tname in thread_names:
+            if is_timed_out:
+                break
+
+            # Thread writes should not exceed 10 seconds
+            while tname not in mycontext:
+                if getruntime() - start_time > TIMEOUT:
+                    is_timed_out = True
+                    break
+
+        actual = test_file.readat(None, 0)
+        assert(WRITE_DATA == actual)
+
+        test_file.close()
+
+    except AssertionError as err:
+        log_success("AssertionError -> Read should return '%s' but instead got '%s'" % (WRITE_DATA, actual))
+    except Exception:
+        pass
+
+
+if callfunc == "initialize":
+    main()
+

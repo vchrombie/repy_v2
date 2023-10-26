@@ -1,0 +1,34 @@
+# verify if locks are implemented properly or not
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# New File Operation
+myfile=openfile("testfile.txt", True)
+
+def threadone():
+  #WRITE Operation
+  try:
+    assert (myfile.readat(4,0)=="1234")
+  except:
+    log("Error in thread handling\n")
+
+def threadtwo():
+  #WRITE Operation
+  myfile.writeat("5678",0)
+  myfile.undo()
+  myfile.writeat("1234",0)
+  myfile.writeat("abcd",0)
+
+
+
+createthread(threadtwo)
+createthread(threadone)
+
+sleep(2)
+myfile.close()
+myfile=openfile("testfile.txt", True)
+try:
+    assert (myfile.readat(4,0)=="abcd")
+except:
+    log("Error when doing thread handling \n")
+myfile.close()

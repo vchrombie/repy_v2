@@ -1,0 +1,31 @@
+if "testfile.txt" in listfiles():
+    removefile("testfile.txt")
+  
+  
+myfile = openfile("testfile.txt", True)
+
+#myfile.writeat("Goodbye", 0)
+
+try:
+    
+    # Here we're trying to see if any of the reference monitors will accept a leading 0 as an offset.
+    # My impression is that a reference monitor that behaves correctly should go to the except clause
+    # and nothing should happen. However, some reference monitors accept the try clause.
+    myfile.writeat("GOODBYE", 0)
+    # I am not sure the line below is valid, but a lot of reference monitors seem to be accepting it.
+    myfile.writeat('Hello', 01)
+    #log(myfile.readat(None, 0))
+except Exception as e:
+    
+    # I would like the reference monitors to enter this 
+    myfile.writeat("goodbye", 0)
+    myfile.writeat("Wonderbread", 0)
+    #assert("Wonderbread" == myfile.readat(None, 0))
+    #pass
+finally:
+    
+    # A lot of reference monitors seem to be accepting myfile.writeat('Hello', 01) as a valid writeat(), which is not good
+    # But this line seems to be breaking everything it writes to
+    assert("GOODBYE" == myfile.readat(None, 0))
+    myfile.close()
+    

@@ -1,0 +1,17 @@
+# Attack case for Repy API exceptions for Readat.
+
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# create a file
+myfile=openfile("testfile.txt",True)
+
+try:
+  myfile.readat(-1,5)
+except RepyArgumentError:
+  pass
+except Exception:
+  log("Unexpected Exception Raised!\n")
+else:
+  log("Should throw RepyArgumentError since negative size is passed!\n")

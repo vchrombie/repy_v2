@@ -1,0 +1,36 @@
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# create a file
+myfile=openfile("testfile.txt",True)
+
+# intial write to the file
+myfile.writeat("12345678",0)
+
+myfile.writeat("Hi",8)
+
+# close the file
+myfile.close()
+
+# open a file
+myfile=openfile("testfile.txt",False)
+
+# intial write to the file
+myfile.writeat("Hello Brother",0)
+
+myfile.writeat("How are you",0)
+
+# close the file
+myfile.close()
+
+# create a file
+myfile=openfile("testfile.txt",False)
+
+#assert("How are youer" == myfile.readat(None,0))
+
+# close the file
+myfile.close()
+
+# check for correct behavior on Open -> Write -> Close -> Open -> Write -> Close
+

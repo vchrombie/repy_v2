@@ -1,0 +1,126 @@
+"""
+This security layer handles the undo functionality for file operations.
+
+Note:
+    This security layer uses encasementlib.r2py, restrictions.default, repy.py, and Python.
+    Also, you need to give it an application to run.
+    python repy.py restrictions.default encasementlib.r2py [security_layer].r2py [attack_program].r2py 
+
+
+
+Requirements:
+
+# Build a Reference Monitor
+## Goal
+Better understand security mechanisms Task: Write a reference monitor for the Seattle VM (version2.0)
+
+## Building a reference monitor
+- Write reference monitor for Seattle
+- Use security layers functionality
+    - see the security layer example on the web page
+- Rules
+    - lmplement 'undo' operation after a valid "writeat'
+    - Be accurate: Only modify what is required.
+    - Be efficient: Use minimum number of resources
+    - Be secure: Make sure that an attacker cannot circumvent this!
+- DO NOT log" anything in your code!!!
+
+## Specifications:
+- Changes using the 'writeat' becomes permanent after a valid 'writeat' orafter the file is closed.
+- The 'undo' operation will reverse the prior valid writeat' operation
+
+
+## Rubrics
+- +20 turning in a file in the correct format
+- +20 file obeys assignment directions with respect toefficiency
+- +60 determined by number of students whose attack codebypasses your security layer
+"""
+
+TYPE = "type"
+ARGS = "args"
+RETURN = "return"
+EXCP = "exceptions"
+TARGET = "target"
+FUNC = "func"
+OBJC = "objc"
+
+class LPFile():
+    def __init__(self, filename, create):
+        self.LPfile = openfile(filename, create)
+        self.file_size = len(self.LPfile.readat(None, 0))
+        self.pending_data = None
+        self.pending_offset = None
+        self.last_written_data = None
+        self.last_written_offset = None
+        self.can_undo = False  # To track if undo can be performed
+
+    def readat(self, bytes, offset):
+        return self.LPfile.readat(bytes, offset)
+
+    def writeat(self, data, offset):
+        if offset < 0:
+            raise Exception("Invalid offset value. Offset cannot be negative.")
+        # First, flush any previous pending write
+        self.flush_pending_write()
+
+        # Save the previous written data before overwriting
+        self.last_written_data = self.pending_data
+        self.last_written_offset = self.pending_offset
+
+        # Set the pending data and offset without actually writing yet
+        self.pending_data = data
+        self.pending_offset = offset
+        self.can_undo = True
+
+    def flush_pending_write(self):
+        # Flush the pending write if there is any
+        if self.pending_data is not None:
+            padding_needed = self.pending_offset - self.file_size
+            if padding_needed > 0:
+                self.LPfile.writeat('\0' * padding_needed, self.file_size)
+                self.file_size += padding_needed
+
+            self.LPfile.writeat(self.pending_data, self.pending_offset)
+            self.file_size = max(self.file_size, self.pending_offset + len(self.pending_data))
+
+            # Clear the pending data after writing
+            self.pending_data = None
+            self.pending_offset = None
+
+    def close(self):
+        # Flush any pending write before closing
+        self.flush_pending_write()
+        self.LPfile.close()
+        self.can_undo = False
+
+    def undo(self):
+        # Only undo if there is a previous written data
+        if self.can_undo:
+            # Revert to the previous written data and offset
+            self.pending_data = self.last_written_data
+            self.pending_offset = self.last_written_offset
+            self.can_undo = False
+
+def LPopenfile(filename, create):
+    return LPFile(filename, create)
+
+# Define the security layer's API
+sec_file_def = {
+    "obj-type": LPFile,
+    "name": "LPFile",
+    "writeat": {"type": "func", "args": (str, (int, long)), "exceptions": Exception, "return": (int, type(None)), "target": LPFile.writeat},
+    "readat": {"type": "func", "args": ((int, long, type(None)), (int, long)), "exceptions": Exception, "return": str, "target": LPFile.readat},
+    "undo": {"type": "func", "args": None, "exceptions": None, "return": type(None), "target": LPFile.undo},
+    "close": {"type": "func", "args": None, "exceptions": Exception, "return": (bool, type(None)), "target": LPFile.close}
+}
+
+CHILD_CONTEXT_DEF["openfile"] = {
+    TYPE: OBJC,
+    ARGS: (str, bool),
+    EXCP: Exception,
+    RETURN: sec_file_def,
+    TARGET: LPopenfile
+}
+
+# Execute the user code
+secure_dispatch_module()

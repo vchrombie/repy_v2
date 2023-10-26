@@ -1,0 +1,23 @@
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# create a file
+myfile=openfile("testfile.txt",True)
+
+# intial write to the file
+myfile.writeat("Hello ",0)
+
+
+try:
+  myfile.writeat("I am ds7615",10)
+  myfile.close()
+  
+except SeekPastEndOfFileError:
+  pass
+else:
+  log("ATTACK - 16| file write is happening with offset more than EOF \n")
+finally:
+  exitall()
+
+

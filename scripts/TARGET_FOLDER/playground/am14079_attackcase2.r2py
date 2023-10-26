@@ -1,0 +1,17 @@
+# Attack case for Writeat and Writeat on close.
+
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# create a file
+myfile=openfile("testfile.txt",True)
+
+myfile.writeat("Hello",0)
+myfile.writeat("Bye",0)
+assert("Hello" == myfile.readat(5,0))
+myfile.close()
+myfile=openfile("testfile.txt",True)
+fileText = myfile.readat(5,0)
+assert("Byelo" == fileText)
+myfile.close()

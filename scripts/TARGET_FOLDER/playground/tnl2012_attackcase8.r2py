@@ -1,0 +1,31 @@
+
+
+### Test 8: Testing writeat when closed
+
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+
+try:
+  # create a file
+    myfile=openfile("testfile.txt",True)
+    myfile.writeat("abc", 0)
+    myfile.close();    
+
+    myfile=openfile("testfile.txt", False)
+    output = myfile.readat(None, 0)
+    if(output != "abc"):
+        raise Exception("Writat close incorrect")
+    myfile.close()
+    
+
+except Exception as e:
+    log("Exception found: ")
+    log(e + "\n")
+
+
+
+
+
+

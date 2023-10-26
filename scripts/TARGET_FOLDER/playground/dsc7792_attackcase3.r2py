@@ -1,0 +1,15 @@
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+myfile=openfile("testfile.txt",True)
+
+myfile.writeat("12345678",0)
+
+# Trying invalid input & should give error
+myfile.writeat("Hi!",-1)
+
+# If it doesn't give error, it is NOT secure
+myfile.undo() 
+
+# close the file
+myfile.close()

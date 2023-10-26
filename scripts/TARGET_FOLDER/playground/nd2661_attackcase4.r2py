@@ -1,0 +1,11 @@
+#to check if non existent file opens or not
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+try:
+    myfile=openfile("testfile.txt",False) 
+    #Above should fail and raise an exception in normal cases
+except FileNotFoundError:
+    pass
+    #log("SUCCESSFUL DEFENSE")
+else:
+    log("ACCURACY_BUG: Non-existent File opened\n")   
