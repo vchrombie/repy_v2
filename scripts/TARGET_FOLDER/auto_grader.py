@@ -45,11 +45,15 @@ path_AttackFolder = os.path.join(rootdir, sys.argv[2])
 path_TempFolder = os.path.join(rootdir, sys.argv[3])
 
 # Path to the folder where we will move attacks that cause timeouts
-path_HaltFolder = os.path.join(rootdir, "halt")
+path_TimeoutFolder = os.path.join(rootdir, "timeout")
 
-# Move the attack file to a "halt" directory
-if not os.path.exists(path_HaltFolder):
-    os.mkdir(path_HaltFolder)
+# Make sure the timeout folder exists
+if not os.path.exists(path_TimeoutFolder):
+    os.mkdir(path_TimeoutFolder)
+
+path_LogFile = os.path.join(path_TimeoutFolder, sys.argv[2].split('_')[-1] + "_timeout_log.txt")
+
+print "Log file: " + path_LogFile
 
 
 #part of filename to look for
@@ -112,7 +116,7 @@ def did_this_attack_succeed(attackFilename, defenseFilename):
     False otherwise
     '''
 
-    timeout=2
+    timeout=10
 
     os.mkdir(path_TempFolder)  # make a temp folder
     os.chdir(path_TempFolder)  # cd to temp folder at this point
@@ -138,8 +142,14 @@ def did_this_attack_succeed(attackFilename, defenseFilename):
             # wait for it to stop...
             pobj.wait()
 
-            # copy the attack file to a "halt" directory
-            shutil.copy(os.path.join(path_TempFolder, attackFilename), os.path.join(path_HaltFolder, attackFilename))
+            # # copy the attack file to a "halt" directory
+            # shutil.copy(os.path.join(path_TempFolder, attackFilename), os.path.join(path_HaltFolder, attackFilename))
+
+            # log the timeout event
+            with open(os.path.join(path_LogFile), 'a') as log_file:
+                log_msg = attackFilename + " timed out against " + defenseFilename + "\n"
+                log_file.write(log_msg)
+
 
             stdout = "timeout"
             stderr = "timeout"
