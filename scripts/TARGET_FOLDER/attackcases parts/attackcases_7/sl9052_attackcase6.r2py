@@ -1,0 +1,15 @@
+# Attempt to perform undo on a closed file
+
+if "testfile.txt" in listfiles():
+    removefile("testfile.txt")
+
+# create a file
+file = openfile("testfile.txt", True)
+file.writeat("Hello, World!", 0)
+file.close()
+file.undo() # should fail
+
+file = openfile("testfile.txt", True)
+data = file.readat(13, 0);
+file.close()
+assert("Hello, World!" == data)

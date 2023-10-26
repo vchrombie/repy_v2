@@ -1,0 +1,51 @@
+if "undotest.txt" in listfiles():
+  removefile("undotest.txt")
+# Create a new file.
+undofile = openfile("undotest.txt", True)
+
+# Write some initial data to the file.
+undofile.writeat("securedata", 0)
+
+# Write a series of updates to the file.
+undofile.writeat("attempt1", 0)  # This data should be pending, not committed.
+
+# Perform an undo operation.
+undofile.undo()  # This should undo "attempt1", no changes should be committed.
+
+# Try reading; it should reflect the initial write.
+data = undofile.readat(10, 0)
+assert(data == "securedata"), f"Unexpected data after first undo: {data}"
+
+# Write another piece of data.
+undofile.writeat("attempt2", 0)  # This should still be pending.
+
+# Perform two undo operations in a row.
+undofile.undo()  # This should undo "attempt2".
+undofile.undo()  # This should NOT undo "securedata" as it's the initial committed write, but we're testing robustness here.
+
+# Attempt a read, it should still reflect "securedata".
+data = undofile.readat(10, 0)
+assert(data == "securedata"), f"Data inconsistency after multiple undos: {data}"
+
+# Now we commit a new write.
+undofile.writeat("finalwrite", 0)  # This commits "securedata".
+
+# Perform a read; it should reflect "securedata" because "finalwrite" is not yet committed.
+data = undofile.readat(10, 0)
+assert(data == "securedata"), f"Uncommitted write visible: {data}"
+
+# Close the file, which should commit "finalwrite".
+undofile.close()
+
+# Reopen the file to check the final state.
+undofile = openfile("undotest.txt", False)
+
+# The final read should now show "finalwrite" as it's been committed on close.
+data = undofile.readat(10, 0)
+assert(data == "finalwrite"), f"Incorrect final data: {data}"
+
+# Clean up the environment after the test.
+undofile.close()
+removefile("undotest.txt")
+
+print("Exploit attempt unsuccessful: Security layer handles multiple undos correctly.")

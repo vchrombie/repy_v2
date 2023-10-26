@@ -1,0 +1,15 @@
+# A4: Call undo on an unmodified file
+# EXPECTATION: Calling undo() without writing anything or on an empty file should not raise ay errors. 
+
+# If the testfile exists, remove it from the directory
+if "testfile.txt" in listfiles():
+    removefile("testfile.txt")
+
+# Open a testfile
+myfile = openfile("testfile.txt", True)
+
+# Call undo on the empty file. Expectation is, nothing should happen:
+myfile.undo()  # Nothing to undo
+
+# Close the file
+myfile.close()

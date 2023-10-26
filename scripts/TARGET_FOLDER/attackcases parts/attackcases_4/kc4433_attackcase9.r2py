@@ -1,0 +1,15 @@
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# create a file
+myfile=openfile("testfile.txt",True)
+myfile.readat(5,100)
+# Attempt to read from past EOF, which should raise an exception
+try:
+	myfile.readat(5,100)
+	myfile.close()
+	log("Error in Attack Case 9")
+except SeekPastEndofFileError:
+	pass
+

@@ -1,0 +1,20 @@
+
+if "testfile.txt" in listfiles():
+    removefile("testfile.txt")
+
+
+myfile = openfile("testfile.txt", True)
+myfile.writeat("12345678", 0)
+
+try:
+    myfile.writeat("Hello world!", 0)
+    myfile.undo()
+    file_contents = myfile.readat(8, 0)
+    if file_contents == "12345678":
+        pass
+    else:
+        log("Basic undo functionality failed")
+    myfile.close()
+
+except Exception as e:
+    log("Error: " + str(e))

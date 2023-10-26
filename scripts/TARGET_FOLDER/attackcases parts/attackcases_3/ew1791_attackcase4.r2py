@@ -1,0 +1,16 @@
+# Clean up of existing file
+if "testfile.txt.a" in listfiles():
+    removefile("testfile.txt.a")
+if "testfile.txt.b" in listfiles():
+    removefile("testfile.txt.b")
+
+# open File Function Call
+myfile = openfile("testfile.txt",True)
+myfile.close()
+
+try:
+    # Close the file
+    myfile = openfile(testfile.txt, True)
+    myfile.close()
+except:
+    log("empty file failure")

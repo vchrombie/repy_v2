@@ -1,0 +1,18 @@
+# verify valid undo operation
+
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# create a file
+myfile=openfile("testfile.txt",True)
+
+try:
+  myfile.writeat("1234",0)
+  myfile.writeat("Test", 0)
+  myfile.undo()
+  assert("1234" == myfile.readat(4,0))
+except:
+  log("Bug found: Undo operation not performed right\n")
+finally:
+   myfile.close()

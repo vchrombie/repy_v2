@@ -1,0 +1,21 @@
+#Tests to see if the file has things loaded into writeat will work correctly
+try:
+    if "testfile.txt" in listfiles():
+        removefile("testfile.txt")
+    myfile=openfile("testfile.txt",True)
+    myfile.writeat("0123456789",0)
+    myfile.close();
+    myfile=openfile("testfile.txt",True)
+    myfile.writeat("Hello",10)
+    if myfile.readat(None,0) != "0123456789" :
+        log("read at not correct 1\n")
+    
+    myfile.writeat("asdf",0)
+    if myfile.readat(None,0) != "0123456789Hello": 
+        log("read at not correct 2\n")
+except:
+    log("an exception occurred\n")
+myfile.undo()
+myfile.close() 
+
+

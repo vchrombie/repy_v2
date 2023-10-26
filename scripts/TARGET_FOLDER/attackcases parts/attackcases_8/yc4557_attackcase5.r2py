@@ -1,0 +1,45 @@
+if "timingfile.txt" in listfiles():
+  removefile("timingfile.txt")
+
+# Create a new file.
+timingfile = openfile("timingfile.txt", True)
+
+# Write initial secure data to the file.
+timingfile.writeat("initialdata", 0)
+
+# Perform a series of writes and reads, trying to exploit any timing issues.
+timingfile.writeat("timingtest1", 0)
+data = timingfile.readat(10, 0)  # Should not reflect the uncommitted write.
+assert(data == "initialdata"), f"Uncommitted write visible: {data}"
+
+timingfile.writeat("timingtest2", 0)  # This should commit "timingtest1".
+
+# Try to confuse the state by calling undo.
+timingfile.undo()  # This should only undo "timingtest2".
+
+# Check the data; should reflect "timingtest1" since it was committed.
+data = timingfile.readat(10, 0)
+assert(data == "timingtest1"), f"State confusion, incorrect data: {data}"
+
+# Write another set of data.
+timingfile.writeat("finalstage", 0)  # This commits "timingtest1".
+
+# Immediately try to read; this should still reflect "timingtest1" due to the uncommitted write.
+data = timingfile.readat(10, 0)
+assert(data == "timingtest1"), f"Committed write not visible: {data}"
+
+# Close the file to commit "finalstage".
+timingfile.close()
+
+# Reopen to check the final state of the file.
+timingfile = openfile("timingfile.txt", False)
+
+# The data should now be "finalstage" after the close operation.
+data = timingfile.readat(10, 0)
+assert(data == "finalstage"), f"Incorrect final data: {data}"
+
+# Clean up the environment after the checks.
+timingfile.close()
+removefile("timingfile.txt")
+
+print("Exploit attempt unsuccessful: Security layer is timing-safe.")

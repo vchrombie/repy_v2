@@ -1,0 +1,19 @@
+try:
+    # Clean up if the file exists.
+    if "testfile.txt" in listfiles():
+      removefile("testfile.txt")
+
+    # Create a file
+    myfile=openfile("testfile.txt",True)
+
+    # Write to the file at a negative offset
+    myfile.writeat("12345678", -1)
+
+    # Close the file
+    myfile.close()
+except RepyArgumentError:
+    pass
+except Exception as e:
+    log("Writing to a file at a negative offset should have thrown a RepyArgumentError but " + repr(e) + " was thrown")
+else:
+    log("Writing to a file at a negative offset should have thrown a RepyArgumentError but no error was thrown")

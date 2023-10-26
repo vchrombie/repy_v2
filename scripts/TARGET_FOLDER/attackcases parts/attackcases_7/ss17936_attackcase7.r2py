@@ -1,0 +1,33 @@
+# running multiple undo operations after writeat
+
+def close_after(t):
+  def sleep_for():
+    # after sleeping t sec, terminate the program
+    sleep(t)
+    log("Operation Unsuccessful as Program Triggered Race Condition / Infinite Loop\n")
+    exitall()
+  return sleep_for
+terminate_program = close_after(10)
+
+createthread(terminate_program)
+
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# create a file
+myfile=openfile("testfile.txt",True)
+
+myfile.writeat("1234",0)
+myfile.writeat("Test",0)
+
+try:
+  assert("1234" == myfile.readat(4,0))
+  myfile.undo()
+  myfile.undo()
+  assert("1234" == myfile.readat(4,0))
+except:
+  log("Bug found: Invalid undo operation performed\n")  
+finally:
+   exitall()
+   myfile.close()  

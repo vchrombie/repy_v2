@@ -1,0 +1,16 @@
+# verify readat without writeat being committed
+
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# create a file
+myfile=openfile("testfile.txt",True)
+
+myfile.writeat("1234",0)
+try:
+  assert("" == myfile.readat(4,0))
+except:
+  log("Bug found: Reading uncommitted write\n")  
+finally:
+  myfile.close()  

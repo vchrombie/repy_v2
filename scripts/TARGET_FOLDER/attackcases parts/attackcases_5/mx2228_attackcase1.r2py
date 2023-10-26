@@ -1,0 +1,23 @@
+# clean up if the file exists.
+if "attackfile1.txt" in listfiles():
+    removefile("attackfile1.txt")
+
+# create a file
+myfile1 = openfile("attackfile1.txt", True)
+
+# initial write to the file
+myfile1.writeat("original", 0)
+
+# attempt to overwrite the beginning of the file
+myfile1.writeat("overwrite", 0)
+
+# now, undo the previous write
+myfile1.undo()
+
+# check the contents
+if "original" != myfile1.readat(8,0):
+    log("Undo after overwrite failed!\n")
+
+# close the file
+myfile1.close()
+

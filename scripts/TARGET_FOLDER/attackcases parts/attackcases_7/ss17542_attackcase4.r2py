@@ -1,0 +1,41 @@
+ 
+def runf1():
+
+  # intial write to the file
+  myfile.writeat("12345678",0)  
+  myfile.writeat("Hi!",0)  
+  # now, undo the previous write
+  myfile.undo()
+
+def runf2():
+  myfile.writeat("hello",0)  
+  sleep(1)
+  myfile.writeat("hello",0)  
+  # now, undo the previous write
+  myfile.undo() 
+
+def runf3():
+
+  myfile.writeat("0123",0)  
+  myfile.writeat("0123",0)  
+  # now, undo the previous write
+  myfile.undo()
+  myfile.undo()
+  myfile.undo()
+
+
+
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+# create a file
+myfile=openfile("testfile.txt",True)
+
+createthread(runf1) 
+createthread(runf2)
+createthread(runf3)
+sleep(1)
+# the contents should still be "12345678" as the overwrite was undone
+if("0123o678" != myfile.readat(8,0)):
+  log("Bypassed!")
+
+myfile.close()

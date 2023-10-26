@@ -1,0 +1,29 @@
+# Test Case 1
+# Trying to write at an offset beyond the EOF
+
+'''
+Debugging Information: If this file provides an error, this is because you aren't keeping track of your file size and the max offset.
+You could create a method to update file size everytime an additional character is added to the file.
+'''
+
+
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# create a file
+myfile=openfile("testfile.txt",True)
+
+# initial write to the file
+try:
+  myfile.writeat("12345678",5)
+except Exception as e:
+  # do nothing if there is an exception
+  pass
+else:
+  # raise an AssertionError if no exception is caught
+  log("Test Failed: Expected an exception when writing past the end of file")
+
+# close the file
+myfile.close()
+

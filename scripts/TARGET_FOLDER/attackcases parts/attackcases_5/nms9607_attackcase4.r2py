@@ -1,0 +1,25 @@
+def run4():
+
+  try:
+    # clean up if the file exists.
+    if "testfile.txt" in listfiles():
+      removefile("testfile.txt")
+
+    # create a file
+    myfile=openfile("testfile.txt",True)
+
+    # intial write to the file
+    myfile.writeat("12345678",True)
+
+    # attempt to overwrite the beginning of the file
+    myfile.writeat("Hi!",0) 
+
+    myfile.close()
+  except RepyArgumentError:
+    pass
+  except:
+    raise Exception("(4): Raises an error, but not a proper RepyArgumentError error ")
+  else:
+    raise Exception("(4): Raises no error despite a negative offset")
+
+run4()

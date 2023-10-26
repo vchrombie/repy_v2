@@ -1,0 +1,18 @@
+# undo after close shouldn't do anything
+
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# create a file
+myfile=openfile("testfile.txt",True)
+myfile.writeat("12345678",0)
+myfile.writeat("Hi!",0) 
+myfile.undo()
+myfile.close()
+myfile.undo()
+
+# verify
+myfile=openfile("testfile.txt", False)
+assert(myfile.readat(None,0) == "12345678")
+myfile.close()

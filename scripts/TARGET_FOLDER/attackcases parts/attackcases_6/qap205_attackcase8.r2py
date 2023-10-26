@@ -1,0 +1,27 @@
+# clean up if the file exists.
+if "testfile8.txt" in listfiles():
+  removefile("testfile8.txt")
+
+# create a file
+myfile=openfile("testfile8.txt",True)
+
+# write to file
+myfile.writeat("offset", 0)
+
+# close file
+myfile.close()
+
+# reopen file
+myfile=openfile("testfile8.txt",False)
+
+# try to read invalid offset
+try:
+    myfile.readat(6, -1)
+except RepyArgumentError:
+    pass
+except ValueError:
+    pass
+else:
+    log("Error! Invalid offset is not handled correctly\n")
+
+myfile.close()

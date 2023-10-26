@@ -1,0 +1,61 @@
+def timeout_thread_func():
+  timeout_seconds = 10
+  sleep(timeout_seconds)
+  assert False, "Timed out after " + str(timeout_seconds) + " seconds"
+  exitall()
+
+createthread(timeout_thread_func)
+
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# create a file
+myfile = openfile("testfile.txt",True)
+
+apple_string = "An apple is green in color."
+
+assert(27 == len(apple_string)) # The string is 27 characters long
+
+try:
+  temp = myfile.writeat(apple_string, 1)
+except SeekPastEndOfFileError:
+  pass
+else:
+  assert False, "SeekPastEndOfFileError not raised on writing to an invalid offset"
+
+try:
+  temp = myfile.writeat(apple_string, -1)
+except RepyArgumentError:
+  pass
+else:
+  assert False, "RepyArgumentError not raised on trying to write to a negative offset"
+
+try:
+  temp = myfile.writeat(23, 0)
+except RepyArgumentError:
+  pass
+else:
+  assert False, "RepyArgumentError not raised on trying to write a non string data"
+
+# Assertion: write to an empty file at offset 0 should write the string (to buffer) and nothing else
+myfile.writeat(apple_string, 0)
+
+# Assertion: writeat() not committed yet, hence return an empty string
+assert("" == myfile.readat(None,0)) 
+
+# Assertion: This should commit the previous write
+myfile.writeat("red", 0)
+
+# Assertion: The string in buffer is written to file, hence it should be read in its entirety
+assert(apple_string == myfile.readat(None,0))
+
+
+myfile.close()
+
+# clean up the file afterwards.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+exitall()
+

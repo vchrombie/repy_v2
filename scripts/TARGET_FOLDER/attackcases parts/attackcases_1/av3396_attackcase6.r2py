@@ -1,0 +1,31 @@
+#Simultaneous write(race condition)
+if "testfile.txt.a" in listfiles():
+  removefile("testfile.txt.a")
+if "testfile.txt.b" in listfiles():
+  removefile("testfile.txt.b")
+if "test.txt" in listfiles():
+  removefile("test.txt")
+
+myfile = openfile("testfile.txt",True)
+
+
+def writeThread1():
+    myfile.writeat("adadada",0)
+    #no closing of file
+def writeThread2():
+    myfile.writeat("ccsccs",0)
+    #no closing of file
+
+createthread(writeThread1)
+createthread(writeThread2)
+
+myfile.close()
+
+myfile=openfile("testfile.txt", False)
+
+try:
+    assert(myfile.readat(None,0)=="ccsccs")
+except:
+    pass
+else:
+    log("ACCURACY_BUG:Simultaneous write allowed")

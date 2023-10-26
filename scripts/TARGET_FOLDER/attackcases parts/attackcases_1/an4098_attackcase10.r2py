@@ -1,0 +1,21 @@
+# Clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# Create a file
+myfile=openfile("testfile.txt",True)
+
+# Initial write to the file
+myfile.writeat("12345678",0)
+
+# Writing to a file 3 times at different offsets
+myfile.writeat("Hi", 0)
+myfile.writeat("Hi", 2)
+myfile.writeat("Hi", 4)
+
+# Close the file
+myfile.close()
+
+# Reopening file and verifying if the file content is HiHiHi78
+myfile=openfile("testfile.txt",False)
+assert("HiHiHi78" == myfile.readat(8,0))

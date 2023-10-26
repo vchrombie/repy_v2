@@ -1,0 +1,20 @@
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# create a file
+myfile=openfile("testfile.txt",True)
+
+# intial write to the file
+myfile.writeat("1234567890", 0)
+myfile.undo()
+
+try:
+  assert("1234567890" == myfile.readat(10,0))
+except(AssertionError):
+  pass
+else:
+  log("Failed, actually wrote to file!")
+
+# close the file
+myfile.close()

@@ -1,0 +1,16 @@
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+myfile=openfile("testfile.txt",True)
+myfile.writeat("First Write",0)
+
+myfile.close()
+try:
+  myfile.writeat("Second Write",0)
+except FileClosedError:
+  pass
+except RepyArgumentError:
+  log("Security test failed! Should throw a FileClosedError but throws RepyArgumentError\n")
+
+else:
+  log("Security test failed! Should throw a file closed error but doesnt\n")

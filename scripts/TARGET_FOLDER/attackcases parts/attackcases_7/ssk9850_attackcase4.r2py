@@ -1,0 +1,19 @@
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+try: 
+    myfile=openfile("testfile.txt",True)
+
+    myfile.writeat("12345678",0)
+
+    myfile.undo()
+
+    myfile.writeat("Hello", -1)
+
+    myfile.undo()
+except ReplyArgumentError:
+    pass
+else:
+    log("Missing ReplyArgumentError\n")
+finally:
+    myfile.close()

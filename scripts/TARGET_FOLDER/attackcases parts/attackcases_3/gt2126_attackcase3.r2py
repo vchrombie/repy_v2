@@ -1,0 +1,25 @@
+##
+# Write then close
+##
+
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# create a file
+myfile=openfile("testfile.txt",True)
+
+# intial write to the file
+myfile.writeat("12345678\n",0)
+
+# now, close the file
+myfile.close()
+
+# reopen the file
+myfile=openfile("testfile.txt",True)
+
+# the contents should be "12345678\n" as the pending data should have been written at file close
+assert("12345678\n" == myfile.readat(9,0))
+
+# close the file
+myfile.close()

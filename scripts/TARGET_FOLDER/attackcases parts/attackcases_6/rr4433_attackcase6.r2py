@@ -1,0 +1,49 @@
+def timeout_thread_func():
+  timeout_seconds = 10
+  sleep(timeout_seconds)
+  assert False, "Timed out after " + str(timeout_seconds) + " seconds"
+  exitall()
+
+createthread(timeout_thread_func)
+
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# create a file
+myfile = openfile("testfile.txt",True)
+
+myfile.close()
+
+# A closed file should raise FileClosedError exception if any operation is done on it
+
+try:
+  myfile.close()
+except FileClosedError:
+  pass
+else:
+  assert False, "FileClosedError not raised for close()"
+
+try:
+  myfile.readat(None,0)
+except FileClosedError:
+  pass
+else:
+  assert False, "FileClosedError not raised for readat()"
+
+myfile.undo() # Undo does nothing even if file is closed
+
+try:
+  myfile.writeat("Test",0)
+except FileClosedError:
+  pass
+else:
+  assert False, "FileClosedError not raised for writeat()"
+
+
+# clean up the file afterwards.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+exitall()
+

@@ -1,0 +1,24 @@
+# This test case will test writing after the EOF
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# create a file
+myfile=openfile("testfile.txt",True)
+
+# intial write to the file
+myfile.writeat("12345678",0)
+
+# attempting to write at an offset greater than the EOF
+try:
+  myfile.writeat("Hi!",10)
+except SeekPastEndOfFileError:
+  pass
+else:
+  log("ERROR: We are expecting a SeekPastEndOfFileError but it is not throwing that here\n")
+
+# We should not be getting the SeekPastEndOfFileError while closing but rather should be getting it when we are writing
+try:
+  myfile.close()
+except SeekPastEndOfFileError:
+  pass

@@ -1,0 +1,17 @@
+#Attack Case to check if an error is raised when reading from a closed file
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# create a file
+myfile=openfile("testfile.txt",True)
+# Close the file
+myfile.writeat("1234",0)
+myfile.writeat("1234",0)
+myfile.close()
+#Should raise an exception when reading from a closed file
+try:
+	myfile.readat(4,0)
+	log("Error in Attack Case 6")
+except FileClosedError:
+	pass

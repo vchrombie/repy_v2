@@ -1,0 +1,10 @@
+#test if read at works if there is something in the queue
+try:
+    if "testfile.txt" in listfiles():
+        removefile("testfile.txt")
+    myfile=openfile("testfile.txt",True)
+    myfile.writeat("0123456789",0)
+    if(myfile.readat(None,0) != ""):
+        log("read at incorrect\n")
+except:
+    log("An exception occurred\n")

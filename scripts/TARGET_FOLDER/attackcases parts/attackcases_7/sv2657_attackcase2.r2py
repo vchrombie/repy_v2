@@ -1,0 +1,10 @@
+# Attempt undo after file is closed.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# create a file
+myfile=openfile("testfile.txt",True)
+
+myfile.close()
+
+myfile.undo()

@@ -1,0 +1,12 @@
+# removing non existent file
+
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+ removefile("testfile.txt")
+
+try:
+    removefile("testfile.txt")
+except FileNotFoundError:
+    pass
+else:
+    log("Error! Non existent file.\n")

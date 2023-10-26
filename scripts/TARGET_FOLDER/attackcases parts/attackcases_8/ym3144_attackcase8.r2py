@@ -1,0 +1,23 @@
+# Attack 8
+# Accuracy Check
+# ---------------------------
+# opening a new file
+# close the file
+# perform writeat
+# ---------------------------
+# Pass: FileClosedError exception thrown.
+# Fail: Any other Exception raised or no exception raised.
+
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+myfile=openfile("testfile.txt",True) 
+myfile.close()
+try:
+    myfile.writeat("abcd", 0)
+except FileClosedError:
+    pass
+except Exception as e:
+    log("LOG - FAILED - ATTACK 8\n")
+else:
+    log("LOG - FAILED - ATTACK 8\n")

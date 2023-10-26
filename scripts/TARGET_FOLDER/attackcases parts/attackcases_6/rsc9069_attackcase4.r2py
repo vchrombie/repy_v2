@@ -1,0 +1,27 @@
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+    removefile("testfile.txt")
+
+# create/open a file
+myfile = openfile("testfile.txt",True)
+
+#check consecutive writeat
+for i in range(10):
+    myfile.writeat(str(i),i)
+    assert(myfile.readat(None,0) == "".join([str(x) for x in range(i)])), "Expected '{}', got '{}'".format("".join([str(x) for x in range(i)]),myfile.readat(None,0))
+
+# undo writeat
+myfile.undo()
+
+# close file
+myfile.close()
+
+# Reopen file
+myfile = openfile("testfile.txt",True)
+
+# check content
+assert(myfile.readat(None,0) == "012345678"), "Expected '012345678', got '{}'".format(myfile.readat(None,0))
+
+
+#close file
+myfile.close()

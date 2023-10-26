@@ -1,0 +1,8 @@
+try:
+    if "testfile.txt" in listfiles():
+        removefile("testfile.txt")
+
+    myfile=openfile("testfile.txt",True)
+    myfile.close()
+except Exception:
+    log("Code raised exception\n")

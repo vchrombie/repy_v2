@@ -1,0 +1,54 @@
+def timeout_thread_func():
+  timeout_seconds = 10
+  sleep(timeout_seconds)
+  assert False, "Timed out after " + str(timeout_seconds) + " seconds"
+  exitall()
+
+createthread(timeout_thread_func)
+
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# create a file
+myfile = openfile("testfile.txt",True)
+
+apple_string = "An apple is green in color."
+assert(27 == len(apple_string))
+
+myfile.writeat(apple_string, 0)
+
+myfile.writeat("Blue", 12)
+
+# Assertion: This should write Blue at offset 0
+myfile.close()
+
+myfile = openfile("testfile.txt",False)
+
+# Assertion: The file now contains Blue at offset 12
+assert("An apple is Bluen in color." == myfile.readat(None,0))
+
+myfile.writeat("yellow",12)
+
+try:
+  # This shouldn't be written to buffer, nor should the buffer be flushed
+  myfile.writeat("Brown",28)
+except SeekPastEndOfFileError:
+  pass
+else:
+  assert False, "SeekPastEndOfFileError not raised on writing to an offset past EOF"
+
+assert("An apple is Bluen in color." == myfile.readat(None,0))
+
+myfile.writeat("",0) # Empty write to flush
+
+assert("An apple is yellowin color." == myfile.readat(None,0))
+
+myfile.close()
+
+# clean up the file afterwards.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+exitall()
+

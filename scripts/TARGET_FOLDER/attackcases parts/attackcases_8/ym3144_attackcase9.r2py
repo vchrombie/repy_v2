@@ -1,0 +1,41 @@
+# Attack 9
+# Accuracy Check
+# writing to multiple files
+# ---------------------------
+# opening a new file 1
+# opening a new file 2
+# performing writeat on file 1
+# performing writeat on file 2
+# performing undo on file 1
+# performing undo on file 2
+# close the file 1
+# close the file 2
+# reopen the files and assert if both are empty.
+# ---------------------------
+# Pass: No exception thrown.
+# Fail: Any Exception raised.
+
+if "testfile1.txt" in listfiles():
+  removefile("testfile1.txt")
+if "testfile2.txt" in listfiles():
+  removefile("testfile2.txt")
+
+myfile1=openfile("testfile1.txt",True)
+myfile2=openfile("testfile2.txt",True) 
+myfile1.writeat("12345678",0)
+myfile2.writeat("87654321",0) 
+myfile1.undo()
+myfile2.undo()
+myfile1.close()
+myfile2.close()
+myfile1=openfile("testfile1.txt",True)
+myfile2=openfile("testfile2.txt",True)
+
+try:  
+  assert('' == myfile1.readat(None,0))
+  assert('' == myfile2.readat(None,0))
+except Exception as e:
+    log("LOG - FAILED - ATTACK 9\n")
+else:
+    myfile1.close()
+    myfile2.close()

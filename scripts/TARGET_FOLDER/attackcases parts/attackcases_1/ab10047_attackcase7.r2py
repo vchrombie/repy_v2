@@ -1,0 +1,35 @@
+def close_after(t):
+  def sleep_for():
+    # after sleeping t sec, terminate the program
+    sleep(t)
+    log("Operation Unsuccessful as Program Triggered Race Condition / Infinite Loop\n")
+    exitall()
+  return sleep_for
+terminate_program = close_after(10)
+createthread(terminate_program)
+
+# New File Open Operation
+
+# Remove existing Files
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# Open File
+myfile=openfile("testfile.txt",True)  #Create an AB file
+
+# Write valid data to the file
+myfile.writeat("1234",0)
+myfile.writeat("1234",0)
+
+# Read data from the file
+try:
+  myfile.readat(-2,0)
+except RepyArgumentError:
+  pass
+else:
+  log("Allowed to read file with negative byte value!\n")
+finally:
+  exitall()
+
+#Close the file
+myfile.close()

@@ -1,0 +1,16 @@
+# Check if "testfile.txt" is in the list of files and remove it if present
+if "testfile.txt" in listfiles():
+    removefile("testfile.txt")
+
+# Open the file for writing
+myfile = openfile("testfile.txt", True)
+myfile.writeat("12345678", 0)
+
+try:
+    myfile.writeat("test", 0)
+    assert("test" == myfile.readat(8, 0))
+    log("Write at not working")
+except Exception:
+    pass
+finally:
+    myfile.close()

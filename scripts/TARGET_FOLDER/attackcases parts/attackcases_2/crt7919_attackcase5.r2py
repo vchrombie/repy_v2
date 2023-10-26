@@ -1,0 +1,7 @@
+def empty_file_handling_test():
+    f = openfile("testfile.txt", True)
+    f.writeat("", 0)
+    assert f.readat(None, 0) == "", "Empty file handling failed."
+    f.close()
+
+empty_file_handling_test()

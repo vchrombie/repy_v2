@@ -1,0 +1,29 @@
+#negative offset unhandled
+
+def close_after(t):
+  def sleep_for():
+    # after sleeping t sec, terminate the program
+    sleep(t)
+    log("Operation Unsuccessful as Program Triggered Race Condition / Infinite Loop\n")
+    exitall()
+  return sleep_for
+terminate_program = close_after(10)
+
+createthread(terminate_program)
+
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# Open File 
+myfile=openfile("testfile.txt",True) 
+
+# READ Operation
+try:
+  myfile.readat(2,-2)
+except RepyArgumentError:
+  pass
+else:
+  log("Bug Detected: Offset lesser than filesize!\n")
+finally:
+  exitall()
+  myfile.close()

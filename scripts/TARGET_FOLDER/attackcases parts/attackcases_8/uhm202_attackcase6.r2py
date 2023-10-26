@@ -1,0 +1,10 @@
+# checking writing at negative index
+
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# create a file
+myfile=openfile("testfile.txt",True)
+myfile.writeat("Hi", -10)
+myfile.close()

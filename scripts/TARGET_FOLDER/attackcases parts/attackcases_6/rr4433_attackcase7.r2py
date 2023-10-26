@@ -1,0 +1,55 @@
+def timeout_thread_func():
+  timeout_seconds = 10
+  sleep(timeout_seconds)
+  assert False, "Timed out after " + str(timeout_seconds) + " seconds"
+  exitall()
+
+createthread(timeout_thread_func)
+
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# create a file
+myfile = openfile("testfile.txt",True)
+
+
+apple_string = "An apple is green in color."
+assert(27 == len(apple_string))
+
+myfile.writeat(apple_string, 0)
+
+myfile.writeat("red", 12)
+
+myfile.writeat("blue", 12)
+
+myfile.undo()
+assert("An apple is reden in color." == myfile.readat(None,0))
+myfile.writeat("",0) # flush with empty write
+assert("An apple is reden in color." == myfile.readat(None,0)) # blue isn't written
+
+myfile.writeat("Blue", 0)
+myfile.undo()
+myfile.writeat("blue", 5)
+myfile.undo()
+myfile.writeat("Blue", 12)
+
+
+# Assertion: This close should flush the buffer to file
+myfile.close()
+
+# Assertion: Reopening the file after closing should be valid
+myfile = openfile("testfile.txt",False)
+
+# Assertion: Confirming that the buffer was flushed correctly
+assert("An apple is Bluen in color." == myfile.readat(None,0))
+assert("s B" == myfile.readat(3,10))
+
+myfile.close()
+
+# clean up the file afterwards.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+exitall()
+

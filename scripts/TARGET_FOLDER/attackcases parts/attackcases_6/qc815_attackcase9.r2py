@@ -1,0 +1,19 @@
+def errortest9():
+  if "testfile.txt" in listfiles():
+    removefile("testfile.txt")
+
+  # create a file
+  myfile=openfile("testfile.txt",True)
+
+  myfile.writeat("12345678", 0)
+
+  myfile.close()
+
+  try:
+    myfile.close()
+  except FileClosedError:
+    pass
+  else:
+    raise Exception("no error raised!")
+
+errortest9()

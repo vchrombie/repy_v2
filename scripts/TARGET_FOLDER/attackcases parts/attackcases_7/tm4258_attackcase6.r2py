@@ -1,0 +1,20 @@
+# This test case will test if the file is being saved or not after closing
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# create a file
+myfile=openfile("testfile.txt",True)
+
+# intial write to the file
+myfile.writeat("12345678",0)
+
+# Now close the file, this will write the content of writeat into file
+myfile.close()
+
+# Checking if the file that we wrote into is getting saved and is present or not
+try:
+   if "testfile.txt" in listfiles():
+      pass
+except:
+   log("ERROR: The written file is not being saved\n")

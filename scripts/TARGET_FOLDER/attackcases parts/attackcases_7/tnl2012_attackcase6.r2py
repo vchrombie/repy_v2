@@ -1,0 +1,17 @@
+
+### Test 6: Exception ordering
+
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+
+try:
+  # create a file
+    myfile=openfile("testfile.txt",True)
+    myfile.close();
+    myfile.writeat("abc", -1)
+except Exception as e:
+   if not isinstance(e, RepyArgumentError):
+     log("Wrong Exception! API states that RepyArgument error has higher precedence than FileClosedError")
+

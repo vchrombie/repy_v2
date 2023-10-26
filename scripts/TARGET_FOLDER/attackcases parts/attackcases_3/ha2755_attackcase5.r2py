@@ -1,0 +1,30 @@
+# ATTACKCASE5: TEST WHETHER THE FILE WRITES WHEN IT IS OPENED IN READ-ONLY MODE
+
+# Create a file
+if "testfile.txt" in listfiles():
+    removefile("testfile.txt")
+
+myfile = openfile("testfile.txt", True)
+
+# Initial write to the file
+myfile.writeat("12345678", 0)
+
+myfile.close()
+
+myfile = openfile("testfile.txt", False)
+
+
+try:
+    myfile.writeat("Hello",0)
+    log("Attackcase5 SUCCESS : WRITE OPERATION IS PERFORMING IN READ-ONLY MODE \n")
+# It raised an Exception (as it was supposed to):
+except Exception:
+    pass
+except RepyArgumentError:
+    pass
+
+
+finally:
+    # Close the file after our attempt.
+    myfile.close()
+

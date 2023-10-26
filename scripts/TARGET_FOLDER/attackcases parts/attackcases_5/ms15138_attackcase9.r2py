@@ -1,0 +1,2 @@
+# There is nothing in this attack to check if there are any inherrent errors or unexpected behaviours in the security layers.
+# If any output is produced because of this "attack", then there is a mistake in the reference monitor.

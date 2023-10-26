@@ -1,0 +1,19 @@
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+    removefile("testfile.txt")
+  
+# create a file
+myfile=openfile("testfile.txt",True)
+
+myfile.writeat("somethingGibberishToBewritten in the file", 0)
+# size of file should be updated now
+myfile.undo() # size of file reverted back to 0
+try:
+    myfile.writeat("hi!", 10)
+except SeekPastEndOfFileError as e:
+    pass
+else:
+    log("SeekPastEndOfFileError should have been raised")
+
+# close the file
+myfile.close()

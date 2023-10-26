@@ -1,0 +1,12 @@
+# clean up if the file exists.
+if "testfile.txt" in listfiles():
+  removefile("testfile.txt")
+
+# create a file
+myfile=openfile("testfile.txt",True)
+myfile.writeat("1234567",0)
+myfile.close()
+myfile.undo()
+
+# close the file
+myfile.close()

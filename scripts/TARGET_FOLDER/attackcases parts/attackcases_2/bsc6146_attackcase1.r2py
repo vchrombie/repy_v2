@@ -1,0 +1,9 @@
+# Simple empty attack case
+# Some files output just when run
+
+# Never raise unexpected errors or produce any output.
+# Confirm if unexpected output from the programs we are testing
+# against is allowed since there may be bugs and unexpected behaviour.
+
+# Create a directory that the security layers will write their files into.
+# Is it ok to just write files into the current directory?

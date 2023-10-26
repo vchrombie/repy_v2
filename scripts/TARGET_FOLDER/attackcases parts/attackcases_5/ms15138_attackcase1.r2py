@@ -1,0 +1,20 @@
+#### A1: Check if the file is opened, written and closed without any errors:
+# If the testfile exists in the directory, remove it
+if "testfile.txt" in listfiles():
+    removefile("testfile.txt")
+
+# Try to write to the file after opening it
+try:
+    # Open the file
+    myfile=openfile("testfile.txt",True)
+
+    # Write to the file at the 0th index
+    myfile.writeat("12345678",0)
+except Exception as e:
+    # There is an error with the security layer. Caught an error when trying to open and write. 
+    log("Attack 1 - ERROR | Unable to Open and write data!\n\n")
+finally:
+    exitall()
+
+# Close the file
+myfile.close()

@@ -1,0 +1,11 @@
+# attackcase4
+# remove file when it is closed
+
+if "testfile.txt" in listfiles():
+	removefile("testfile.txt")
+
+aFile = openfile("testfile.txt", True)
+
+aFile.close()
+
+removefile("testfile.txt")

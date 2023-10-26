@@ -1,0 +1,29 @@
+#### A5: If negative offset is given, the expectation is RepyArgumentError. Anything else is incorrect, i.e, no error or ValueError, etc.
+# EXPECTATION: Negative offsets are invalid so a RepyArgumentError must be raised. The message passed using the error can be anything. It does not necessarily have to be "Min value is 0."
+# It is my assumption that only the error matters, not the message used to explain the reason for the error.
+
+# If the testfile exists in the directory, remove it
+if "testfile.txt" in listfiles():
+    removefile("testfile.txt")
+
+# Create a new testfile
+myfile=openfile("testfile.txt",True)
+
+# Try to write at a negative offset
+try:
+    # Pass negative value to the offset
+    myfile.writeat("Hello World",-1)
+except RepyArgumentError:
+    # If RepyArgumentError is caught, the security layer is behaving as expected.
+    pass
+except Exception as e:
+    # Any other kinds of exceptions are invalid
+    log("Attack 5 - ERROR | Writing to negative offset must raise a RepyArgumentError. Not a different exception.\n\n")
+else:
+    # If no exception is raised, it is incorrect too. Should've raised RepyArgumentError
+    log("Attack 5 - ERROR | Writing to negative offset must raise a RepyArgumentError.\n\n")
+finally:
+    exitall()
+
+# Close the file
+myfile.close()
