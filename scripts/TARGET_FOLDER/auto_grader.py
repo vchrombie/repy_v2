@@ -51,9 +51,18 @@ path_TimeoutFolder = os.path.join(rootdir, "timeout")
 if not os.path.exists(path_TimeoutFolder):
     os.mkdir(path_TimeoutFolder)
 
-path_LogFile = os.path.join(path_TimeoutFolder, sys.argv[2].split('_')[-1] + "_timeout_log.txt")
+if '_' in sys.argv[2]:
+  path_LogFile = os.path.join(path_TimeoutFolder, sys.argv[2].split('_')[-1] + "_timeout_log.txt")
+elif "/" in sys.argv[2]:
+  path_LogFile = os.path.join(path_TimeoutFolder, sys.argv[2].split('/')[-1] + "_timeout.log")
+else:
+  path_LogFile = os.path.join(path_TimeoutFolder, "timeout.log")
 
 print "Log file: " + path_LogFile
+
+TIMEOUT = 10
+
+print 'TIMEOUT is set to', TIMEOUT, 'seconds'
 
 
 #part of filename to look for
@@ -116,7 +125,7 @@ def did_this_attack_succeed(attackFilename, defenseFilename):
     False otherwise
     '''
 
-    timeout=10
+    timeout=TIMEOUT
 
     os.mkdir(path_TempFolder)  # make a temp folder
     os.chdir(path_TempFolder)  # cd to temp folder at this point
@@ -203,6 +212,9 @@ def main():
 
     studentIDlist = get_student_ID(attack_fnlist)
     print 'number of students in the course', len(studentIDlist)
+
+    print '------------------'
+    print '------------------'
 
     header_attackmatrix=attack_fnlist
     header_attackmatrix.insert(0,'All attack files-->')
