@@ -24,6 +24,7 @@ class LPFile():
         self.pending_data = None
         self.pending_offset = None
         self.length = len(self.LPfile.readat(None, 0))
+        self.is_closed = False
         self._write_lock = createlock()
 
     def readat(self, bytes, offset):
@@ -34,6 +35,11 @@ class LPFile():
         self._write_lock.acquire(True)
 
         try:
+            # If the file is closed, raise an exception.
+            if self.is_closed:
+                raise FileClosedError(
+                    'File is already closed!')
+
             # RepyArgumentError is raised if the offset is negative.
             if offset < 0:
                 raise RepyArgumentError("Min value is 0.")
@@ -79,6 +85,7 @@ class LPFile():
                     self.length, self.pending_offset + len(self.pending_data)
                 )
 
+            self.is_closed = True
             self.LPfile.close()
 
         finally:
