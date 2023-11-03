@@ -1,0 +1,169 @@
+TYPE = "type"
+ARGS = "args"
+RETURN = "return"
+EXCP = "exceptions"
+TARGET = "target"
+FUNC = "func"
+OBJC = "objc"
+class LPFile():
+    def __init__(self, filename, create):
+        self.has_opened=False
+        mycontext['debug'] = False
+        #create=False
+        self.lock = createlock() # create a lock object to acheive synchronization
+        self.close_lock = createlock() # lock object for file closing
+        self.should_close = False # flag to indicate if file should be closed
+
+        #RepyArgumentError is raised if create is not a boolean type.
+        if not isinstance(create, bool):
+            raise RepyArgumentError("Argument number 2 to function 'openfile' is of the wrong type! Must be of type:<type 'bool'>") 
+        if not filename:
+            raise RepyArgumentError("Illegal filename provided!")
+        if filename[0]=='.' and not len(filename)==1  and not (filename[0:2]==".." and len(filename)==2):
+            raise RepyArgumentError("Filename starts with a period, this is not allowed!")
+        if (filename=='.' and len(filename)==1) or (filename=='..' and len(filename)==2):
+            raise RepyArgumentError("Illegal filename provided!")
+        for char in filename:
+            #file name can not contain  upper case characters
+            if char.isupper():
+                raise RepyArgumentError("Filename has disallowed character '"+char+"'")
+        for char in filename:
+            #file name can not contain  upper case characters
+            if not char in "abcdefghijklmnopqrstuvwxyz0123456789.-_'":
+                raise RepyArgumentError("Filename has disallowed character '"+char+"'")
+        try:
+            # Attempt to open the file handle exceptions specified in repy API
+            self.LPfile = openfile(filename, create)
+            self.has_opened=True #if the file was successfully opened
+        except FileInUseError as e:
+            raise FileInUseError(e)
+        except ResourceExhaustedError as e:
+            raise ResourceExhaustedError("No available file handles", e)
+        except FileNotFoundError as e:
+            if create==False: # if the file isn't found and create is false, meanoing it wont get created
+                raise FileNotFoundError("File not found & create is False", e)
+
+
+        self.filename=filename #create a global variable called file name to print in error messages
+        self.LPfile.closed=False #if we manage to open the file the closed flag is false
+        self.pending_data = None #currently no pending data
+        self.pending_offset = None #currently no ofset given
+        self.current_data = self.LPfile.readat(None, 0)
+
+        files_that_exist=listfiles()
+        if filename in files_that_exist:
+            self.has_opened=True
+            self.file_size = len(self.current_data)
+        else:
+            # The file doesn't exist, so set file_size to 0 if it's a new creation
+            self.file_size = 0
+
+
+    def readat(self, bytes, offset):
+        self.lock.acquire(True) # acquire the lock before reading
+        try:
+            return self.LPfile.readat(bytes, offset)
+        finally:
+            self.lock.release() # release the lock after reading
+    def writeat(self, data, offset):
+        self.lock.acquire(True) # acquire the lock before writing
+        try:
+            #RepyArgumentError is raised if the offset is negative or data is not a string
+            if offset < 0:
+                raise RepyArgumentError("Min value is 0.")
+            if not isinstance(data, str):
+                raise RepyArgumentError("Argument number 1 to function 'LPFile.writeat' is of the wrong type! Must be of type:<type 'str'>")
+
+            #calculating the size of the file
+            if self.pending_data is not None:
+                self.file_size = max(self.file_size, self.pending_offset + len(self.pending_data))
+
+            #FileClosedError is raised if file is already closed
+            if self.LPfile.closed: # Check if the file is already closed
+                raise FileClosedError("File '" + self.filename + "' is already closed!")
+
+            #SeekPastEndOfFileError is raised if trying to write past the EOF.
+            #if offset>=len(self.LPfile.readat(None,0)) and not offset==0:
+            if offset>=self.file_size+1 and  not offset==0:
+                raise Exception("Seek offset extends past the EOF!")
+                #raise RepyArgumentError("Min value is 0. !!")
+
+            if self.pending_data !=None:
+                self.LPfile.writeat(self.pending_data, self.pending_offset) #new data is added to the appropriate offset; file now contains current daa+new data
+                #log("writing " +self.pending_data + "\n")
+            self.pending_data = data
+            self.pending_offset = offset
+        finally:
+            self.lock.release() # release the lock after writing
+    
+    def undo(self):
+        self.lock.acquire(True) # acquire the lock before undoing
+        try:
+            if not self.LPfile.closed:
+            # Perform undo operation only if the file is open
+                self.pending_data = None
+                self.pending_offset = None
+            #unfortunately not allowed to raise exceptions in undo if the file is already closed
+            #if self.LPfile.closed: # Check if the file is already closed
+                #raise FileClosedError("File '" + self.filename + "' is already closed!")
+        finally:
+            self.lock.release() # release the lock after undoing
+    def close(self):
+        self.close_lock.acquire(True)
+        try:
+            if not self.LPfile.closed:
+                if self.pending_data is not None:
+                    self.LPfile.writeat(self.pending_data, self.pending_offset)
+                self.pending_data = None
+                self.pending_offset = None
+                self.should_close = True
+                if not self.should_close:
+                  return True
+                else:
+                  # check if other thread has finished writing to the file
+                  while not self.should_close:
+                      sleep(0.1)
+                self.LPfile.closed = True
+                self.LPfile.close()
+                return True
+            else:
+                raise FileClosedError("File '" + self.filename + "' is already closed!")
+                return False
+        finally:
+            self.close_lock.release()
+    '''
+    def clear_state(self):
+        if not self.LPfile.closed:
+            self.close()  # Close the file if it's open
+        removefile(self.filename)  # Delete the file
+        # Re-initialize the LPFile object's state
+        self.LPfile = openfile(self.filename, False)
+        self.pending_data = None
+        self.pending_offset = None
+        self.current_data = self.LPfile.readat(None, 0)
+        self.file_size = 0
+    ''' 
+
+def LPopenfile(filename, create):
+    return LPFile(filename, create)
+# The code here sets up type checking and variable hiding for you.
+# You should not need to change anything below here.
+sec_file_def = {
+    "obj-type": LPFile,
+    "name": "LPFile",
+    "writeat": {"type": "func", "args": (str, (int, long)), "exceptions": Exception, "return": (int, type(None)), "target": LPFile.writeat},
+    "readat": {"type": "func", "args": ((int, long, type(None)), (int, long)), "exceptions": Exception, "return": str, "target": LPFile.readat},
+    "undo": {"type": "func", "args": None, "exceptions": None, "return": type(None), "target": LPFile.undo},
+    "close": {"type": "func", "args": None, "exceptions": Exception, "return": (bool, type(None)), "target": LPFile.close}
+}
+
+CHILD_CONTEXT_DEF["openfile"] = {
+    TYPE: OBJC,
+    ARGS: (str, bool),
+    EXCP: Exception,
+    RETURN: sec_file_def,
+    TARGET: LPopenfile
+}
+
+# Execute the user code
+secure_dispatch_module()

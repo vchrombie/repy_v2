@@ -1,0 +1,80 @@
+TYPE = "type"
+ARGS = "args"
+RETURN = "return"
+EXCP = "exceptions"
+TARGET = "target"
+FUNC = "func"
+OBJC = "objc"
+
+
+class LPFile():
+    def _init_(self, filename, create):
+        mycontext['debug'] = False
+        self.LPfile = openfile(filename, create)
+        self.pending_data = None
+        self.pending_offset = None
+        self.file_closed = False
+        self.file_name = filename
+
+    def readat(self, bytes, offset):
+        if file_closed:
+            return self.LPfile.readat(bytes, offset)
+
+
+    def writeat(self, data, offset):
+
+        if(self.file_closed) or (offset < 0):
+            return
+
+        if(self.pending_data != None):
+            if(offset > self.pending_offset + len(self.pending_data)):
+                self.LPfile.writeat("", offset)
+        else:
+            self.LPfile.writeat("", offset)
+
+        if(self.pending_data != None):
+            self.LPfile.writeat(self.pending_data, self.pending_offset)
+
+        self.pending_data = data
+        self.pending_offset = offset
+
+    def undo(self):
+        if(self.file_closed):
+            return
+
+        self.pending_data = None
+        self.pending_offset = None
+
+    def close(self):
+        if(self.pending_data != None):
+            self.LPfile.writeat(self.pending_data, self.pending_offset)
+            self.pending_data = None
+            self.pending_offset = None
+
+        self.LPfile.close()
+        self.file_closed = True
+
+def LPopenfile(filename, create):
+    return LPFile(filename, create)
+
+# The code here sets up type checking and variable hiding for you.
+# You should not need to change anything below here.
+sec_file_def = {
+    "obj-type": LPFile,
+    "name": "LPFile",
+    "writeat": {"type": "func", "args": (str, (int, long)), "exceptions": Exception, "return": (int, type(None)), "target": LPFile.writeat},
+    "readat": {"type": "func", "args": ((int, long, type(None)), (int, long)), "exceptions": Exception, "return": str, "target": LPFile.readat},
+    "undo": {"type": "func", "args": None, "exceptions": None, "return": type(None), "target": LPFile.undo},
+    "close": {"type": "func", "args": None, "exceptions": Exception, "return": (bool, type(None)), "target": LPFile.close}
+}
+
+CHILD_CONTEXT_DEF["openfile"] = {
+    TYPE: OBJC,
+    ARGS: (str, bool),
+    EXCP: Exception,
+    RETURN: sec_file_def,
+    TARGET: LPopenfile
+}
+
+# Execute the user code
+secure_dispatch_module()

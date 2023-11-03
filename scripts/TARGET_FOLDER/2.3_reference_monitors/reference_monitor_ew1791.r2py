@@ -1,0 +1,105 @@
+"""
+Emma Wilkins - ew1791
+Assignment 2 part 3 -- correction of previous reference monitor 
+Computer Security CSUY 3923  
+"""
+TYPE = "type"
+ARGS = "args"
+RETURN = "return"
+EXCP = "exceptions"
+TARGET = "target"
+FUNC = "func"
+OBJC = "objc"
+
+# define two files to keep track of current and last valid state
+class LPFile():
+    def __init__(self, filename, create):
+        # globals
+        mycontext['debug'] = False
+        self.LPfile = open(filename, create)
+        self.filename = filename
+        # bool to check if file is open 
+        self.closed = False
+        # initalize data queue
+        self.pending_data = None
+        self.pending_offset = None
+        # track end of file
+        self.pending_end = len(self.LPfile.readat(None, 0));
+        # set old end to current end 
+        self.old_end = self.pending_end
+
+    
+    def readat(self, bytes, offset):
+        # Read from the file using the sandbox's readat...
+        return self.LPfile.readat(bytes, offset)
+
+    # write operations should not imediatley change the file 
+    # store previous value
+    # only commit if another write operation happens or if file is closed
+    def writeat(self, data, offset):
+        # if there is pending data, write it to the file
+        # this is inorder to inialize the next writeat operation
+        if self.pending_data is not None: 
+            self.LPfile.writeat(self.pending_data, self.pending_offset)
+        
+        # error handling from common attack cases : file closed, offset negative, write past the files end
+        # if file is closed, raise error
+        if (self.closed):
+            raise RepyArgumentError("File is closed")
+        # offset is negative
+        if(offset < 0): 
+            raise RepyArgumentError("Offset must be greater than or equal to 0")
+        # write past the files end
+        if(offset > self.pending_end): 
+            raise RepyArgumentError("Offset must be less than or equal to the files end")
+
+        # no errors occured -- update pending data to new data 
+        self.pending_data = data
+        self.pending_offset = offset 
+        self.old_end = self.pending_end
+        self.pending_end = offset + len(data)
+
+    # can undo the last writeat operation - only the most recent operation
+    # if no operations undo will do nothing
+    #  revert to last valid write at 
+    def undo(self):
+        # reset all pending data
+        self.pending_data = None
+        self.pending_offset = None
+        self.pending_end = self.old_end
+
+    def commit_write(self): 
+        self.LPfile.writeat(self.pending_data, self.pending_offset); 
+
+    def close(self):
+        # completes writeat if there is pending data 
+        # if pending data exists, not == none
+        if self.pending_data is not None: 
+            self.commit_write(self)
+        self.LPfile.close()
+        self.closed = True
+
+def LPopenfile(filename, create):
+    return LPFile(filename, create)
+
+# The code here sets up type checking and variable hiding for you.
+# You should not need to change anything below here.
+sec_file_def = {
+    "obj-type": LPFile,
+    "name": "LPFile",
+    "writeat": {"type": "func", "args": (str, (int, long)), "exceptions": Exception, "return": (int, type(None)), "target": LPFile.writeat},
+    "readat": {"type": "func", "args": ((int, long, type(None)), (int, long)), "exceptions": Exception, "return": str, "target": LPFile.readat},
+    "undo": {"type": "func", "args": None, "exceptions": None, "return": type(None), "target": LPFile.undo},
+    "close": {"type": "func", "args": None, "exceptions": Exception, "return": (bool, type(None)), "target": LPFile.close}
+}
+
+CHILD_CONTEXT_DEF["openfile"] = {
+    TYPE: OBJC,
+    ARGS: (str, bool),
+    EXCP: Exception,
+    RETURN: sec_file_def,
+    TARGET: LPopenfile
+}
+
+# Execute the user code
+secure_dispatch_module()

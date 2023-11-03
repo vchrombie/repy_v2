@@ -1,4 +1,0 @@
-# use negative offset
-myfile = openfile("testfile1.txt", True)
-myfile.writeat("something", -50)
-myfile1.close()

@@ -1,0 +1,140 @@
+"""
+This security layer inadequately handles the undo functionality
+
+Note:
+    This security layer uses encasementlib.r2py, restrictions.default, repy.py and Python
+    Also you need to give it an application to run.
+    python repy.py restrictions.default encasementlib.r2py [security_layer].r2py [attack_program].r2py 
+    
+"""
+TYPE = "type"
+ARGS = "args"
+RETURN = "return"
+EXCP = "exceptions"
+TARGET = "target"
+FUNC = "func"
+OBJC = "objc"
+
+class LPFile():
+    def __init__(self, filename, create):
+        # globals
+        mycontext['debug'] = False
+        try:
+            self.LPfile = openfile(filename, create)
+            self.is_closed = False  # Track whether the file is closed
+            self.lock = createlock()
+            self.buffer = self.LPfile.readat(None, 0)
+            self.length = len(self.buffer)
+            self.pending_data = None
+            self.pending_offset = None
+        except Exception as e:
+            self.is_closed = True
+            raise e
+
+    def readat(self, bytes, offset):
+        if not self.is_closed:
+            if self.buffer is None:
+                self.buffer = self.LPfile.readat(None, 0)
+                self.length = len(self.buffer)
+            if offset < 0:
+                raise RepyArgumentError("Argument bytes error")
+            # when bytes is None, read to EOF
+            if bytes is None:
+                return self.buffer[offset:]
+            if bytes < 0:
+                raise RepyArgumentError("Argument bytes error")
+            if offset <= self.length:
+                return self.buffer[offset : offset + bytes]
+            else:
+                raise SeekPastEndOfFileError("Offset out of bound error")
+        else:
+            raise FileClosedError("File closed")
+
+    def writeat(self, data, offset):
+        if not self.is_closed:
+            self.lock.acquire(True)
+            # Check offset
+            if offset < 0:
+                self.lock.release()
+                raise RepyArgumentError("Offset out of bound error")
+            if self.pending_data is not None:
+                if offset > max(self.length, self.pending_offset + len(self.pending_data)):
+                    self.lock.release()
+                    raise SeekPastEndOfFileError("Offset out of bound error")
+            else:
+                if offset > self.length:
+                    self.lock.release()
+                    raise SeekPastEndOfFileError("Offset out of bound error")
+            if self.pending_data is not None:
+                self.commit(self.pending_data, self.pending_offset)
+                self.pending_data = None
+                self.pending_offset = None
+            # Store the new data as pending data
+            self.pending_data = data
+            self.pending_offset = offset
+            self.lock.release()
+        else:
+            raise FileClosedError("File closed")
+
+    def undo(self):
+        self.lock.acquire(True)
+        # Discard the pending data
+        self.pending_data = None
+        self.pending_offset = None
+        self.lock.release()
+
+    def close(self):
+        if not self.is_closed:
+            self.lock.acquire(True)
+            if self.pending_data is not None:
+                # If there is pending data, write it to the file before closing
+                self.commit(self.pending_data, self.pending_offset)
+                self.pending_data = None
+                self.pending_offset = None
+            # Close file
+            self.LPfile.close()
+            self.is_closed = True  # Mark the file as closed
+            self.lock.release()
+        else:
+            raise FileClosedError("File closed")
+
+    def commit(self, data, offset):
+        if 0 <= offset and offset <= self.length:
+            self.LPfile.writeat(data, offset)
+        self.buffer = self.LPfile.readat(None, 0)
+        self.length = len(self.buffer)
+
+
+def LPopenfile(filename, create):
+    if len(filename) == 0 or len(filename.split(".")) != 2:
+        raise RepyArgumentError("Filename is invalid.")
+    prefix = filename.split(".")[0]
+    suffix = filename.split(".")[1]
+    if prefix.isalnum() and prefix.islower() and suffix.isalnum() and suffix.islower():
+        if filename not in listfiles() and not create:
+            raise FileNotFoundError("File not found")
+        return LPFile(filename, create)
+    else:
+        raise RepyArgumentError("Filename is invalid.")
+
+# The code here sets up type checking and variable hiding for you.
+# You should not need to change anything below here.
+sec_file_def = {
+    "obj-type": LPFile,
+    "name": "LPFile",
+    "writeat": {"type": "func", "args": (str, (int, long)), "exceptions": Exception, "return": (int, type(None)), "target": LPFile.writeat},
+    "readat": {"type": "func", "args": ((int, long, type(None)), (int, long)), "exceptions": Exception, "return": str, "target": LPFile.readat},
+    "undo": {"type": "func", "args": None, "exceptions": None, "return": type(None), "target": LPFile.undo},
+    "close": {"type": "func", "args": None, "exceptions": Exception, "return": (bool, type(None)), "target": LPFile.close}
+}
+
+CHILD_CONTEXT_DEF["openfile"] = {
+    TYPE: OBJC,
+    ARGS: (str, bool),
+    EXCP: Exception,
+    RETURN: sec_file_def,
+    TARGET: LPopenfile
+}
+
+# Execute the user code
+secure_dispatch_module()

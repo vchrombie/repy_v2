@@ -1,0 +1,221 @@
+TYPE = "type"
+ARGS = "args"
+RETURN = "return"
+EXCP = "exceptions"
+TARGET = "target"
+FUNC = "func"
+OBJC = "objc"
+
+class LPFile():
+    def __init__(self, filename, create):
+        # globals
+        mycontext['debug'] = False
+        
+        # Try to open the file and catch Errors
+        try:
+            self.LPfile = openfile(filename, create)
+        except FileNotFoundError as e:
+            # Raise a FileNotFoundError if the file is not found
+            # log("FileNotFoundError: " + str(e) + "\n")
+            raise FileNotFoundError
+        except FileInUseError as e:
+            # Raise a FileInUseError if the file is in use
+            # log("FileInUseError: " + str(e) + "\n")
+            raise FileInUseError
+    
+
+        # Initialize pending data and offset
+        self.pending_write = None
+        self.pending_offset = None
+
+        # Initialize file closed flag
+        self.file_closed = False
+
+        # Get the initial file content and file size
+        self.file_content = self.LPfile.readat(None, 0)
+        self.file_size = len(self.file_content)
+
+        # Initialize last committed size
+        self.last_committed_size = self.file_size
+
+        # Create a thread lock
+        self.seek_lock = createlock()  
+
+    def readat(self, bytes, offset):
+        # Check if offset is negative
+        if offset < 0:
+            raise RepyArgumentError('Offset is negative')
+        
+        # Check if bytes is negative
+        if bytes is not None and bytes < 0:
+            raise RepyArgumentError('Bytes is negative')
+
+        # Check if the file is closed
+        if self.file_closed:
+            raise FileClosedError('File is closed')
+
+        # Check if offset is past EOF
+        if offset > self.file_size:
+            raise SeekPastEndOfFileError('Offset is past EOF')
+
+        # Acquire the lock before reading
+        self.seek_lock.acquire(True)
+
+        # Read the data at the given offset
+        data = self.LPfile.readat(bytes, offset)
+
+        # Release the lock after reading
+        self.seek_lock.release()
+
+        return data
+
+    def writeat(self, data, offset):
+
+        # Check if offset is negative
+        if offset < 0:
+            raise RepyArgumentError('Offset is negative')
+        
+        # Check if the file is closed
+        if self.file_closed:
+            raise FileClosedError('File is closed')
+
+        # Check is offset is past EOF
+        # log("offset: " + str(offset) + "  current file size: " + str(self.file_size) + "\n")
+        if offset > self.file_size:
+            raise SeekPastEndOfFileError('Offset is past EOF')
+
+        # Calculate the new file size if the write were to happen
+        new_file_size = offset + len(data)
+
+        # Check if the write is past EOF
+        if self.pending_write is not None:
+            # Calculate the size after pending write
+            pending_new_size = self.pending_offset + len(self.pending_write)
+            max_size = max(self.file_size, pending_new_size)
+        else:
+            max_size = self.file_size
+
+        # log("max_size: " + str(max_size) + "\n")
+        # Check if the write is beyond the allowable file size
+        if offset > max_size:
+            # log("offset: " + str(offset) + "\n")
+            raise SeekPastEndOfFileError('Offset is beyond the allowable file size')
+
+        # Acquire the lock before writing
+        self.seek_lock.acquire(True)
+
+        # If there's pending data, write it first
+        if self.pending_write is not None:
+            self.last_committed_size = self.file_size
+            self.LPfile.writeat(self.pending_write, self.pending_offset)
+            # Update the file size if the write is beyond the current end of the file
+            if self.pending_offset + len(self.pending_write) > self.file_size:
+                self.file_size = self.pending_offset + len(self.pending_write)
+            # Clear the pending data after it's written
+            self.pending_write = None
+            self.pending_offset = None
+
+        # Check is offset is past EOF
+        if offset > self.file_size:
+            raise SeekPastEndOfFileError('Offset is past EOF')
+        
+        # Set new pending data and offset
+        self.pending_write = data
+        self.pending_offset = offset
+
+        # Update the file size if the write extends the file
+        if new_file_size > self.file_size:
+            self.file_size = new_file_size
+
+        # Release the lock after writing
+        self.seek_lock.release()
+
+    def close(self):
+        if self.file_closed:
+            raise FileClosedError('File is already closed')
+
+        self.seek_lock.acquire(True)
+
+        # Write pending data if there is any
+        if self.pending_write is not None:
+            self.LPfile.writeat(self.pending_write, self.pending_offset)
+
+        self.LPfile.close()
+        self.file_closed = True
+        self.seek_lock.release()
+
+    def undo(self):
+        if self.file_closed:
+            raise FileClosedError('File is closed')
+
+        self.seek_lock.acquire(True)
+        if self.pending_write is not None:
+            # Clear pending data
+            self.file_size = self.last_committed_size
+            # Clear pending data
+            self.pending_write = None  # Clear pending writes since we're undoing
+            self.pending_offset = None
+
+        self.seek_lock.release()
+
+
+def is_valid_filename(filename):
+    # Check if filename is a string instance
+    if not isinstance(filename, str):
+        return False
+
+    # Check if filename is not empty
+    if not filename:
+        return False
+
+    # Check if filename contains only lowercase letters, digits, or a period
+    # for char in filename:
+    #     if not (char.islower() or char.isdigit() or char == '.'):
+    #         return False
+
+    # Check if filename contains invalid path characters
+    invalid_chars = ['/', '\\', ':', '*', '?', '"', '<', '>', '|']
+    if any(char in filename for char in invalid_chars):
+        return False
+
+    # Check if file name is too long
+    if len(filename) > 128:
+        return False
+
+    return True  # Filename is valid
+
+
+def LPopenfile(filename, create):
+    # Validate the filename
+    if not is_valid_filename(filename):
+        # Raise a RepyArgumentError if the filename is invalid
+        raise RepyArgumentError
+    
+
+    # Create a new LPFile object
+    lpfile = LPFile(filename, create)
+    
+    # Return the LPFile object if the file is opened successfully
+    return lpfile
+
+
+# You should not need to change anything below here.
+sec_file_def = {
+    "obj-type": LPFile,
+    "name": "LPFile",
+    "writeat": {"type": "func", "args": (str, (int, long)), "exceptions": Exception, "return": (int, type(None)), "target": LPFile.writeat},
+    "readat": {"type": "func", "args": ((int, long, type(None)), (int, long)), "exceptions": Exception, "return": str, "target": LPFile.readat},
+    "undo": {"type": "func", "args": None, "exceptions": None, "return": type(None), "target": LPFile.undo},
+    "close": {"type": "func", "args": None, "exceptions": Exception, "return": (bool, type(None)), "target": LPFile.close}
+}
+
+CHILD_CONTEXT_DEF["openfile"] = {
+    TYPE: OBJC,
+    ARGS: (str, bool),
+    EXCP: Exception,
+    RETURN: sec_file_def,
+    TARGET: LPopenfile
+}
+
+# Execute the user code
+secure_dispatch_module()

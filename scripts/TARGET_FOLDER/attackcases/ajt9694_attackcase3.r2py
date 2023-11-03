@@ -1,6 +1,0 @@
-# Clean up if the file exists.
-if "empty.txt" in listfiles():
-    removefile("empty.txt")
-
-# Attempt to open an empty file (should not raise exceptions)
-empty_file = openfile("empty.txt", True)

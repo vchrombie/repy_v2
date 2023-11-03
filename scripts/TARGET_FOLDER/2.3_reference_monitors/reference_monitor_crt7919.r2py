@@ -1,0 +1,126 @@
+TYPE = "type"
+ARGS = "args"
+RETURN = "return"
+EXCP = "exceptions"
+TARGET = "target"
+FUNC = "func"
+OBJC = "objc"
+
+class LPFile():
+    MAX_UNDO_SIZE = 100  # an example size; adjust based on needs
+
+    def __init__(self, filename, create):
+        if create and filename in listfiles():
+            raise Exception("Cannot open an existing file with create=True")
+
+        self.LPfile = openfile(filename, create)
+        self.undo_dict = {}  # Dictionary where keys are offsets and values are lists
+        self.is_open = True  # Track if the file is open
+        self.lock = createlock()  # Lock for synchronization
+
+    def readat(self, bytes, offset):
+        if not self.lock.acquire(True):  
+            raise Exception("Could not acquire lock")
+        try:
+            if not self.is_open:
+                raise Exception("File is closed")
+            if offset < 0:
+                raise Exception("Negative offset is invalid")
+
+            return self.LPfile.readat(bytes, offset)
+        finally:
+            self.lock.release()
+
+    def writeat(self, data, offset):
+        if not self.lock.acquire(True):
+            raise Exception("Could not acquire lock")
+        try:
+            if not self.is_open:
+                raise Exception("File is closed")
+            if offset < 0:
+                raise Exception("Negative offset is invalid")
+
+            if offset not in self.undo_dict:
+                self.undo_dict[offset] = []
+            current_data = self.LPfile.readat(len(data), offset)
+            self.undo_dict[offset].append(current_data)
+            
+            if len(self.undo_dict[offset]) > self.MAX_UNDO_SIZE:
+                self.undo_dict[offset].pop(0)  # remove the oldest entry
+
+            self.LPfile.writeat(data, offset)
+        finally:
+            self.lock.release()
+
+    def undo(self):
+        if not self.lock.acquire(True):
+            raise Exception("Could not acquire lock")
+        try:
+            if not self.is_open:
+                raise Exception("File is closed")
+            last_offset = max(self.undo_dict.keys(), default=None)
+            if last_offset is None:
+                return
+            last_data = self.undo_dict[last_offset].pop()
+            if not self.undo_dict[last_offset]:
+                del self.undo_dict[last_offset]  # delete the list if it's empty
+            self.LPfile.writeat(last_data, last_offset)
+        finally:
+            self.lock.release()
+
+    def close(self):
+        if not self.lock.acquire(True):
+            raise Exception("Could not acquire lock")
+        try:
+            self.LPfile.close()
+            self.is_open = False
+            self.undo_dict.clear()
+        finally:
+            self.lock.release()
+
+def LPopenfile(filename, create):
+    return LPFile(filename, create)
+
+# Security definition (unchanged)
+sec_file_def = {
+    "obj-type": LPFile,
+    "name": "LPFile",
+    "writeat": {
+        TYPE: FUNC, 
+        ARGS: (str, (int, long)), 
+        EXCP: Exception, 
+        RETURN: (int, type(None)), 
+        TARGET: LPFile.writeat
+    },
+    "readat": {
+        TYPE: FUNC, 
+        ARGS: ((int, long, type(None)), (int, long)), 
+        EXCP: Exception, 
+        RETURN: str, 
+        TARGET: LPFile.readat
+    },
+    "undo": {
+        TYPE: FUNC, 
+        ARGS: None, 
+        EXCP: None, 
+        RETURN: type(None), 
+        TARGET: LPFile.undo
+    },
+    "close": {
+        TYPE: FUNC, 
+        ARGS: None, 
+        EXCP: Exception, 
+        RETURN: (bool, type(None)), 
+        TARGET: LPFile.close
+    }
+}
+
+CHILD_CONTEXT_DEF["openfile"] = {
+    TYPE: OBJC,
+    ARGS: (str, bool),
+    EXCP: Exception,
+    RETURN: sec_file_def,
+    TARGET: LPopenfile
+}
+
+secure_dispatch_module()

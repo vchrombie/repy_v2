@@ -1,8 +1,0 @@
-if "testfile.txt" in listfiles():
-    removefile("testfile.txt")
-
-myfile = openfile("testfile.txt", True)
-
-myfile.writeat("", 0)
-
-myfile.close()

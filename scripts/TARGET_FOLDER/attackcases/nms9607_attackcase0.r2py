@@ -1,4 +1,0 @@
-try:
-  pass
-except:
-  raise Exception("(0): Failed to sync into python correctly")

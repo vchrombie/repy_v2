@@ -1,0 +1,116 @@
+# Constants used for dictionary keys
+TYPE = "type"
+ARGS = "args"
+RETURN = "return"
+EXCP = "exceptions"
+TARGET = "target"
+FUNC = "func"
+OBJC = "objc"
+
+# LPFile class definition
+class LPFile:
+    def __init__(self, filename, create):
+        # Initialize the LPFile object
+        mycontext['debug'] = False
+        self.LPfile = openfile(filename, create)
+        self.filename = filename
+        self.filesize = len(self.LPfile.readat(None, 0))
+        self.pending_data = None
+        self.pending_offset = None
+        self.buffer_flushed = True
+        self.lock = createlock()
+
+    def readat(self, num_bytes, offset):
+        # Read data from the file at the specified offset
+        if num_bytes < 0 and num_bytes is not None:
+            raise RepyArgumentError("-ve read size")
+        if offset < 0:
+            raise RepyArgumentError("-ve read offset")
+
+        self.lock.acquire(True)
+        try:
+            if self.LPfile is None:
+                raise FileClosedError("File '{}' is already closed!".format(self.filename))
+            return self.LPfile.readat(num_bytes, offset)
+        finally:
+            self.lock.release()
+
+    def writeat(self, data, offset):
+        # Write data to the file at the specified offset
+        if offset < 0:
+            raise RepyArgumentError("-ve offset")
+        if not isinstance(data, str):
+            raise RepyArgumentError("not string data")
+
+        self.lock.acquire(True)
+        try:
+            if self.LPfile is None:
+                raise FileClosedError("File '{}' is already closed!".format(self.filename))
+            if self.buffer_flushed:
+                if offset > self.filesize:
+                    raise SeekPastEndOfFileError("Seek offset extends past the EOF!")
+            elif not self.buffer_flushed:
+                if offset > self.filesize and offset > self.pending_offset + len(self.pending_data):
+                    raise SeekPastEndOfFileError("offset past the end of file")
+                self.LPfile.writeat(self.pending_data, self.pending_offset)
+                if self.pending_offset + len(self.pending_data) > self.filesize:
+                    self.filesize = self.pending_offset + len(self.pending_data)
+                self.buffer_flushed = True
+            self.pending_data = data
+            self.pending_offset = offset
+            self.buffer_flushed = False
+        finally:
+            self.lock.release()
+
+    def undo(self):
+        # Undo any pending changes to the file
+        self.lock.acquire(True)
+        try:
+            if self.LPfile is None:
+                return
+            self.pending_data = None
+            self.pending_offset = None
+            self.buffer_flushed = True
+        finally:
+            self.lock.release()
+
+    def close(self):
+        # Close the file and write pending data if necessary
+        self.lock.acquire(True)
+        try:
+            if self.LPfile is None:
+                raise FileClosedError("File '{}' is already closed!".format(self.filename))
+
+            if not self.buffer_flushed:
+                self.LPfile.writeat(self.pending_data, self.pending_offset)
+
+            self.LPfile.close()
+            self.LPfile = None
+        finally:
+            self.lock.release()
+
+def LPopenfile(filename, create):
+    # Create an instance of the LPFile class with the given filename and create flag
+    return LPFile(filename, create)
+
+# Define a security context for LPFile operations
+sec_file_def = {
+    "obj-type": LPFile,
+    "name": "LPFile",
+    "writeat": {TYPE: FUNC, ARGS: (str, (int, int)), EXCP: Exception, RETURN: (int, type(None)), TARGET: LPFile.writeat},
+    "readat": {TYPE: FUNC, ARGS: ((int, int, type(None)), (int, int)), EXCP: Exception, RETURN: str, TARGET: LPFile.readat},
+    "undo": {TYPE: FUNC, ARGS: None, EXCP: None, RETURN: type(None), TARGET: LPFile.undo},
+    "close": {TYPE: FUNC, ARGS: None, EXCP: Exception, RETURN: (bool, type(None)), TARGET: LPFile.close}
+}
+
+# Add LPopenfile function to the child context with the appropriate security definition
+CHILD_CONTEXT_DEF["openfile"] = {
+    TYPE: OBJC,
+    ARGS: (str, bool),
+    EXCP: Exception,
+    RETURN: sec_file_def,
+    TARGET: LPopenfile
+}
+
+# Execute the user's code within the security context
+secure_dispatch_module()

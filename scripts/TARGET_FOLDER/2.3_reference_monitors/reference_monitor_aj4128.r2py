@@ -1,0 +1,122 @@
+'''
+    _       _ _ _                     _           _     _
+   / \   __| (_) |_ _   _  __ _      | | ___  ___| |__ (_)
+  / _ \ / _` | | __| | | |/ _` |  _  | |/ _ \/ __| '_ \| |
+ / ___ \ (_| | | |_| |_| | (_| | | |_| | (_) \__ \ | | | |
+/_/   \_\__,_|_|\__|\__, |\__,_|  \___/ \___/|___/_| |_|_|
+                    |___/'''
+
+TYPE = "type"
+ARGS = "args"
+RETURN = "return"
+EXCP = "exceptions"
+TARGET = "target"
+FUNC = "func"
+OBJC = "objc"
+
+
+class LPFile():
+    def _init_(self, filename, create):
+        mycontext['debug'] = False
+
+        # Open the file with create as what the user sets. When its true
+        self.LPfile = openfile(filename, create)
+
+        # The filesize this variable is initialised with the size the file has when opened
+        self.InitialFilesize = len(self.LPfile.readat(None, 0))
+
+        # These are file sizes that can be altered and be used to play around with in the commit and undo uses
+        self.EarlierFileSize = self.InitialFilesize
+        self.LaterFileSize = self.InitialFilesize
+
+        # This is similar to the default program which we use to write and clear buffer data
+        self.pending_data = ""
+
+        # As with file size we use this, we have two variants to set initially and then alter the other, it is also required in the
+        # writeat function, and filesize is more critical to when already written files are reopened.
+        self.EarlierOffset = 0
+        self.LaterOffset = 0
+
+        # An attack pattern that i noticed was to close a file and then attempt to write in it again
+        self.isFileClosed = False
+
+    def readat(self, bytes, offset):
+        # Read from the file using the sandbox's readat...
+        return self.LPfile.readat(bytes, offset)
+
+    def writeat(self, data, offset):
+        # An interesting attack that i was able to think was to attack the monitor by sending offsets of different data types
+        # Is it intended no, but None and "" act similarly in some if conditions.
+        if offset < 0 or offset is None or offset is "":
+            raise RepyArgumentError("Erroneous Offset Sent")
+        # This one is slightly self explanatory as the opposite of the above, wherein attacks tried to replace content
+        # or read starting from ahead of the EOF
+        elif offset > self.LaterFileSize:
+            raise SeekPastEndOfFileError(
+                "Trying to Read or Write more than Permissible")
+
+        elif data is None:
+            raise RepyArgumentError("Incompatible data provided")
+
+        # Trying to do things when the file is closed, to thwart those that repeatedly opened and closed files
+        elif self.isFileClosed == True:
+            raise FileClosedError(
+                "File is closed and can't be changed when closed")
+        # If all good and none of the above exceptions are raised
+        else:
+            self.LPfile.writeat(self.pending_data, self.LaterOffset)
+
+        # Writing to the buffer
+        self.pending_data = data
+        self.LaterOffset = offset
+
+        # Updating file size and offset after a write(basically a commit to these variables)
+        self.EarlierOffset = self.LaterOffset
+        self.EarlierFileSize = self.LaterFileSize
+        # is a very elegant way to check for when a complete overlap exists in the filesize,
+        # or there is some new stuff writen in a write
+        self.LaterFileSize = max(
+            self.LaterFileSize, self.LaterOffset + len(self.pending_data))
+
+    def undo(self):
+        # Performed under an assumption that undo must do something only when the file is open
+        if self.isFileClosed is False:
+
+            # carrying out the changes like my earlier monitor but with addition of filesize being undone
+            self.pending_data = ""
+            self.LaterOffset = self.EarlierOffset
+            self.LaterFileSize = self.EarlierFileSize
+
+    def close(self):
+        # Performing a final write, and to maintain efficiency,
+        # setting the closed as a boolean variable to true after closing it
+        self.LPfile.writeat(self.pending_data, self.LaterOffset)
+        self.LPfile.close()
+        self.isFileClosed = True
+
+
+def LPopenfile(filename, create):
+    return LPFile(filename, create)
+
+
+# The code here sets up type checking and variable hiding for you.
+# You should not need to change anything below here.
+sec_file_def = {
+    "obj-type": LPFile,
+    "name": "LPFile",
+    "writeat": {"type": "func", "args": (str, (int, long)), "exceptions": Exception, "return": (int, type(None)), "target": LPFile.writeat},
+    "readat": {"type": "func", "args": ((int, long, type(None)), (int, long)), "exceptions": Exception, "return": str, "target": LPFile.readat},
+    "undo": {"type": "func", "args": None, "exceptions": None, "return": type(None), "target": LPFile.undo},
+    "close": {"type": "func", "args": None, "exceptions": Exception, "return": (bool, type(None)), "target": LPFile.close}
+}
+
+CHILD_CONTEXT_DEF["openfile"] = {
+    TYPE: OBJC,
+    ARGS: (str, bool),
+    EXCP: Exception,
+    RETURN: sec_file_def,
+    TARGET: LPopenfile
+}
+
+# Execute the user code
+secure_dispatch_module()

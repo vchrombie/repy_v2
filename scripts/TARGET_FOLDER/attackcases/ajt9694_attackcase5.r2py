@@ -1,9 +1,0 @@
-# Clean up if the file exists.
-if "testfile.txt" in listfiles():
-    removefile("testfile.txt")
-
-# Create a file using the reference monitor
-secure_file = openfile("testfile.txt", True)
-
-# Attempt to undo without a previous write (should have no effect)
-secure_file.undo()

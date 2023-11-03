@@ -1,0 +1,137 @@
+"""
+This security layer adequately handles the undo functionality
+
+Note:
+    This security layer uses encasementlib.r2py, restrictions.default, repy.py and Python
+    Also you need to give it an application to run.
+    python repy.py restrictions.default encasementlib.r2py [security_layer].r2py [attack_program].r2py 
+    
+"""
+TYPE = "type"
+ARGS = "args"
+RETURN = "return"
+EXCP = "exceptions"
+TARGET = "target"
+FUNC = "func"
+OBJC = "objc"
+
+class LPFile():
+    def __init__(self, filename, create):
+        # globals
+        mycontext['debug'] = False
+        self.mylock = createlock()
+
+        self.mylock.acquire(True)
+        try:
+            self.LPfile = openfile(filename, create)
+            self.pending_data = None
+            self.pending_offset = None
+            self.file_size = len(self.LPfile.readat(None, 0))
+        except RepyException:
+            raise
+        finally:
+            self.mylock.release()
+
+    def readat(self, bytes, offset):
+        # Read from the file using the sandbox's readat...
+        
+        if bytes is not None:
+            if bytes<0:
+                raise RepyArgumentError   #Bytes cannot be negative
+        if offset is None or offset < 0:
+            raise RepyArgumentError("Offset cannot be negative or None")
+        elif offset > self.file_size:
+            raise SeekPastEndOfFileError("offset exceeds the file length")        
+
+        self.mylock.acquire(True)
+        try:
+            if self.LPfile is None:
+                raise FileClosedError
+            return self.LPfile.readat(bytes, offset)
+        finally:
+            self.mylock.release()
+
+    def writeat(self, data, offset):
+        
+        if offset < 0:
+            raise RepyArgumentError 
+            
+        if self.LPfile is None:
+            raise FileClosedError
+        
+        #changed exception here to match repy
+        if data is None or offset is None:
+            raise RepyArgumentError
+        
+        if type(data) is not str:
+            raise RepyArgumentError
+
+           
+        if self.pending_data is None:    
+            if offset > self.file_size:
+                raise SeekPastEndOfFileError("Seek offset extends past the EOF!")
+
+        self.mylock.acquire(True)
+        try:
+            if self.pending_data is not None and self.pending_offset is not None:
+                if offset > self.file_size and offset > self.pending_offset + len(self.pending_data):
+                    raise SeekPastEndOfFileError("Seek offset extends past the EOF!")
+                self.LPfile.writeat(self.pending_data, self.pending_offset)
+                if self.pending_offset + len(self.pending_data) > self.file_size:
+                    self.file_size = self.pending_offset + len(self.pending_data)
+            self.pending_data = data
+            self.pending_offset = offset
+        finally:
+            self.mylock.release()
+
+             
+    def undo(self):
+        self.mylock.acquire(True)
+        try:
+            if self.LPfile is None:  # if file is closed, returns nothing
+                return
+            if self.pending_data is not None:
+                self.pending_data = None
+                self.pending_offset = None
+        finally:
+            self.mylock.release() 
+
+    def close(self):
+        self.mylock.acquire(True)
+        try:
+            if self.LPfile is None:
+                raise FileClosedError
+            if self.pending_data is not None and self.pending_offset is not None:
+                self.LPfile.writeat(self.pending_data, self.pending_offset)
+                
+            self.LPfile.close() 
+            self.LPfile = None
+        finally:         
+            self.mylock.release() 
+
+def LPopenfile(filename, create):
+    return LPFile(filename, create)
+
+
+
+# The code here sets up type checking and variable hiding for you.
+# You should not need to change anything below here.
+sec_file_def = {
+    "obj-type": LPFile,
+    "name": "LPFile",
+    "writeat": {"type": "func", "args": (str, (int, long)), "exceptions": Exception, "return": (int, type(None)), "target": LPFile.writeat},
+    "readat": {"type": "func", "args": ((int, long, type(None)), (int, long)), "exceptions": Exception, "return": str, "target": LPFile.readat},
+    "undo": {"type": "func", "args": None, "exceptions": None, "return": type(None), "target": LPFile.undo},
+    "close": {"type": "func", "args": None, "exceptions": Exception, "return": (bool, type(None)), "target": LPFile.close}
+}
+
+CHILD_CONTEXT_DEF["openfile"] = {
+    TYPE: OBJC,
+    ARGS: (str, bool),
+    EXCP: Exception,
+    RETURN: sec_file_def,
+    TARGET: LPopenfile
+}
+
+# Execute the user code
+secure_dispatch_module()

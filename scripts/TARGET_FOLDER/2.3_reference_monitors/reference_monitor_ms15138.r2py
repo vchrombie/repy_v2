@@ -1,0 +1,176 @@
+"""
+This security layer inadequately handles the undo functionality
+
+Note:
+    This security layer uses encasementlib.r2py, restrictions.default, repy.py and Python
+    Also you need to give it an application to run.
+    python repy.py restrictions.default encasementlib.r2py [security_layer].r2py [attack_program].r2py 
+    
+"""
+TYPE = "type"
+ARGS = "args"
+RETURN = "return"
+EXCP = "exceptions"
+TARGET = "target"
+FUNC = "func"
+OBJC = "objc"
+
+
+
+
+
+class LPFile():
+    def __init__(self, filename, create):
+        mycontext['debug'] = False
+        self.LPfile = openfile(filename, create)
+        self.pending_data = None
+        self.pending_offset = None
+        self.lock = createlock()
+        self.file_is_open = True  # file is open and yet to be closed
+        self.close_call = False  # close_call is set when a close() method is called or invoked
+        
+        # Initialize file_length and previous_file_length to zero
+        self.file_length = 0
+        self.previous_file_length = 0
+
+        # If the file already exists or if create is set to False, read the entire content to determine its length
+        if filename in listfiles() or not create:
+            entire_file_content = self.LPfile.readat(None, 0)  # Read the entire file
+            self.file_length = len(entire_file_content)
+            self.previous_file_length = self.file_length
+
+
+
+    def readat(self, bytes, offset):
+        # Reading does not need a lock
+
+        # If the offset is negative, raise RepyArgumentError
+        if offset < 0 or bytes < 0 and bytes is not None:
+            raise RepyArgumentError("Min value is 0.")
+
+        # If the file is closed, do NOT read. Raise FileClosedError
+        if self.file_is_open == False:
+            raise FileClosedError("File is already closed!")
+
+        # Account for the potential length of the pending_data
+        effective_file_length = self.file_length
+        if self.pending_data:
+            potential_end = self.pending_offset + len(self.pending_data)
+            effective_file_length = max(effective_file_length, potential_end)
+
+        # If the offset is higher than the effective length of the file, raise SeekPastEndOfFileError
+        if offset > effective_file_length:
+            raise SeekPastEndOfFileError("Attempted to seek past the end of the file.")
+
+        return self.LPfile.readat(bytes, offset)
+
+
+
+    def writeat(self, data, offset):
+        lock_acquired_locally = False  # A flag to indicate if the lock was acquired
+        
+        if not self.close_call:  # If not called from close() method
+            self.lock.acquire(True)
+            lock_acquired_locally = True
+
+        try:
+            # If the offset is negative, raise RepyArgumentError
+            if offset < 0 or isinstance(offset, bool):
+                raise RepyArgumentError("Min value is 0.")
+
+            # If the file is closed, do NOT write. Raise FileClosedError
+            if self.file_is_open == False:
+                raise FileClosedError("File is already closed!")
+
+            # If the offset is higher than the length of the current keep, then raise SeekPastEndOfFileError
+            if offset > self.file_length:
+                raise SeekPastEndOfFileError("Attempted to seek past the end of the file.")
+            
+            # If there's existing pending data, write it to the file before setting new pending data.
+            if self.pending_data:
+                self.LPfile.writeat(self.pending_data, self.pending_offset)
+                end_position = self.pending_offset + len(self.pending_data)
+                if end_position > self.file_length:
+                    self.file_length = end_position
+                self.pending_data = None
+                self.pending_offset = None
+
+            # Store the current file_length to previous_file_length
+            self.previous_file_length = self.file_length
+
+            # Calculate the potential end position for this data
+            end_position = offset + len(data)
+            if end_position > self.file_length:
+                self.file_length = end_position
+
+            self.pending_data = data
+            self.pending_offset = offset
+
+        finally:
+            if lock_acquired_locally:  # Release the lock only if it was acquired at the beginning
+                self.lock.release()
+
+
+
+    def undo(self):
+        self.lock.acquire(True)
+        try:
+            # If the file is closed, do NOT undo. And do NOT Raise FileClosedError as instructed on BrightSpace
+            if self.file_is_open:
+                self.file_length = self.previous_file_length
+                self.pending_data = None
+                self.pending_offset = None
+            else:
+                pass
+        finally:
+            self.lock.release()
+        
+
+
+    def close(self):
+        self.lock.acquire(True)
+        try:
+            self.close_call = True
+
+            # If file is already closed, raise FileClosedError
+            if self.file_is_open == False:
+                raise FileClosedError("File is already closed!")
+
+            if self.pending_data is not None:
+                self.writeat(self.pending_data, self.pending_offset)
+                self.pending_data = None
+                self.pending_offset = None
+            self.file_is_open = False
+            self.LPfile.close()
+        finally:
+            self.close_call = False
+            self.lock.release()
+
+
+
+
+
+def LPopenfile(filename, create):
+    return LPFile(filename, create)
+
+# The code here sets up type checking and variable hiding for you.
+# You should not need to change anything below here.
+sec_file_def = {
+    "obj-type": LPFile,
+    "name": "LPFile",
+    "writeat": {"type": "func", "args": (str, (int, long)), "exceptions": Exception, "return": (int, type(None)), "target": LPFile.writeat},
+    "readat": {"type": "func", "args": ((int, long, type(None)), (int, long)), "exceptions": Exception, "return": str, "target": LPFile.readat},
+    "undo": {"type": "func", "args": None, "exceptions": None, "return": type(None), "target": LPFile.undo},
+    "close": {"type": "func", "args": None, "exceptions": Exception, "return": (bool, type(None)), "target": LPFile.close}
+}
+
+CHILD_CONTEXT_DEF["openfile"] = {
+    TYPE: OBJC,
+    ARGS: (str, bool),
+    EXCP: Exception,
+    RETURN: sec_file_def,
+    TARGET: LPopenfile
+}
+
+# Execute the user code
+secure_dispatch_module()

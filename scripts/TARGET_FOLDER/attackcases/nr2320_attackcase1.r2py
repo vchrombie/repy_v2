@@ -1,4 +1,0 @@
-try:
-    myfile=openfile("",True)
-except RepyArgumentError:
-    pass

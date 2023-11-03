@@ -1,0 +1,168 @@
+"""
+
+Modified by: Farhan Khan
+Submission Date: 17 Oct, 2023
+Course Title: CS-UY 3923 Computer Security
+Course Instructor: Prof. Justin Cappos
+
+Original Repository: https://github.com/SeattleTestbed/docs/blob/master/EducationalAssignments/UndoPartOne.md#choice-of-file-names
+
+This security layer attempts to adequately handle the undo functionality.
+
+Note:
+    This security layer uses encasementlib.r2py, restrictions.default, repy.py and Python
+    Also you need to give it an application to run.
+    python repy.py restrictions.default encasementlib.r2py [security_layer].r2py [attack_program].r2py 
+    
+"""
+#Generating random integer for creating a unique thread ID
+#Can handle upto 100 concurrent threads, can be increased to handle more
+#Vulnerability: you'd have to generate n+1 threads if the max value = n for a possible race condition
+def random_integer(min_value=0, max_value=100):
+    return min_value + int((max_value - min_value + 1) * randomfloat())
+
+
+TYPE = "type"
+ARGS = "args"
+RETURN = "return"
+EXCP = "exceptions"
+TARGET = "target"
+FUNC = "func"
+OBJC = "objc"
+
+
+class LPFile():
+    def __init__(self, filename, create):
+        self.lock = createlock()
+        self.lock.acquire(True)
+        try:
+            self.LPfile = openfile(filename,create)
+            self.file_size = len(self.LPfile.readat(None,0))
+            self.pending_data = None
+            self.pending_offset = None
+            self.pending_filesize = self.file_size
+            self.initialized = True
+        except FileInUseError as e:
+            self.initialized = False
+            raise FileInUseError("FileInUseError: File Already Open")
+        finally:
+            self.lock.release()
+
+
+    def readat(self, bytes, offset):
+        # Minimally modified for checking initialization. Still has potential vulnerabilities
+        
+        if bytes is not None and bytes < 0:
+            raise RepyArgumentError("Bytes cannot be negative in readat()\n")
+        # validating offset
+        elif offset < 0:
+            raise RepyArgumentError("Offset cannot be negative in readat()\n")
+        elif offset > self.pending_filesize:
+            raise SeekPastEndOfFileError("Offset greater than filesize\n")
+        # Check if the file is initialized
+        elif not self.initialized:
+            raise FileClosedError("The file is not initialized\n")
+        
+        # Preventing errors
+        if self.file_size == 0:
+            return ""
+        # Read from the file using the sandbox's readat...
+        return self.LPfile.readat(bytes, offset)
+
+
+    def writeat(self, data, offset):
+        self.lock.acquire(True) 
+        try:
+            
+            
+            
+            # Check if Offset < 0 
+            if offset < 0:
+                raise RepyArgumentError("RepyArgumentError: Offset must be non-negative\n")
+            # Check if the file is initialized
+            elif not self.initialized:
+                raise FileClosedError("FileClosedError: The file is not initialized\n")
+            # or if Offset > pending_filesize
+            elif offset > self.pending_filesize:
+                raise SeekPastEndOfFileError("Offset greater than filesize\n")
+           
+            else:
+                if self.pending_data is not None and self.pending_offset is not None:
+                    self.LPfile.writeat(self.pending_data, self.pending_offset)
+                    self.file_size = self.pending_filesize
+                elif data == "":
+                    # Skip the function and release the lock
+                    return
+                self.pending_data = data
+                self.pending_offset = offset
+                self.pending_filesize = max(self.pending_filesize, self.pending_offset + len(self.pending_data))
+        
+        #For hierarchy        
+        except RepyArgumentError as r:
+            raise r
+        except SeekPastEndOfFileError as s:
+            raise s
+        except Exception as e:
+            raise e
+        finally:
+            self.lock.release()
+
+    def undo(self):
+        self.lock.acquire(True)
+        try:
+                if self.pending_data is not None and self.pending_offset is not None:
+                    
+                    self.pending_data = None
+                    self.pending_offset = None
+                    self.pending_filesize = self.file_size
+        finally:
+            self.lock.release()
+
+    def close(self):
+        self.lock.acquire(True)
+        try:
+            # Check if the file is initialized
+            if not self.initialized:
+              raise FileClosedError("FileClosedError: The file is closed\n")
+            #Writing down the last changes on the file before closing
+            if self.pending_data is not None and self.pending_offset is not None:
+                self.LPfile.writeat(self.pending_data, self.pending_offset)
+            self.LPfile.close()
+            # Set the initialized flag to False
+            self.initialized = False
+        finally:
+            self.lock.release()
+
+
+
+#This was modified to prevent crashing due to attempted concurrent access
+def LPopenfile(filename, create):
+    if filename not in listfiles():
+        if not create:
+            raise FileNotFoundError("FileNotFoundError: The file does not exist\n")
+    # Create a new LPFile object
+    return LPFile(filename, create)
+
+
+# The code here sets up type checking and variable hiding for you.
+# You should not need to change anything below here.
+sec_file_def = {
+    "obj-type": LPFile,
+    "name": "LPFile",
+    "writeat": {"type": "func", "args": (str, (int, long)), "exceptions": Exception, "return": (int, type(None)), "target": LPFile.writeat},
+    "readat": {"type": "func", "args": ((int, long, type(None)), (int, long)), "exceptions": Exception, "return": str, "target": LPFile.readat},
+    "undo": {"type": "func", "args": None, "exceptions": None, "return": type(None), "target": LPFile.undo},
+    "close": {"type": "func", "args": None, "exceptions": Exception, "return": (bool, type(None)), "target": LPFile.close}
+
+}
+
+CHILD_CONTEXT_DEF["openfile"] = {
+    TYPE: OBJC,
+    ARGS: (str, bool),
+    EXCP: Exception,
+    RETURN: sec_file_def,
+    TARGET: LPopenfile
+}
+
+# Execute the user code
+secure_dispatch_module()

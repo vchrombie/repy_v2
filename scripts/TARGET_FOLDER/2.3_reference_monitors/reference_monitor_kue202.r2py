@@ -1,0 +1,156 @@
+"""
+This security layer inadequately handles the undo functionality
+
+Note:
+    This security layer uses encasementlib.r2py, restrictions.default, repy.py and Python
+    Also you need to give it an application to run.
+    python repy.py restrictions.default encasementlib.r2py [security_layer].r2py [attack_program].r2py 
+    
+"""
+TYPE = "type"
+ARGS = "args"
+RETURN = "return"
+EXCP = "exceptions"
+TARGET = "target"
+FUNC = "func"
+OBJC = "objc"
+
+
+class LPFile():
+    open_files = {}
+    def __init__(self, filename, create):
+        mycontext['debug'] = False  # Set debug mode to False
+        self.LPfile = openfile(filename, create)  # Open the specified file
+        self.file_buffer = self.LPfile.readat(None, 0)
+        self.pending_data = None
+        self.pending_offset = None
+        self.original_data = None
+        self.first_write_done = False
+        self.is_closed = False  # Add a flag to track if the file is closed
+        self.write_history = []
+        self.lock = createlock()
+
+        
+
+    def readat(self, bytes, offset):
+        self.lock.acquire(True)
+        try:
+            if self.is_closed:
+                return
+            if bytes is not None and bytes < 0:
+                raise RepyArgumentError("Negative byte count is not allowed")
+            if offset < 0 or offset is None:
+                raise RepyArgumentError("Negative Offset is not allowed")
+            if bytes is None:
+                end_position = len(self.file_buffer)
+            else: 
+                end_position = offset + bytes
+                if end_position > len(self.file_buffer):
+                    raise SeekPastEndOfFileError("Attempt to read past the end of the file")
+            # If the pending data and offset matches, return original data
+            if self.pending_data is not None and offset == self.pending_offset:
+                return self.original_data
+            # Read from the buffer
+            return self.file_buffer[offset:offset + bytes]
+        finally:
+            self.lock.release()
+
+    def writeat(self, data, offset):
+        self.lock.acquire(True)
+        try:
+            if not self.first_write_done:
+                self.first_write_done = True
+            if self.is_closed:
+                return
+            if offset < 0 or offset is None:
+                return
+
+        # Extend the file_buffer with null bytes if writing past the current end
+            if offset + len(data) > len(self.file_buffer):
+                self.file_buffer += '\x00' * (offset + len(data) - len(self.file_buffer))
+
+        # If there's a pending write, commit it to the file
+            if self.pending_data is not None:
+                self.LPfile.writeat(self.pending_data, self.pending_offset)
+                # Update the file buffer with the pending data
+                self.file_buffer = (self.file_buffer[:self.pending_offset] + self.pending_data + self.file_buffer[self.pending_offset + len(self.pending_data):])
+                self.pending_data = None
+                self.pending_offset = None
+            
+        # Store the data which will be overwritten for undo
+            original_data_length = len(data)
+            self.original_data = self.file_buffer[offset:offset + original_data_length]
+            self.write_history.append((data, offset, self.original_data))
+
+        # Set the current write operation as pending
+            self.pending_data = data
+            self.pending_offset = offset
+
+        # Write the data into the file_buffer
+            self.file_buffer = (self.file_buffer[:offset] + data + self.file_buffer[offset + len(data):])
+        finally:
+            self.lock.release()
+
+    def undo(self):
+        self.lock.acquire(True)
+        try:
+            if self.is_closed:
+                return
+            if not self.write_history:
+                return  # Replace with an appropriate custom exception
+            last_write_data, last_write_offset, original_data = self.write_history.pop()
+
+            if not self.write_history and self.first_write_done:
+                return
+            self.file_buffer = (self.file_buffer[:last_write_offset] +
+                            original_data +
+                            self.file_buffer[last_write_offset + len(last_write_data):])
+            if not self.write_history:
+                self.LPfile.writeat(original_data, last_write_offset)
+            self.pending_data = None
+            self.pending_offset = None
+            self.original_data = None
+        finally:
+            self.lock.release()
+
+
+
+    def close(self):
+        self.lock.acquire(True)
+        try:  
+            if self.is_closed:
+                return
+            # If there's a pending write, commit it to the file
+            if self.pending_data is not None:
+                self.LPfile.writeat(self.pending_data, self.pending_offset)
+                del self.write_history[:]
+            
+            # Close the file
+            self.LPfile.close()
+            self.is_closed = True  # Set the flag to True when the file is closed
+        finally:
+            self.lock.release()
+
+
+def LPopenfile(filename, create):
+    return LPFile(filename, create)
+
+sec_file_def = {
+    "obj-type": LPFile,
+    "name": "LPFile",
+    "writeat": {"type": "func", "args": (str, (int, long)), "exceptions": Exception, "return": (int, type(None)), "target": LPFile.writeat},
+    "readat": {"type": "func", "args": ((int, long, type(None)), (int, long)), "exceptions": Exception, "return": str, "target": LPFile.readat},
+    "undo": {"type": "func", "args": None, "exceptions": None, "return": type(None), "target": LPFile.undo},
+    "close": {"type": "func", "args": None, "exceptions": Exception, "return": (bool, type(None)), "target": LPFile.close}
+}
+
+CHILD_CONTEXT_DEF["openfile"] = {
+    TYPE: OBJC,
+    ARGS: (str, bool),
+    EXCP: Exception,
+    RETURN: sec_file_def,
+    TARGET: LPopenfile
+}
+
+# Execute the user code
+secure_dispatch_module()

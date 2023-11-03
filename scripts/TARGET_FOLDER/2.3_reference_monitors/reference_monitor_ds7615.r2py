@@ -1,0 +1,155 @@
+"""
+This security layer inadequately handles the undo functionality
+
+Note:
+    This security layer uses encasementlib.r2py, restrictions.default, repy.py and Python
+    Also you need to give it an application to run.
+    python repy.py restrictions.default encasementlib.r2py [security_layer].r2py [attack_program].r2py 
+    
+"""
+TYPE = "type"
+ARGS = "args"
+RETURN = "return"
+EXCP = "exceptions"
+TARGET = "target"
+FUNC = "func"
+OBJC = "objc"
+
+class LPFile():
+    def __init__(self, filename, create):
+        # globals
+        mycontext['debug'] = False
+        mycontext['EOF'] = 0
+        self.LPfile = openfile(filename, create)
+        self.isOpen = True
+        self.pending_data = None
+        self.pending_offset = None
+        self.EOF = len(self.LPfile.readat(None, 0))
+        self.EOF_buff = self.EOF
+        #log("\n initial EOF: {0}".format(self.EOF))
+        self.lock = createlock()
+
+
+    def readat(self, bytes, offset):
+        
+        if offset < 0 or (bytes != None and bytes < 0):
+            #log("\n offset negetive . Offset:{0}\n".format(offset))
+            raise RepyArgumentError
+
+        elif offset > self.EOF:
+            #log("\n offset more than EOF  offset:{0} EOF:{1} \n".format(offset,self.EOF))
+            raise SeekPastEndOfFileError
+
+        elif self.isOpen == False:
+            raise FileClosedError
+
+        else:
+            try:
+                # Read from the file using the sandbox's readat...
+                #log("\n reading from file  offset:{0} bytes:{1} EOF: {2} \n".format(offset,bytes,self.EOF))
+                read_data = self.LPfile.readat(bytes, offset)
+                return read_data
+            except FileClosedError:
+                raise FileClosedError
+
+    
+    def isvalid(self, data, offset):
+
+        #valid = True
+        #log(self.LPfile)
+
+        if self.isOpen == False:
+            #log("\n file closed \n{0}\n".format(self.LPfile))
+            raise FileClosedError
+
+        elif(data == None or offset == None):
+            valid = False
+            raise RepyArgumentError
+
+        elif(offset < 0):
+            #log("\n offset negetive . Offset:{0}\n".format(offset))
+            valid = False
+            raise RepyArgumentError
+
+        elif(offset > self.EOF):
+            #log("\n offset more than EOF  offset:{0} EOF:{1} \n".format(offset,self.EOF))
+            valid = False
+            raise SeekPastEndOfFileError
+
+        else:
+            #log("passed all layer")
+            valid = True
+
+        return valid
+
+    def writeat(self, data, offset):
+
+        #log("\n data:{0} offset:{1} \n".format(data,offset))
+        
+        if(self.isvalid(data,offset)):
+            try:
+            
+                #log("\n valid bit is true \n ")
+                if(self.pending_data != None and self.pending_offset != None):
+
+                    try:
+                        self.lock.acquire(True)
+                        #log("\n writing to file  offset:{0} data:{1} EOF: {2} \n".format(self.pending_offset,self.pending_data,self.EOF))
+                        self.LPfile.writeat(self.pending_data, self.pending_offset)
+                    finally:
+                        self.lock.release()
+
+                newEof = offset + len(data)
+                if(newEof > self.EOF):
+                    self.EOF_buff = self.EOF
+                    self.EOF = newEof
+                #log("\n new EOF: {0}".format(self.EOF))
+
+                self.pending_data = data
+                self.pending_offset = offset
+                
+            except FileClosedError:
+                raise FileClosedError
+                
+
+    def undo(self):
+
+        if(self.pending_data != None and self.pending_offset != None):
+            tempEof = self.pending_offset + len(self.pending_data)
+            if(tempEof == self.EOF and tempEof > self.EOF_buff):
+                self.EOF = self.EOF_buff
+            self.pending_data = None
+            self.pending_offset = None
+        
+
+    def close(self):
+
+        self.writeat("close",0)
+        self.LPfile.close()
+        self.isOpen = False
+
+def LPopenfile(filename, create):
+    return LPFile(filename, create)
+
+# The code here sets up type checking and variable hiding for you.
+# You should not need to change anything below here.
+sec_file_def = {
+    "obj-type": LPFile,
+    "name": "LPFile",
+    "writeat": {"type": "func", "args": (str, (int, long)), "exceptions": Exception, "return": (int, type(None)), "target": LPFile.writeat},
+    "readat": {"type": "func", "args": ((int, long, type(None)), (int, long)), "exceptions": Exception, "return": str, "target": LPFile.readat},
+    "undo": {"type": "func", "args": None, "exceptions": None, "return": type(None), "target": LPFile.undo},
+    "close": {"type": "func", "args": None, "exceptions": Exception, "return": (bool, type(None)), "target": LPFile.close}
+}
+
+CHILD_CONTEXT_DEF["openfile"] = {
+    TYPE: OBJC,
+    ARGS: (str, bool),
+    EXCP: Exception,
+    RETURN: sec_file_def,
+    TARGET: LPopenfile
+}
+
+# Execute the user code
+secure_dispatch_module()
+
