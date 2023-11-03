@@ -1,7 +1,0 @@
-def basic_write_read_verification():
-    f = openfile("testfile.txt", True)
-    f.writeat("Hello World", 0)
-    assert f.readat(None, 0) == "Hello World", "Basic write or read failed."
-    f.close()
-
-basic_write_read_verification()

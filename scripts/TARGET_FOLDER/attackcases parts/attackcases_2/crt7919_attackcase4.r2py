@@ -1,7 +1,0 @@
-def file_overflow_test():
-    f = openfile("testfile.txt", True)
-    f.writeat("Hello", 1000)
-    assert len(f.readat(None, 0)) == 1005, "File overflow handling failed."
-    f.close()
-
-file_overflow_test()

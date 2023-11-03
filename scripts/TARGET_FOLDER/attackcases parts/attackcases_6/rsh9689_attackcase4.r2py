@@ -1,9 +1,0 @@
-#Invalid filename
-
-try:
-    myfile = openfile("g49@@!!\\./.txt", True)
-# should be raised when file is not found and create is False
-except RepyArgumentError:
-    pass
-else:
-    log("Error! File exists when it should not.\n")

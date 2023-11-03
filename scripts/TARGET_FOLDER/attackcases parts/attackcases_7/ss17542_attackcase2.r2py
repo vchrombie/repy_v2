@@ -1,8 +1,0 @@
- 
-
-if "testfile.txt" in listfiles():
-  removefile("testfile.txt") 
-myfile2=openfile("testfile.txt",True) 
-myfile2.writeat("01235678",-1) #using negative offset to see if it trip the ref mon
-myfile2.close()
-log("-1 offset bypassed successfully \n")

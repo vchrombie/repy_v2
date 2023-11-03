@@ -1,8 +1,0 @@
-# undo after file close
-myfile1 = openfile("testfile1.txt", True)
-myfile1.writeat("something", 0)
-myfile1.close()
-myfile1.undo()
-
-
-

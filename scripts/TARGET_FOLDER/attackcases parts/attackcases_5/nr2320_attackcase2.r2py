@@ -1,6 +1,0 @@
-if "testfile.txt" in listfiles():
-  removefile("testfile.txt")
-try:
-    myfile=openfile("test.txt",False)
-except FileNotFoundError:
-    pass

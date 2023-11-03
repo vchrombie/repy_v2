@@ -1,8 +1,0 @@
-def undo_vulnerability_test():
-    f = openfile("testfile.txt", True)
-    f.writeat("Hello", 0)
-    f.undo()
-    assert f.readat(None, 0) == "", "Undo failed to revert changes."
-    f.close()
-
-undo_vulnerability_test()
