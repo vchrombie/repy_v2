@@ -1,0 +1,73 @@
+from threading import Lock
+import os
+
+class SeekPastEndOfFileError(Exception):
+    pass
+
+class FileClosedError(Exception):
+    pass
+
+class RepyArgumentError(Exception):
+    pass
+
+class LPFile():
+    def __init__(self, filename, create):
+        if not os.path.basename(filename) or '..' in filename or filename.startswith('/'):
+            raise ValueError("Invalid filename!")
+
+        self.LPfile = open(filename, 'w+' if create else 'r+')
+        self.pending_data = None
+        self.pending_offset = None
+        self.lock = Lock()
+        self.is_closed = False
+
+    def readat(self, bytes, offset):
+        if not isinstance(bytes, (int, type(None))) or (bytes is not None and bytes < 0):
+            raise ValueError("Invalid number of bytes to read.")
+        if not isinstance(offset, int) or offset < 0:
+            raise ValueError("Invalid offset.")
+
+        with self.lock:
+            if self.is_closed:
+                raise FileClosedError("File is closed.")
+            if self.pending_data is not None:
+                return ""  # Cannot read uncommitted data
+            return self.LPfile.read(bytes)
+
+    def writeat(self, data, offset):
+        if not isinstance(data, str):
+            raise ValueError("Invalid data type.")
+        if not isinstance(offset, int) or offset < 0:
+            raise RepyArgumentError("Invalid offset.")
+
+        with self.lock:
+            if self.is_closed:
+                raise FileClosedError("File is closed.")
+            if self.pending_data is not None:
+                # Ensure not writing past EOF
+                if self.pending_offset + len(self.pending_data) != offset:
+                    raise SeekPastEndOfFileError("Cannot write past EOF.")
+                self.LPfile.write(self.pending_data)
+            self.pending_data = data
+            self.pending_offset = offset
+
+    def undo(self):
+        with self.lock:
+            if self.is_closed:
+                return  # No error if undo is called on closed file
+            self.pending_data = None
+            self.pending_offset = None
+
+    def close(self):
+        with self.lock:
+            if self.is_closed:
+                return  # No error if close is called on closed file
+            if self.pending_data is not None:
+                self.LPfile.write(self.pending_data)
+            self.LPfile.close()
+            self.is_closed = True
+            self.pending_data = None
+            self.pending_offset = None
+
+def LPopenfile(filename, create):
+    return LPFile(filename, create)
