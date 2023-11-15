@@ -1,0 +1,1556 @@
+{
+    "at5076": [
+        {
+            "name": "Anna Tanaka Viertler"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_at5076.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_at5076.r2py"
+        },
+        {
+            "writeup": "at5076 - Anna Tanaka Viertler.pdf"
+        }
+    ],
+    "zm2538": [
+        {
+            "name": "Zaki Maqbool"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_zm2538.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_zm2538.r2py"
+        },
+        {
+            "writeup": "zm2538 - Zaki Maqbool.pdf"
+        }
+    ],
+    "eh3300": [
+        {
+            "name": "Emily Harrington"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_eh3300.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_eh3300.r2py"
+        },
+        {
+            "writeup": null
+        }
+    ],
+    "jc12690": [
+        {
+            "name": "Jarred Carter"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_jc12690.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_jc12690.r2py"
+        },
+        {
+            "writeup": "jc12690 - Jarred Carter.pdf"
+        }
+    ],
+    "vrk3366": [
+        {
+            "name": "Vivek Radhakrishnan"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_vrk3366.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_vrk3366.r2py"
+        },
+        {
+            "writeup": null
+        }
+    ],
+    "jz3928": [
+        {
+            "name": "Jin Zhou"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_jz3928.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_jz3928.r2py"
+        },
+        {
+            "writeup": "jz3928 - Jin Zhou.pdf"
+        }
+    ],
+    "geg321": [
+        {
+            "name": "George Gonzalez"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_geg321.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_geg321.r2py"
+        },
+        {
+            "writeup": "geg321 - George Gonzalez.pdf"
+        }
+    ],
+    "ym2977": [
+        {
+            "name": "Yash Mathur"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_ym2977.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_ym2977.r2py"
+        },
+        {
+            "writeup": "ym2977 - Yash Mathur.pdf"
+        }
+    ],
+    "ns5239": [
+        {
+            "name": "Naman Soni"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_ns5239.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_ns5239.r2py"
+        },
+        {
+            "writeup": "ns5239 - Naman Soni.pdf"
+        }
+    ],
+    "lpv2011": [
+        {
+            "name": "Lasya Vadapalli"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_lpv2011.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_lpv2011.r2py"
+        },
+        {
+            "writeup": "lpv2011 - Lasya Vadapalli.pdf"
+        }
+    ],
+    "gsl9701": [
+        {
+            "name": "Grace Liu"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_gsl9701.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_gsl9701.r2py"
+        },
+        {
+            "writeup": "gsl9701 - Grace Liu.pdf"
+        }
+    ],
+    "es5185": [
+        {
+            "name": "Ethan Shieh"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_es5185.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_es5185.r2py"
+        },
+        {
+            "writeup": "es5185 - Ethan Shieh.pdf"
+        }
+    ],
+    "eav8168": [
+        {
+            "name": "Ethan Vazquez"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_eav8168.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_eav8168.r2py"
+        },
+        {
+            "writeup": "eav8168 - Ethan Vazquez.pdf"
+        }
+    ],
+    "zx904": [
+        {
+            "name": "Jacob Xu"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_zx904.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_zx904.r2py"
+        },
+        {
+            "writeup": "zx904 - Jacob Xu.pdf"
+        }
+    ],
+    "aj4128": [
+        {
+            "name": "Aditya Joshi"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_aj4128.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_aj4128.r2py"
+        },
+        {
+            "writeup": "aj4128 - Aditya Joshi.pdf"
+        }
+    ],
+    "kc4433": [
+        {
+            "name": "Kevin Chen"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_kc4433.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_kc4433.r2py"
+        },
+        {
+            "writeup": "kc4433 - Kevin Chen.pdf"
+        }
+    ],
+    "lsp8273": [
+        {
+            "name": "Lanelle Phillips t"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_lsp8273.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_lsp8273.r2py"
+        },
+        {
+            "writeup": "lsp8273 - Lanelle Phillips t.pdf"
+        }
+    ],
+    "yx3254": [
+        {
+            "name": "Yukai Xue"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_yx3254.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_yx3254.r2py"
+        },
+        {
+            "writeup": "yx3254 - Yukai Xue.pdf"
+        }
+    ],
+    "aac9988": [
+        {
+            "name": "Aurora Cruci"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_aac9988.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_aac9988.r2py"
+        },
+        {
+            "writeup": "aac9988 - Aurora Cruci.pdf"
+        }
+    ],
+    "imr8217": [
+        {
+            "name": "Igor Rodrigues"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_imr8217.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_imr8217.r2py"
+        },
+        {
+            "writeup": "imr8217 - Igor Rodrigues.pdf"
+        }
+    ],
+    "sr6895": [
+        {
+            "name": "Saurabh Rajguru"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_sr6895.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_sr6895.r2py"
+        },
+        {
+            "writeup": "sr6895 - Saurabh Rajguru.pdf"
+        }
+    ],
+    "ha2755": [
+        {
+            "name": "Hari Kishan Reddy Abbasani"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_ha2755.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_ha2755.r2py"
+        },
+        {
+            "writeup": "ha2755 - Hari Kishan Reddy Abbasani.pdf"
+        }
+    ],
+    "jfz241": [
+        {
+            "name": "Jared Zimmermann"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_jfz241.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_jfz241.r2py"
+        },
+        {
+            "writeup": "jfz241 - Jared Zimmermann.pdf"
+        }
+    ],
+    "ar8300": [
+        {
+            "name": "Aryan Rai"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_ar8300.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_ar8300.r2py"
+        },
+        {
+            "writeup": null
+        }
+    ],
+    "pg2441": [
+        {
+            "name": "Pratham Gupta"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_pg2441.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_pg2441.r2py"
+        },
+        {
+            "writeup": "pg2441 - Pratham Gupta.pdf"
+        }
+    ],
+    "sv2657": [
+        {
+            "name": "Samuel Vieira Restrepo"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_sv2657.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_sv2657.r2py"
+        },
+        {
+            "writeup": "sv2657 - Samuel Vieira Restrepo.pdf"
+        }
+    ],
+    "sv2616": [
+        {
+            "name": "Sai Prasanth Virigineni"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_sv2616.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_sv2616.r2py"
+        },
+        {
+            "writeup": "sv2616 - Sai Prasanth Virigineni.pdf"
+        }
+    ],
+    "uhm202": [
+        {
+            "name": "Usaid Malik"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_uhm202.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_uhm202.r2py"
+        },
+        {
+            "writeup": "uhm202 - Usaid Malik.pdf"
+        }
+    ],
+    "mx2228": [
+        {
+            "name": "Metun"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_mx2228.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_mx2228.r2py"
+        },
+        {
+            "writeup": "mx2228 - Metun.pdf"
+        }
+    ],
+    "yl7685": [
+        {
+            "name": "Justin Li"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_yl7685.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_yl7685.r2py"
+        },
+        {
+            "writeup": "yl7685 - Justin Li.pdf"
+        }
+    ],
+    "cp4123": [
+        {
+            "name": "Cristian Panaro"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_cp4123.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_cp4123.r2py"
+        },
+        {
+            "writeup": "cp4123 - Cristian Panaro.pdf"
+        }
+    ],
+    "gt2126": [
+        {
+            "name": "Gayatri Tyagi"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_gt2126.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_gt2126.r2py"
+        },
+        {
+            "writeup": "gt2126 - Gayatri Tyagi.pdf"
+        }
+    ],
+    "dh3382": [
+        {
+            "name": "David Hauss"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_dh3382.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_dh3382.r2py"
+        },
+        {
+            "writeup": "dh3382 - David Hauss.pdf"
+        }
+    ],
+    "db4922": [
+        {
+            "name": "Devyani Bairagya"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_db4922.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_db4922.r2py"
+        },
+        {
+            "writeup": "db4922 - Devyani Bairagya.pdf"
+        }
+    ],
+    "qc815": [
+        {
+            "name": "Qianxi Chen"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_qc815.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_qc815.r2py"
+        },
+        {
+            "writeup": "qc815 - Qianxi Chen.pdf"
+        }
+    ],
+    "ssm10021": [
+        {
+            "name": "Sarah Moughal"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_ssm10021.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_ssm10021.r2py"
+        },
+        {
+            "writeup": "ssm10021 - Sarah Moughal.pdf"
+        }
+    ],
+    "ss17936": [
+        {
+            "name": "Shambhavi Seth"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_ss17936.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_ss17936.r2py"
+        },
+        {
+            "writeup": "ss17936 - Shambhavi Seth.pdf"
+        }
+    ],
+    "dz2188": [
+        {
+            "name": "David Zhang"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_dz2188.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_dz2188.r2py"
+        },
+        {
+            "writeup": "dz2188 - David Zhang.pdf"
+        }
+    ],
+    "jyl9583": [
+        {
+            "name": "Jason Lin"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_jyl9583.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_jyl9583.r2py"
+        },
+        {
+            "writeup": "jyl9583 - Jason Lin.pdf"
+        }
+    ],
+    "sl9052": [
+        {
+            "name": "Sunny Li"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_sl9052.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_sl9052.r2py"
+        },
+        {
+            "writeup": "sl9052 - Sunny Li.pdf"
+        }
+    ],
+    "jl14678": [
+        {
+            "name": "Jiaran Liu"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_jl14678.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_jl14678.r2py"
+        },
+        {
+            "writeup": "jl14678 - Jiaran Liu.pdf"
+        }
+    ],
+    "av3396": [
+        {
+            "name": "Anish Vempaty"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_av3396.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_av3396.r2py"
+        },
+        {
+            "writeup": "av3396 - Anish Vempaty.pdf"
+        }
+    ],
+    "sg8024": [
+        {
+            "name": "Sameer Gori"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_sg8024.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_sg8024.r2py"
+        },
+        {
+            "writeup": "sg8024 - Sameer Gori.pdf"
+        }
+    ],
+    "mr7172": [
+        {
+            "name": "Mayank Ramnani"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_mr7172.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_mr7172.r2py"
+        },
+        {
+            "writeup": "mr7172 - Mayank Ramnani.pdf"
+        }
+    ],
+    "mzg9288": [
+        {
+            "name": "Matthew Gong"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_mzg9288.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_mzg9288.r2py"
+        },
+        {
+            "writeup": "mzg9288 - Matthew Gong.docx"
+        }
+    ],
+    "bsc6146": [
+        {
+            "name": "Bradley Cushing"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_bsc6146.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_bsc6146.r2py"
+        },
+        {
+            "writeup": "bsc6146 - Bradley Cushing.pdf"
+        }
+    ],
+    "nms9607": [
+        {
+            "name": "Nathan Smith"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_nms9607.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_nms9607.r2py"
+        },
+        {
+            "writeup": "nms9607 - Nathan Smith.pdf"
+        }
+    ],
+    "jg7683": [
+        {
+            "name": "Jeetesh Gowder"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_jg7683.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_jg7683.r2py"
+        },
+        {
+            "writeup": "jg7683 - Jeetesh Gowder.pdf"
+        }
+    ],
+    "jnr8342": [
+        {
+            "name": "Justin Rivera"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_jnr8342.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_jnr8342.r2py"
+        },
+        {
+            "writeup": "jnr8342 - Justin Rivera.pdf"
+        }
+    ],
+    "jw6680": [
+        {
+            "name": "Jia Lin Weng"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_jw6680.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_jw6680.r2py"
+        },
+        {
+            "writeup": "jw6680 - Jia Lin Weng.pdf"
+        }
+    ],
+    "yc4557": [
+        {
+            "name": "Michael Chen"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_yc4557.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_yc4557.r2py"
+        },
+        {
+            "writeup": "yc4557 - Michael Chen.pdf"
+        }
+    ],
+    "rwm9998": [
+        {
+            "name": "Ryan Menier"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_rwm9998.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_rwm9998.r2py"
+        },
+        {
+            "writeup": "rwm9998 - Ryan Menier.pdf"
+        }
+    ],
+    "sm11378": [
+        {
+            "name": "Spandan Mishra"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_sm11378.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_sm11378.r2py"
+        },
+        {
+            "writeup": "sm11378 - Spandan Mishra.pdf"
+        }
+    ],
+    "ds7615": [
+        {
+            "name": "Disha Sheshappa"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_ds7615.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_ds7615.r2py"
+        },
+        {
+            "writeup": "ds7615 - Disha Sheshappa.pdf"
+        }
+    ],
+    "ajt9694": [
+        {
+            "name": "Ashish Tiwari"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_ajt9694.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_ajt9694.r2py"
+        },
+        {
+            "writeup": "ajt9694 - Ashish Tiwari.pdf"
+        }
+    ],
+    "sg8013": [
+        {
+            "name": "Shivani Gandhi"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_sg8013.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_sg8013.r2py"
+        },
+        {
+            "writeup": "sg8013 - Shivani Gandhi.pdf"
+        }
+    ],
+    "hj2118": [
+        {
+            "name": "Heejin Jang"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_hj2118.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_hj2118.r2py"
+        },
+        {
+            "writeup": "hj2118 - Heejin Jang.pdf"
+        }
+    ],
+    "rsc9069": [
+        {
+            "name": "Rohit Chaudhari"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_rsc9069.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_rsc9069.r2py"
+        },
+        {
+            "writeup": "rsc9069 - Rohit Chaudhari.pdf"
+        }
+    ],
+    "dp3757": [
+        {
+            "name": "Dwireph Kamleshkumar Parmar"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_dp3757.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_dp3757.r2py"
+        },
+        {
+            "writeup": "dp3757 - Dwireph Kamleshkumar Parmar.pdf"
+        }
+    ],
+    "ab10047": [
+        {
+            "name": "Aatish Balaji"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_ab10047.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_ab10047.r2py"
+        },
+        {
+            "writeup": "ab10047 - Aatish Balaji.pdf"
+        }
+    ],
+    "nd2290": [
+        {
+            "name": "Nidhi Desu"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_nd2290.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_nd2290.r2py"
+        },
+        {
+            "writeup": "nd2290 - Nidhi Desu.pdf"
+        }
+    ],
+    "qap205": [
+        {
+            "name": "Quan Phung"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_qap205.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_qap205.r2py"
+        },
+        {
+            "writeup": "qap205 - Quan Phung.pdf"
+        }
+    ],
+    "mm13075": [
+        {
+            "name": "Maryam Mohagheghi"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_mm13075.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_mm13075.r2py"
+        },
+        {
+            "writeup": "mm13075 - Maryam Mohagheghi.pdf"
+        }
+    ],
+    "tmh8479": [
+        {
+            "name": null
+        },
+        {
+            "reference_monitor_1": "reference_monitor_tmh8479.r2py"
+        },
+        {
+            "reference_monitor_3": null
+        },
+        {
+            "writeup": null
+        }
+    ],
+    "mm13171": [
+        {
+            "name": "Mridul Mittal"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_mm13171.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_mm13171.r2py"
+        },
+        {
+            "writeup": "mm13171 - Mridul Mittal.pdf"
+        }
+    ],
+    "rr4433": [
+        {
+            "name": "Rajath Reghunath"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_rr4433.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_rr4433.r2py"
+        },
+        {
+            "writeup": "rr4433 - Rajath Reghunath.pdf"
+        }
+    ],
+    "ua2047": [
+        {
+            "name": "Ushan Abeysekera"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_ua2047.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_ua2047.r2py"
+        },
+        {
+            "writeup": "ua2047 - Ushan Abeysekera.docx"
+        }
+    ],
+    "sb9156": [
+        {
+            "name": "Swati Baleri"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_sb9156.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_sb9156.r2py"
+        },
+        {
+            "writeup": "sb9156 - Swati Baleri.pdf"
+        }
+    ],
+    "ms15138": [
+        {
+            "name": "Makesh Srinivasan"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_ms15138.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_ms15138.r2py"
+        },
+        {
+            "writeup": "ms15138 - Makesh Srinivasan.pdf"
+        }
+    ],
+    "jw4186": [
+        {
+            "name": "Jeffrey Wong"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_jw4186.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_jw4186.r2py"
+        },
+        {
+            "writeup": "jw4186 - Jeffrey Wong.pdf"
+        }
+    ],
+    "akg9910": [
+        {
+            "name": "Amanda Gonzalez"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_akg9910.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_akg9910.r2py"
+        },
+        {
+            "writeup": "akg9910 - Amanda Gonzalez.pdf"
+        }
+    ],
+    "bp2200": [
+        {
+            "name": "Brandon Pinos"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_bp2200.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_bp2200.r2py"
+        },
+        {
+            "writeup": "bp2200 - Brandon Pinos.pdf"
+        }
+    ],
+    "tm4258": [
+        {
+            "name": "Tejeshu Mutte"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_tm4258.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_tm4258.r2py"
+        },
+        {
+            "writeup": "tm4258 - Tejeshu Mutte.pdf"
+        }
+    ],
+    "ew1791": [
+        {
+            "name": "Emma WIlkins"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_ew1791.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_ew1791.r2py"
+        },
+        {
+            "writeup": "ew1791 - Emma WIlkins.docx"
+        }
+    ],
+    "ag9489": [
+        {
+            "name": "Abhay Garg"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_ag9489.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_ag9489.r2py"
+        },
+        {
+            "writeup": "ag9489 - Abhay Garg.pdf"
+        }
+    ],
+    "nd2661": [
+        {
+            "name": "Nikhita Dhenuvakonda"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_nd2661.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_nd2661.r2py"
+        },
+        {
+            "writeup": "nd2661 - Nikhita Dhenuvakonda.pdf"
+        }
+    ],
+    "jwh8918": [
+        {
+            "name": "Joel Harawa"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_jwh8918.r2py"
+        },
+        {
+            "reference_monitor_3": null
+        },
+        {
+            "writeup": null
+        }
+    ],
+    "aa11533": [
+        {
+            "name": "Abdul Alhazmi"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_aa11533.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_aa11533.r2py"
+        },
+        {
+            "writeup": null
+        }
+    ],
+    "vkk2020": [
+        {
+            "name": "Vamsi Koneti"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_vkk2020.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_vkk2020.r2py"
+        },
+        {
+            "writeup": "vkk2020 - Vamsi Koneti.pdf"
+        }
+    ],
+    "ss17542": [
+        {
+            "name": "Samkit Shah"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_ss17542.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_ss17542.r2py"
+        },
+        {
+            "writeup": "ss17542 - Samkit Shah.pdf"
+        }
+    ],
+    "kue202": [
+        {
+            "name": "Kaya Erol"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_kue202.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_kue202.r2py"
+        },
+        {
+            "writeup": "kue202 - Kaya Erol.pdf"
+        }
+    ],
+    "dkd284": [
+        {
+            "name": "Khanh Duong"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_dkd284.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_dkd284.r2py"
+        },
+        {
+            "writeup": "dkd284 - Khanh Duong.pdf"
+        }
+    ],
+    "jzh9076": [
+        {
+            "name": "Jia Huang"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_jzh9076.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_jzh9076.r2py"
+        },
+        {
+            "writeup": "jzh9076 - Jia Huang.pdf"
+        }
+    ],
+    "tyz212": [
+        {
+            "name": "Tom Zhang"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_tyz212.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_tyz212.r2py"
+        },
+        {
+            "writeup": "tyz212 - Tom Zhang.pdf"
+        }
+    ],
+    "kp3291": [
+        {
+            "name": "Kaartikeya Panjwani"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_kp3291.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_kp3291.r2py"
+        },
+        {
+            "writeup": "kp3291 - Kaartikeya Panjwani.pdf"
+        }
+    ],
+    "mlh9655": [
+        {
+            "name": "Maya Humston"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_mlh9655.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_mlh9655.r2py"
+        },
+        {
+            "writeup": "mlh9655 - Maya Humston.pdf"
+        }
+    ],
+    "am14079": [
+        {
+            "name": "Adittya Mittal"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_am14079.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_am14079.r2py"
+        },
+        {
+            "writeup": "am14079 - Adittya Mittal.pdf"
+        }
+    ],
+    "st5073": [
+        {
+            "name": "Shiv Thaker"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_st5073.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_st5073.r2py"
+        },
+        {
+            "writeup": "st5073 - Shiv Thaker.pdf"
+        }
+    ],
+    "fkk2008": [
+        {
+            "name": "Farhan Khan"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_fkk2008.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_fkk2008.r2py"
+        },
+        {
+            "writeup": "fkk2008 - Farhan Khan.pdf"
+        }
+    ],
+    "vm2496": [
+        {
+            "name": "Vamshi Madineni"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_vm2496.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_vm2496.r2py"
+        },
+        {
+            "writeup": "vm2496 - Vamshi Madineni.pdf"
+        }
+    ],
+    "fgd238": [
+        {
+            "name": "Francis Delamerced"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_fgd238.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_fgd238.r2py"
+        },
+        {
+            "writeup": "fgd238 - Francis Delamerced.docx"
+        }
+    ],
+    "bb3722": [
+        {
+            "name": "Bharani Kumar Reddy Bandla"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_bb3722.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_bb3722.r2py"
+        },
+        {
+            "writeup": "bb3722 - Bharani Kumar Reddy Bandla.pdf"
+        }
+    ],
+    "dsc7792": [
+        {
+            "name": "Dhanraj Chavan"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_dsc7792.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_dsc7792.r2py"
+        },
+        {
+            "writeup": "dsc7792 - Dhanraj Chavan.pdf"
+        }
+    ],
+    "rsh9689": [
+        {
+            "name": "Raiya Haque"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_rsh9689.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_rsh9689.r2py"
+        },
+        {
+            "writeup": "rsh9689 - Raiya Haque.pdf"
+        }
+    ],
+    "sl7228": [
+        {
+            "name": "Songwei Li"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_sl7228.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_sl7228.r2py"
+        },
+        {
+            "writeup": "sl7228 - Songwei Li.pdf"
+        }
+    ],
+    "mmy5950": [
+        {
+            "name": "Max Yin"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_mmy5950.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_mmy5950.r2py"
+        },
+        {
+            "writeup": "mmy5950 - Max Yin.pdf"
+        }
+    ],
+    "sc9608": [
+        {
+            "name": "Yoon Cho"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_sc9608.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_sc9608.r2py"
+        },
+        {
+            "writeup": "sc9608 - Yoon Cho.pdf"
+        }
+    ],
+    "ssk9850": [
+        {
+            "name": "Skye Kim"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_ssk9850.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_ssk9850.r2py"
+        },
+        {
+            "writeup": "ssk9850 - Skye Kim.pdf"
+        }
+    ],
+    "sr7013": [
+        {
+            "name": "Sushanth Ravipalli"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_sr7013.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_sr7013.r2py"
+        },
+        {
+            "writeup": "sr7013 - Sushanth Ravipalli.pdf"
+        }
+    ],
+    "hq2040": [
+        {
+            "name": "Jackson Qu"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_hq2040.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_hq2040.r2py"
+        },
+        {
+            "writeup": "hq2040 - Jackson Qu.pdf"
+        }
+    ],
+    "an4098": [
+        {
+            "name": "Avinash Narasimhan"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_an4098.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_an4098.r2py"
+        },
+        {
+            "writeup": "an4098 - Avinash Narasimhan.pdf"
+        }
+    ],
+    "tnl2012": [
+        {
+            "name": "Thaison Le"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_tnl2012.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_tnl2012.r2py"
+        },
+        {
+            "writeup": "tnl2012 - Thaison Le.pdf"
+        }
+    ],
+    "ap7949": [
+        {
+            "name": "Aryan Prasad"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_ap7949.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_ap7949.r2py"
+        },
+        {
+            "writeup": null
+        }
+    ],
+    "raz6675": [
+        {
+            "name": "Ricky Zapata"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_raz6675.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_raz6675.r2py"
+        },
+        {
+            "writeup": "raz6675 - Ricky Zapata.pdf"
+        }
+    ],
+    "ym3144": [
+        {
+            "name": "Yashaswi Makula"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_ym3144.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_ym3144.r2py"
+        },
+        {
+            "writeup": "ym3144 - Yashaswi Makula.pdf"
+        }
+    ],
+    "de814": [
+        {
+            "name": "Dominique Eberhard"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_de814.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_de814.r2py"
+        },
+        {
+            "writeup": "de814 - Dominique Eberhard.pdf"
+        }
+    ],
+    "nr2320": [
+        {
+            "name": "Nihal Rahman"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_nr2320.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_nr2320.r2py"
+        },
+        {
+            "writeup": "nr2320 - Nihal Rahman.pdf"
+        }
+    ],
+    "crt7919": [
+        {
+            "name": "Chris Torres"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_crt7919.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_crt7919.r2py"
+        },
+        {
+            "writeup": "crt7919 - Chris Torres.pdf"
+        }
+    ],
+    "hw2509": [
+        {
+            "name": "Esther Wang"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_hw2509.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_hw2509.r2py"
+        },
+        {
+            "writeup": "hw2509 - Esther Wang.pdf"
+        }
+    ],
+    "kk5268": [
+        {
+            "name": "Kushal Kothari"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_kk5268.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_kk5268.r2py"
+        },
+        {
+            "writeup": "kk5268 - Kushal Kothari.pdf"
+        }
+    ],
+    "gh2222": [
+        {
+            "name": "Garvin Huang"
+        },
+        {
+            "reference_monitor_1": "reference_monitor_gh2222.r2py"
+        },
+        {
+            "reference_monitor_3": "reference_monitor_gh2222.r2py"
+        },
+        {
+            "writeup": "gh2222 - Garvin Huang.pdf"
+        }
+    ]
+}

@@ -1,0 +1,28 @@
+# 
+echo "2.3"
+
+cd 2.3_reference_monitors/
+
+code reference_monitor_$1.r2py
+
+python2 ../repy.py ../restrictions.default ../encasementlib.r2py reference_monitor_$1.r2py vt2182_attackcase2.r2py
+
+rm *.txt
+
+cd ..
+
+# 
+echo "\n"
+
+# 
+echo "2.1"
+
+cd 2.1_reference_monitors/
+
+code reference_monitor_$1.r2py
+
+python2 ../repy.py ../restrictions.default ../encasementlib.r2py reference_monitor_$1.r2py vt2182_attackcase2.r2py
+
+rm *.txt
+
+cd ..
