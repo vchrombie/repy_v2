@@ -16,7 +16,7 @@ OBJC = "objc"
 
 
 class LPFile():
-    def _init_(self, filename, create):
+    def __init__(self, filename, create):
         mycontext['debug'] = False
 
         # Open the file with create as what the user sets. When its true
